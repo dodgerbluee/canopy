@@ -14,10 +14,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// Sandbox runs codec commands as direct argv inside a fresh, resource-
-// limited container. argv is never interpolated into a shell, workDir is
-// a server-created temp directory mounted at /work, and the container
-// has no network. A hostile image can only damage its own sandbox.
+// Sandbox runs server-authored codec argv in a private job directory.
+// Implementations enforce resource limits without interpolating a shell.
 type Sandbox interface {
 	Run(ctx context.Context, workDir string, argv ...string) (Output, error)
 }
@@ -40,12 +38,11 @@ func (e *SandboxError) Error() string {
 	return fmt.Sprintf("sandbox command %v exited %d: %s", e.Argv, e.Exit, e.Stderr)
 }
 
-// ErrSandboxUnavailable is an infrastructure failure (docker missing,
-// image absent, daemon down): the job must be retried, not failed at the
-// domain level.
+// ErrSandboxUnavailable is an infrastructure failure (missing tools or
+// unavailable runtime): retry the job rather than declaring bad input.
 var ErrSandboxUnavailable = errors.New("media sandbox unavailable")
 
-// DockerSandbox is the production Sandbox. Memory and swap are pinned
+// DockerSandbox is the optional legacy development/test adapter. Memory and swap are pinned
 // equal so the cgroup cannot lean on swap; pids are capped so fork bombs
 // die at once; --user maps the container to the host uid so bind-mounted
 // outputs stay manageable.

@@ -1,9 +1,8 @@
 // Package processor normalizes uploaded photos (T14): orientation,
 // responsive derivatives, metadata stripping, and honest failure states.
 // Decoding never happens inside the API process and never inside this
-// process either: codec work runs as direct-argv subprocesses in a
-// pinned, resource-limited container (the Sandbox), so a hostile image
-// can only damage its own sandbox.
+// process either: codec work runs as resource-limited direct-argv
+// subprocesses in the application container.
 package processor
 
 // Variant describes one derivative the pipeline must produce. Names are
@@ -26,7 +25,7 @@ var Variants = []Variant{
 }
 
 // DefaultMaxPixels bounds decode work before any pixel is touched: the
-// container header probe reports dimensions, and anything over budget is
+// codec header probe reports dimensions, and anything over budget is
 // refused without decoding (decompression-bomb guard). 50MP covers a
 // 12MP iPhone with wide headroom while refusing 576MP bombs.
 const DefaultMaxPixels int64 = 50_000_000

@@ -44,7 +44,7 @@ done
 if [ -s "$ENVFILE" ]; then
   dsn=$(python3 -c "import json;print(json.load(open('$ENVFILE'))['dsn'])")
   DATABASE_URL="$dsn" CANOPY_ENV=test CANOPY_LOG_LEVEL="${E2E_WORKER_LOG:-warn}" \
-    CANOPY_STORAGE_ROOT="$PWD/.artifacts/e2e/storage" \
+    CANOPY_STORAGE_ROOT="$PWD/.artifacts/e2e/storage" CANOPY_MEDIA_BACKEND=docker \
     CANOPY_AI_BASE_URL="http://127.0.0.1:${STUB_PORT}" CANOPY_AI_API_KEY=e2e-stub-key \
     CANOPY_AI_MODEL=e2e-stub CANOPY_AI_DAILY_RUN_LIMIT="$E2E_AI_DAILY_RUN_LIMIT" \
     ./.artifacts/e2e/worker-host > .artifacts/e2e/worker.log 2>&1 &

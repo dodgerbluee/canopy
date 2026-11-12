@@ -20,16 +20,14 @@ COPY contracts/generated/ /src/contracts/generated/
 RUN npm run build -- --output-path=/out
 
 FROM caddy:2-alpine AS caddy
-FROM docker:cli AS dockercli
 
-# Codec packages match docker/media.Dockerfile. Tests keep that image;
-# this deployment image carries the same tools so the existing sandbox
-# can run them by replacing CMD. There is intentionally no ENTRYPOINT.
+# Photo and receipt tools run inside this image as bounded, unprivileged processes.
 FROM ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
+      util-linux \
       libvips-tools \
       libheif1 \
       libheif-plugin-libde265 \
@@ -44,25 +42,24 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* \
  && groupadd --gid 10001 canopy \
  && useradd --uid 10001 --gid canopy --home-dir /var/lib/canopy --no-create-home --shell /usr/sbin/nologin canopy \
- && install -d -o 10001 -g 10001 /var/lib/canopy /work
+ && install -d -o 10001 -g 10001 /var/lib/canopy /work /tmp/canopy
 
 COPY --from=go-build /out/ /usr/local/bin/
 COPY --from=caddy /usr/bin/caddy /usr/local/bin/caddy
-COPY --from=dockercli /usr/local/bin/docker /usr/local/bin/docker
 COPY docker/canopy-run /usr/local/bin/canopy-run
 COPY --from=web-build /out/browser/ /srv/
 COPY docker/Caddyfile.web /etc/caddy/Caddyfile
-RUN chmod 755 /usr/local/bin/canopy-run /usr/local/bin/caddy /usr/local/bin/docker \
+RUN chmod 755 /usr/local/bin/canopy-run /usr/local/bin/caddy \
  && caddy version \
- && docker --version \
- && setpriv --reuid=10001 --regid=10001 --groups 10001,0 true
+ && prlimit --version \
+ && setpriv --reuid=10001 --regid=10001 --init-groups true
 
 ENV CANOPY_ENV=dev \
     CANOPY_SITE=http://:80 \
     CANOPY_STORAGE_ROOT=/var/lib/canopy \
     CANOPY_TRUST_PROXY=1 \
     CANOPY_MCP_ENABLED=true \
-    TMPDIR=/srv/canopy/work \
+    TMPDIR=/tmp/canopy \
     XDG_CONFIG_HOME=/config \
     XDG_DATA_HOME=/data \
     CANOPY_API_UPSTREAM=127.0.0.1:8080

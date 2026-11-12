@@ -44,17 +44,15 @@ type Config struct {
 	// QuotaBytes is the per-workspace storage quota for asset bytes
 	// (default 10 GiB, operator-adjustable).
 	QuotaBytes int64
-	// MediaImage is the pinned codec container the processor sandbox
-	// runs in (decode-only: libvips + HEIF decode plugin, no encoders).
+	// MediaImage is used only by the optional legacy Docker development adapter.
 	MediaImage string
 	// MediaMaxPixels refuses decode work whose header dimensions exceed
 	// this budget (decompression-bomb guard, checked pre-decode).
 	MediaMaxPixels int64
-	// MediaMemory is the per-command cgroup memory limit for the codec
-	// sandbox; swap is pinned equal so the cgroup cannot lean on swap.
+	// MediaMemory limits virtual address space per codec subprocess.
 	MediaMemory string
 	// MediaTimeout bounds one asset's processing wall-clock; the sandbox
-	// container is killed when it fires.
+	// process group is killed when it fires.
 	MediaTimeout time.Duration
 	// LoginLimit is the sliding-window login budget per key (default
 	// 10 per 15 min, operator-adjustable; e2e raises it because the

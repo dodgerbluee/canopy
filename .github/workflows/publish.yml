@@ -44,6 +44,12 @@ jobs:
           tags: canopy-release-test:smoke
           cache-from: type=gha,scope=app
           cache-to: type=gha,scope=app,mode=max
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+      - name: Verify bundled codec limits, photo formats and PDF/image OCR without a socket
+        run: bash scripts/release/codecs.sh
       - name: Verify actual deployment and queued photo processing
         run: python3 scripts/release/smoke.py
   images:

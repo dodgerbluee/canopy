@@ -29,6 +29,8 @@ class ArtifactTest(unittest.TestCase):
                 compose=archive.extractfile('compose.yaml').read().decode()
                 self.assertIn('${CANOPY_IMAGE_PREFIX:-ghcr.io/owner/repo}:${CANOPY_VERSION:-1.2.3}',compose)
                 self.assertNotIn('build:',compose)
+                self.assertNotIn('docker.sock',compose)
+                self.assertNotIn('CANOPY_WORK_DIR',compose)
                 template=archive.extractfile('.env.example').read().decode()
                 self.assertIn('CANOPY_VERSION=1.2.3',template)
                 self.assertIn('POSTGRES_PASSWORD=\n',template)

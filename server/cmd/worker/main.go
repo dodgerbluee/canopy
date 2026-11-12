@@ -65,11 +65,21 @@ func main() {
 		log.Error("media store", "err", err)
 		os.Exit(1)
 	}
-	mediaSB := &processor.DockerSandbox{Image: cfg.MediaImage, Memory: cfg.MediaMemory, PIDs: 64}
+	mediaSB, err := processor.NewProcessSandbox(cfg.MediaMemory, cfg.MediaTimeout)
+	if err != nil {
+		log.Error("invalid media process limits", "err", err)
+		os.Exit(1)
+	}
+	var mediaRunner processor.Sandbox = mediaSB
+	// Optional legacy adapter for host-development harnesses only. Bundled
+	// deployments always default to installed tools and never need Docker.
+	if os.Getenv("CANOPY_MEDIA_BACKEND") == "docker" {
+		mediaRunner = &processor.DockerSandbox{Image: cfg.MediaImage, Memory: cfg.MediaMemory, PIDs: 64}
+	}
 	river.AddWorker(workers, &processor.Worker{
 		Pool:       pool,
 		Store:      store,
-		SB:         mediaSB,
+		SB:         mediaRunner,
 		MaxPixels:  cfg.MediaMaxPixels,
 		JobTimeout: cfg.MediaTimeout,
 		Log:        log,
@@ -129,7 +139,7 @@ func main() {
 		log.Error("ai adapter config", "err", err)
 		os.Exit(1)
 	}
-	connectionProvider := insights.WithConnections(aiConnections, provider, pool, store, &processor.DockerSandbox{Image: cfg.MediaImage, Memory: cfg.MediaMemory, PIDs: 64}, cfg.OCRLangs, int(cfg.OCRMaxPages))
+	connectionProvider := insights.WithConnections(aiConnections, provider, pool, store, mediaRunner, cfg.OCRLangs, int(cfg.OCRMaxPages))
 	insightsSvc := insights.New(pool, log, insightLimits, connectionProvider)
 	insightsSvc.PromptVersion = cfg.AIPromptVersion
 	insightsSvc.SchemaVersion = cfg.AIResultSchemaVer

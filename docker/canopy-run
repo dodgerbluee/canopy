@@ -1,20 +1,10 @@
 #!/bin/bash
-# Run the unchanged API, worker and frontend together. There is no image
-# ENTRYPOINT, so codec jobs replace CMD directly and remain Docker-sandboxed.
+# Run API, worker and frontend together; codec tools run as local processes.
 set -eu
 rm -f /run/canopy-ready
 
-install -d -o 10001 -g 10001 /var/lib/canopy "${TMPDIR:-/srv/canopy/work}"
-export TMPDIR="${TMPDIR:-/srv/canopy/work}"
-if [ ! -S /var/run/docker.sock ]; then
-  echo 'canopy: mount /var/run/docker.sock for the existing photo sandbox' >&2
-  exit 1
-fi
-socket_group=$(stat -c '%g' /var/run/docker.sock)
-if [ -z "${CANOPY_MEDIA_IMAGE:-}" ]; then
-  CANOPY_MEDIA_IMAGE=$(docker inspect --format '{{.Config.Image}}' "$HOSTNAME")
-fi
-export CANOPY_MEDIA_IMAGE
+install -d -o 10001 -g 10001 /var/lib/canopy "${TMPDIR:-/tmp/canopy}"
+export TMPDIR="${TMPDIR:-/tmp/canopy}"
 public_url="${CANOPY_PUBLIC_URL:-http://localhost:7080}"
 public_url="${public_url%/}"
 authority="${public_url#*://}"
@@ -62,7 +52,7 @@ stop_children() {
   fi
 }
 trap 'stop_children; exit 0' TERM INT
-start setpriv --reuid=10001 --regid=10001 --init-groups /usr/local/bin/api
+start setpriv --no-new-privs --reuid=10001 --regid=10001 --init-groups /usr/local/bin/api
 start /usr/local/bin/caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
 ready=0
 for _ in $(seq 1 90); do
@@ -73,7 +63,7 @@ for _ in $(seq 1 90); do
   sleep 1
 done
 if [ "$ready" -ne 1 ]; then stop_children; exit 1; fi
-start setpriv --reuid=10001 --regid=10001 --groups "10001,$socket_group" /usr/local/bin/worker
+start setpriv --no-new-privs --reuid=10001 --regid=10001 --init-groups /usr/local/bin/worker
 sleep 2
 for pid in "${pids[@]}"; do
   if ! kill -0 "$pid" 2>/dev/null; then stop_children; exit 1; fi

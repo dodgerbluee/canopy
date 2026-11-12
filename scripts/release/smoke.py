@@ -20,7 +20,6 @@ import urllib.request
 root = Path(__file__).resolve().parents[2]
 project = 'canopy-release-' + secrets.token_hex(5)
 temp = Path(tempfile.mkdtemp(prefix=project+'-')).resolve()
-work = temp/'work'; work.mkdir()
 password = secrets.token_urlsafe(24)
 database_password = secrets.token_hex(24)
 (temp/'owner-password').write_text(password)
@@ -32,8 +31,6 @@ def port():
         return listener.getsockname()[1]
 
 http_port, https_port = port(), port()
-socket_path=os.environ.get('DOCKER_SOCKET','/var/run/docker.sock')
-socket_group=subprocess.check_output(['docker','run','--rm','-v',socket_path+':/socket','--entrypoint','stat','canopy-release-test:smoke','-c','%g','/socket'],text=True).strip()
 base = f'http://localhost:{http_port}'
 config = temp/'.env'
 config.write_text(f'''CANOPY_IMAGE_PREFIX=canopy-release-test
@@ -41,10 +38,7 @@ CANOPY_VERSION=smoke
 CANOPY_PORT={http_port}
 CANOPY_INITIAL_PASSWORD={password}
 CANOPY_PUBLIC_URL={base}
-CANOPY_WORK_DIR={work}
 POSTGRES_PASSWORD={database_password}
-DOCKER_GID={socket_group}
-DOCKER_SOCKET={os.environ.get('DOCKER_SOCKET','/var/run/docker.sock')}
 HTTP_PORT={http_port}
 HTTPS_PORT={https_port}
 ''')
@@ -81,8 +75,11 @@ def gql(query,variables=None,field=None):
 
 try:
     dc('config','-q')
-    assert set(json.loads(dc('config','--format','json'))['services']) == {'canopy','postgres'}
+    services=json.loads(dc('config','--format','json'))['services']
+    assert set(services) == {'canopy','postgres'}
+    assert all(v['type']=='volume' and v['target']=='/var/lib/canopy' for v in services['canopy']['volumes'])
     dc('up','-d','--wait','--wait-timeout','180')
+    assert dc('exec','-T','canopy','/bin/sh','-ec','test ! -e /var/run/docker.sock; if command -v docker; then exit 1; fi; id -u canopy').strip()==b'10001'
     # Anonymous session errors must be API JSON/status, not the SPA fallback.
     session=json.loads(request('/api/auth/login',{'password':password}))
     csrf=session['csrfToken']
@@ -128,7 +125,7 @@ try:
             except (OSError,urllib.error.URLError):stable=0
         if time.monotonic()>deadline:raise RuntimeError('Bundled worker failure was not recovered')
         time.sleep(1)
-    result={'compose':True,'twoServices':True,'bundledFrontendAPIWorker':True,'ownerLogin':True,'spaDeepLink':True,'mcpRequiresCredential':True,'queuedPhotoProcessed':True,'originalCaptureDate':True,'privateDerivative':True,'supervisedRestart':True,'bootstrapSurvivesRestart':True}
+    result={'compose':True,'twoServices':True,'noDockerSocketOrHostMounts':True,'bundledFrontendAPIWorker':True,'ownerLogin':True,'spaDeepLink':True,'mcpRequiresCredential':True,'queuedPhotoProcessed':True,'originalCaptureDate':True,'privateDerivative':True,'supervisedRestart':True,'bootstrapSurvivesRestart':True}
     report=Path(os.environ.get('CANOPY_RELEASE_SMOKE_REPORT',str(root/'.artifacts/agents/DEP02/smoke.json')))
     report.parent.mkdir(parents=True,exist_ok=True);report.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))
@@ -141,7 +138,4 @@ except Exception:
 finally:
     try: dc('down','-v','--remove-orphans','--timeout','30')
     finally:
-        # The UID-10001 worker owns its temp directory. Clear only this
-        # generated smoke bind mount before removing its enclosing temp dir.
-        subprocess.run(['docker','run','--rm','--user','0:0','-v',str(work)+':/work','--entrypoint','/bin/sh','canopy-release-test:smoke','-ec','find /work -mindepth 1 -delete'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         shutil.rmtree(temp)

@@ -2,7 +2,8 @@
 
 The application is one image: `ghcr.io/dodgerbluee/canopy`. It includes the
 frontend, API, worker, migrations and existing photo/receipt tools. Compose runs
-two services: Canopy and PostgreSQL. No application features were redesigned.
+two services: Canopy and PostgreSQL. No Docker socket or host-directory mounts
+are required. Photo processing and receipt OCR run inside the app container.
 
 ## Portainer / Docker Compose
 
@@ -43,17 +44,22 @@ docker build -t ghcr.io/dodgerbluee/canopy:local .
 
 ## Photo processing
 
-The existing Docker-based sandbox is retained. The app launches short-lived,
-network-disabled codec jobs using its own already-pulled image. These are not
-additional Compose services. The Docker socket and work-directory mounts in the
-Compose file support that existing behavior. The app detects the socket group
-and image name automatically. It does not need registry credentials inside it.
-The work directory must retain the same absolute path inside the app and on the
-Docker host; the published Compose file already does this.
+Starting with v1.1.1, libvips, HEIF decoding, Tesseract and Poppler run as
+unprivileged subprocesses inside the Canopy container. The worker invokes only
+these installed tools using direct arguments, with no shell or inherited database
+or provider credentials. Each command has address-space, CPU, file-size and
+open-file limits, capped captured output and a wall-clock timeout that kills its
+process group. The photo pixel budget, metadata stripping and capture-date
+handling remain unchanged. Temporary job directories are removed after use.
 
-The worker has Docker-host authority through that socket, as before. The API
-runs as UID 10001 without the worker's socket group. Codec jobs receive only
-their temporary input/output directory, never the application's data volume.
+These subprocesses share the worker's UID and container filesystem/network;
+they are not separate security sandboxes. Keep Canopy and codec packages updated.
+The app has no access to the Docker daemon. The optional legacy Docker adapter
+is reserved for development harnesses, not the published Compose deployment.
+
+When upgrading from v1.1.0, remove the Docker socket and host work-directory
+mounts, along with `TMPDIR`/`CANOPY_WORK_DIR` overrides. Keep both named data
+volumes. No database or media migration is required.
 
 ## MCP and operator tools
 

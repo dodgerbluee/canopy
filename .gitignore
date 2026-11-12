@@ -15,6 +15,6 @@ dist/
 .artifacts/agents/*/*
 !.artifacts/agents/*/EVIDENCE.md
 __pycache__/
-release/
-digests/
-candidate/
+/release/
+/digests/
+/candidate/

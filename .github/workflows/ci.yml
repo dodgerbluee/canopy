@@ -1,6 +1,8 @@
 name: ci
 on:
   push:
+    branches-ignore: [main, master]
+    tags-ignore: ["**"]
   pull_request:
   workflow_call:
 

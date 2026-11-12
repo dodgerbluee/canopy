@@ -913,7 +913,7 @@
       "dependsOn": [
         "PUB01"
       ],
-      "status": "IN_PROGRESS",
+      "status": "ACCEPTED",
       "release": "R3"
     }
   },

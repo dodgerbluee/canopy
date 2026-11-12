@@ -144,3 +144,5 @@ as passing).
 | 2026-11-11 | DEP01 | ACCEPTED | Docked-style dev/tagged GHCR release/manual digest promotion; actual server/web/media images, TLS Compose bundle and seven release tests. Local image builds and isolated production-mode queued-photo smoke pass; workflow lint passes. No Git remote or external publication; remote CI/native dual-platform publication unverified. Evidence: `.artifacts/agents/DEP01/`. |
 
 | 2026-11-11 | PUB01 | ACCEPTED | Private dodgerbluee/canopy created from clean source; no private development history. Zero-leak scan, clean generation, 477 frontend/all Go tests, and complete GitHub v1.0.0 CI/smoke/AMD64+ARM64 publication succeed. Deployment bundle checksums verified; latest not promoted. Evidence: `.artifacts/agents/PUB01/`. |
+
+| 2026-11-12 | DEP02 | ACCEPTED | Published combined app image v1.0.1 for AMD64/ARM64 with two-service Compose. Local queued photo/restart/receipt checks and GitHub full CI/smoke/publication pass; downloaded release checksums, revision and app digest verified. Evidence: `.artifacts/agents/DEP02/`. |

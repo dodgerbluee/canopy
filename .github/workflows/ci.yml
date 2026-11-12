@@ -29,6 +29,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
       # web/contract tooling stays on the pinned node:24 image (ADR-0001)
       - name: release tooling
         run: |

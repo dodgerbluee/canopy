@@ -142,3 +142,5 @@ as passing).
 | 2026-11-11 | UI32 | ACCEPTED | Compact action-first suggestions with disclosed context, grouped evidence counts, exact readable money and Add to care confirmations. 16 affected tests, production build, five responsive accessibility flows and actual read-only Meyer lemon phone/desktop checks pass. Published locally. Evidence: `.artifacts/agents/UI32/`. |
 
 | 2026-11-11 | DEP01 | ACCEPTED | Docked-style dev/tagged GHCR release/manual digest promotion; actual server/web/media images, TLS Compose bundle and seven release tests. Local image builds and isolated production-mode queued-photo smoke pass; workflow lint passes. No Git remote or external publication; remote CI/native dual-platform publication unverified. Evidence: `.artifacts/agents/DEP01/`. |
+
+| 2026-11-11 | PUB01 | ACCEPTED | Private dodgerbluee/canopy created from clean source; no private development history. Zero-leak scan, clean generation, 477 frontend/all Go tests, and complete GitHub v1.0.0 CI/smoke/AMD64+ARM64 publication succeed. Deployment bundle checksums verified; latest not promoted. Evidence: `.artifacts/agents/PUB01/`. |

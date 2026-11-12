@@ -158,3 +158,5 @@ as passing).
 | 2026-11-12 | AUTH05 | ACCEPTED | Removed registration name field; default display name is username. Ten-character account password policy synchronized across backend and frontend. Backend suites, 493 Angular tests, image build, browser checks and queued-photo/restart smoke pass. Preview refreshed on 7081. Evidence: `.artifacts/agents/AUTH05/`. |
 
 | 2026-11-12 | MIG01 | ACCEPTED | Migrated the actual 4311 garden to combined app + dedicated PostgreSQL; verified 23 table fingerprints, 408 original files and backup checksums. Restored-copy handover/private-photo/live-AI/export rehearsal and production worker jobs pass. Protected one-use registration opened for owner-chosen credentials; original runtime/data retained for rollback. Evidence: `.artifacts/agents/MIG01/`. |
+
+| 2026-11-12 | PUB02 | ACCEPTED | Published v1.1.0 combined AMD64/ARM64 image after full CI and actual photo/restart smoke. Release assets/checksums and pinned two-service bundle verified; latest promoted to identical digest. Known-private-value scan clean; production garden unchanged. Evidence: `.artifacts/agents/PUB02/`. |

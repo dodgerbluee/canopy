@@ -981,7 +981,7 @@
       "release": "R3"
     },
     "DEP03": {
-      "title": "Socket-free bundled media and OCR processing; publish v1.1.1",
+      "title": "Socket-free bundled media and OCR processing; publish v1.1.2",
       "dependsOn": [
         "PUB02"
       ],

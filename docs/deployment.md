@@ -44,7 +44,7 @@ docker build -t ghcr.io/dodgerbluee/canopy:local .
 
 ## Photo processing
 
-Starting with v1.1.1, libvips, HEIF decoding, Tesseract and Poppler run as
+Starting with v1.1.2, libvips, HEIF decoding, Tesseract and Poppler run as
 unprivileged subprocesses inside the Canopy container. The worker invokes only
 these installed tools using direct arguments, with no shell or inherited database
 or provider credentials. Each command has address-space, CPU, file-size and

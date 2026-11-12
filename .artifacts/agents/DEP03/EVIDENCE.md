@@ -17,3 +17,10 @@ for existing host-development harnesses only.
 
 Raw logs, test executables and smoke report remain ignored in this directory.
 No production records or operator configuration were modified.
+
+The first tag (v1.1.1, run 43321895998) stopped before image publication: the
+cancellation assertion raced asynchronous SIGKILL delivery on the Linux CI host.
+The test now polls for actual termination for at most one second and still fails
+if a live descendant remains. The corrected test passed thirty repeated runs in
+the unprivileged, network-disabled image. The new release candidate is v1.1.2;
+no failed tag or existing image was overwritten.

@@ -127,9 +127,16 @@ func TestProcessCancellationKillsDescendants(t *testing.T) {
 				t.Fatal(err)
 			}
 			// A killed orphan may remain briefly as a zombie until PID 1 reaps it.
-			stat, err := os.ReadFile(filepath.Join("/proc", strconv.Itoa(pid), "stat"))
-			if err == nil && !strings.Contains(string(stat), ") Z ") && syscall.Kill(pid, 0) == nil {
-				t.Fatalf("codec descendant %d survived cancellation", pid)
+			deadline := time.Now().Add(time.Second)
+			for {
+				stat, err := os.ReadFile(filepath.Join("/proc", strconv.Itoa(pid), "stat"))
+				if errors.Is(err, os.ErrNotExist) || (err == nil && strings.Contains(string(stat), ") Z ")) || syscall.Kill(pid, 0) == syscall.ESRCH {
+					break
+				}
+				if time.Now().After(deadline) {
+					t.Fatalf("codec descendant %d survived cancellation", pid)
+				}
+				time.Sleep(10 * time.Millisecond)
 			}
 		})
 	}

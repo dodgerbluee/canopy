@@ -114,21 +114,30 @@ try:
     container_id=dc('ps','-q','canopy').decode().strip()
     dc('exec','-T','canopy','/bin/bash','-ec', 'for file in /proc/[0-9]*/comm; do read -r name < "$file" || continue; if [ "$name" = worker ]; then pid=${file%/comm}; kill -TERM "${pid##*/}"; break; fi; done')
     deadline=time.monotonic()+90
-    while True:
-        count=int(subprocess.check_output(['docker','inspect','--format','{{.RestartCount}}',container_id]))
-        if count>0:
+    stable=0
+    while stable<2:
+        state=json.loads(subprocess.check_output(['docker','inspect','--format','{{json .}}',container_id]))
+        count=state['RestartCount']
+        if count>1:raise RuntimeError('Bundled app is repeatedly restarting')
+        if count==1 and state['State'].get('Health',{}).get('Status')=='healthy':
             try:
-                request('/readyz')
-                break
-            except Exception:pass
+                if stable==0:
+                    session=json.loads(request('/api/auth/login',{'password':password}));csrf=session['csrfToken']
+                assert request('/api/media/'+asset+'/thumb').startswith(b'\xff\xd8')
+                stable+=1
+            except (OSError,urllib.error.URLError):stable=0
         if time.monotonic()>deadline:raise RuntimeError('Bundled worker failure was not recovered')
         time.sleep(1)
-    session=json.loads(request('/api/auth/login',{'password':password}));csrf=session['csrfToken']
-    assert request('/api/media/'+asset+'/thumb').startswith(b'\xff\xd8')
     result={'compose':True,'twoServices':True,'bundledFrontendAPIWorker':True,'ownerLogin':True,'spaDeepLink':True,'mcpRequiresCredential':True,'queuedPhotoProcessed':True,'originalCaptureDate':True,'privateDerivative':True,'supervisedRestart':True,'bootstrapSurvivesRestart':True}
     report=Path(os.environ.get('CANOPY_RELEASE_SMOKE_REPORT',str(root/'.artifacts/agents/DEP02/smoke.json')))
     report.parent.mkdir(parents=True,exist_ok=True);report.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))
+except Exception:
+    try:
+        logs=dc('logs','--no-color','--tail','80','canopy').decode(errors='replace')
+        print(logs.replace(database_password,'[redacted]').replace(password,'[redacted]'))
+    except Exception:pass
+    raise
 finally:
     try: dc('down','-v','--remove-orphans','--timeout','30')
     finally:

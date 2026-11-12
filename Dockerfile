@@ -68,5 +68,5 @@ ENV CANOPY_ENV=dev \
     CANOPY_API_UPSTREAM=127.0.0.1:8080
 WORKDIR /work
 EXPOSE 80 443
-HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=18 CMD wget -q -O /dev/null http://127.0.0.1/readyz || exit 1
+HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=18 CMD test -f /run/canopy-ready && wget -q -O /dev/null http://127.0.0.1/readyz || exit 1
 CMD ["/usr/local/bin/canopy-run"]

@@ -2,6 +2,7 @@
 # Run the unchanged API, worker and frontend together. There is no image
 # ENTRYPOINT, so codec jobs replace CMD directly and remain Docker-sandboxed.
 set -eu
+rm -f /run/canopy-ready
 
 install -d -o 10001 -g 10001 /var/lib/canopy "${TMPDIR:-/srv/canopy/work}"
 export TMPDIR="${TMPDIR:-/srv/canopy/work}"
@@ -54,6 +55,7 @@ fi
 pids=()
 start() { "$@" & pids+=("$!"); }
 stop_children() {
+  rm -f /run/canopy-ready
   if [ "${#pids[@]}" -gt 0 ]; then
     kill "${pids[@]}" 2>/dev/null || true
     wait "${pids[@]}" 2>/dev/null || true
@@ -62,7 +64,21 @@ stop_children() {
 trap 'stop_children; exit 0' TERM INT
 start setpriv --reuid=10001 --regid=10001 --init-groups /usr/local/bin/api
 start /usr/local/bin/caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+ready=0
+for _ in $(seq 1 90); do
+  if ! kill -0 "${pids[0]}" 2>/dev/null || ! kill -0 "${pids[1]}" 2>/dev/null; then
+    break
+  fi
+  if wget -q -O /dev/null http://127.0.0.1:8080/readyz; then ready=1; break; fi
+  sleep 1
+done
+if [ "$ready" -ne 1 ]; then stop_children; exit 1; fi
 start setpriv --reuid=10001 --regid=10001 --groups "10001,$socket_group" /usr/local/bin/worker
+sleep 2
+for pid in "${pids[@]}"; do
+  if ! kill -0 "$pid" 2>/dev/null; then stop_children; exit 1; fi
+done
+touch /run/canopy-ready
 # Any service failure tears down its peers so Docker restarts one coherent app.
 while true; do
   for pid in "${pids[@]}"; do

@@ -25,9 +25,9 @@ scheme information from private-network proxies. Direct public HTTP exposure is
 not intended. The existing production configuration remains available for
 operators supplying their own TLS database and HTTPS setup.
 
-The package is private until its owner changes GitHub Packages visibility.
-Configure GHCR credentials with permission to read the package in Portainer,
-or run `docker login ghcr.io` before pulling with Compose.
+The published Canopy image is public; registry credentials are not required.
+For private forks, configure GHCR credentials with package-read permission in
+Portainer or run `docker login ghcr.io` before pulling with Compose.
 
 ```sh
 cp .env.example .env

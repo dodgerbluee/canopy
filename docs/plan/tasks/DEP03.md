@@ -1,6 +1,6 @@
 # DEP03 — Socket-free processing
 
-Status: IN_PROGRESS.
+Status: ACCEPTED.
 
 ### DEP03 — Socket-free bundled processing and v1.1.2
 
@@ -11,3 +11,7 @@ Own: `server/internal/media/processor/`, `server/internal/insights/receipt_proce
 Acceptance: Default app + PostgreSQL deployment has no Docker socket, host work directory or runtime Docker CLI requirement. Run installed codecs/OCR as bounded unprivileged subprocesses; preserve formats, orientation, capture dates, derivatives and receipt extraction. Context cancellation kills codec process groups. Publish tested v1.1.2 and promote its verified digest to latest. Preserve local production data/configuration.
 
 Verify: Runner tests for command restrictions, path mapping, bounded output, missing tools, cancellation and resource limits; real HEIC/JPEG/WebP/PNG and PDF/image OCR in the combined image without socket mounts; actual queued photo job, capture date and restart smoke; release CI and AMD64/ARM64 manifests.
+
+Release: https://github.com/dodgerbluee/canopy/releases/tag/v1.1.2
+Full CI/release: 43322860660. Latest promotion: 43325271507.
+Evidence: `.artifacts/agents/DEP03/EVIDENCE.md`.

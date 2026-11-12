@@ -1,0 +1,24 @@
+.kind-GROWTH {
+  --kind-color: var(--accent);
+}
+.kind-BLOOM {
+  --kind-color: var(--danger);
+}
+.kind-HARVEST {
+  --kind-color: var(--warning);
+}
+.kind-FERTILIZE {
+  --kind-color: var(--season-violet);
+}
+.kind-WATER_CHECK {
+  --kind-color: var(--season-blue);
+}
+.kind-PRUNE {
+  --kind-color: var(--text-primary);
+}
+.kind-DORMANCY {
+  --kind-color: var(--text-muted);
+}
+.kind-PROTECT {
+  --kind-color: var(--season-blue);
+}

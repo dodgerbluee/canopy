@@ -1,0 +1,28 @@
+# Public acceptance record: UI30
+
+This is a source-release summary. Original local execution artifacts remain private because they may include personal garden data. Current GitHub CI reproduces the verification gates.
+
+| 2026-11-11 | UI30 | ACCEPTED | Removed redundant detail/journey labels, aligned month controls, moved Edit into header and enabled transactional quality-based cover refresh. 72 frontend tests, affected Go suites, five browser/accessibility layouts, live garden read-only check and actual queued worker proof pass. Matched API/worker and frontend published locally. Evidence: `.artifacts/agents/UI30/`. |
+
+# UI30 — Quiet journey headings and automatic quality-based covers
+
+Status: ACCEPTED.
+
+Details no longer links redundantly to the Gallery. Journey removes “The story so far”; its filter/log buttons share the first visible month heading, with an empty/error fallback. The pencil is inside the plant identity header. Both light/dark and narrow layouts retain the shared modals and section navigation.
+
+Processed photo thumbnails receive bounded local quality scores from lighting, detail, contrast and central foliage coverage. Upload and Rounds now leave default cover selection to the server; explicit Choose as cover and Make cover remain available. Attachments compare stored scores and capture dates under a plant lock in the same transaction as the photo attachment. Better current whole-plant photos can replace covers; older imports, close-ups, unscorable candidates and substantially poorer images do not. Comparable newer photos can refresh the cover after a small freshness bonus. The first attached photo supplies an initial cover. Manual selection is immediate, not a permanent pin against future better uploads.
+
+This is a heuristic, not semantic AI or a health judgment. Original decoding remains sandboxed; only bounded normalized JPEG thumbnails are scored in the worker. Existing assets receive derived scores in bounded, maintenance-aware background batches without retroactive cover changes. Nullable score/version columns preserve restores from older archives. Selection preserves capture metadata, idempotency and single-cover uniqueness. A redundant Make cover on the existing cover no longer clears it and conflicts against its own revision.
+
+Executed evidence in `.artifacts/agents/UI30/`:
+
+- `frontend.log`: 72 affected Angular tests pass and production build completes under Node 24 Docker.
+- `backend-tests.log`, `cover-tests.log`: media, codec processor, GraphQL, agent API and portability tests pass with PostgreSQL; includes quality ranking, historical/close-up/blurry rejection, manual selection, attachment retries, concurrent candidates and real HEIC processing/backfill convergence.
+- `vet.log`, `generation.log`: affected Go vet and authoritative SQL/GraphQL/MCP generation complete.
+- `browser-report.json`: five 320/390/1440 light/dark layouts pass filters, header/month geometry, redundant-label removal, editing and zero axe/browser errors.
+- `live-browser.log`, `live-plant-phone.png`: real authenticated Android-emulated garden passes new header/month placement and Details cleanup plus existing filtering/edit navigation, with no garden mutations.
+- `migration.log`, `runtime-live.json`: additive migration 16 and matched API/worker deployment preserve existing storage and Strata configuration.
+- `queued-worker.log`: actual deployed worker binary processes a queued original upload through validation, sandboxed derivatives and capture-date attachment in an isolated schema/storage.
+- `garden-after.json`: live background quality job completed and 79 photo assets scored; live garden contains 17 plants, 79 photos and 4 purchases. No before/after preservation comparison is claimed because a pre-migration count query failed before producing a baseline.
+- `published.json`, `local-release.json`: identical final assets served on desktop, progress and LAN phone previews; API ready. Temporary task QA server stopped.
+- `plan-boundary.log`: plan, packet, dispatch and import-boundary checks pass.

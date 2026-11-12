@@ -1,0 +1,91 @@
+<section class="page-head">
+  <div class="page-head-main">
+    <p class="eyebrow">Notifications</p>
+    <h1 class="editorial">Inbox</h1>
+    <p class="caption">
+      Reminders to act on and AI suggestions to review. Your recorded garden history lives in
+      Journal.
+    </p>
+  </div>
+  <div class="row wrap">
+    @if (unreadShown() > 0) {
+      <span class="badge num" aria-live="polite">{{ unreadShown() }} unread</span>
+    }
+    <button type="button" class="btn" [attr.aria-pressed]="unreadOnly()" (click)="toggleFilter()">
+      {{ unreadOnly() ? 'Showing unread' : 'Showing all' }}
+    </button>
+  </div>
+</section>
+
+@if (store.error()) {
+  <section class="card" role="alert" aria-labelledby="ib-err" style="max-width: 640px">
+    <h2 id="ib-err">Inbox failed to load</h2>
+    <p class="caption">{{ store.error() }} This is not an empty inbox — nothing was changed.</p>
+    <div><button type="button" class="btn btn-primary" (click)="retry()">Retry</button></div>
+  </section>
+} @else if (store.loading() && store.items().length === 0) {
+  <div class="stack" aria-busy="true">
+    @for (i of [1, 2, 3]; track i) {
+      <ui-skeleton ar="auto" maxW="100%" />
+    }
+  </div>
+} @else if (store.items().length === 0) {
+  <section class="card" style="max-width: 640px">
+    <h2>{{ unreadOnly() ? 'Nothing unread' : 'No notifications yet' }}</h2>
+    <p class="caption">
+      Scheduled care reminders and AI review notices appear here. An empty inbox does not mean every
+      plant is watered or healthy. Opening this page never marks anything read.
+    </p>
+    <div class="row wrap">
+      <a class="btn btn-primary" routerLink="/care">Review care</a
+      ><a class="btn" routerLink="/insights">Open AI assistant</a>
+    </div>
+  </section>
+} @else {
+  <ul class="stack notice-list">
+    @for (n of store.items(); track n.id) {
+      <li class="card notice-row" [class.is-unread]="!n.readAt">
+        <div class="notice-grid">
+          <span class="chan" aria-hidden="true">
+            <ui-icon [name]="n.channel === 'EMAIL' ? 'inbox' : 'calendar'" [size]="18" />
+          </span>
+          <div class="notice-content">
+            <div class="row spread wrap">
+              <strong class="small">{{ n.title }}</strong>
+              <span class="row wrap">
+                <span class="badge">{{ channelLabel(n) }}</span>
+                <span class="badge num">{{ n.createdAt | date: 'mediumDate' }}</span>
+              </span>
+            </div>
+            <p class="caption notice-body">{{ n.body }}</p>
+            <div class="row wrap notice-actions">
+              <a class="btn" [routerLink]="n.refKind === 'SUGGESTION' ? '/insights' : '/care'">{{
+                n.refKind === 'SUGGESTION' ? 'Review AI suggestions' : 'Review care'
+              }}</a>
+              @if (!n.readAt) {
+                <button
+                  type="button"
+                  class="btn btn-primary"
+                  [disabled]="busy()"
+                  (click)="markRead(n)"
+                >
+                  Mark as read
+                </button>
+              } @else {
+                <span class="caption">Read {{ n.readAt | date: 'medium' }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      </li>
+    }
+  </ul>
+  <div class="row" style="margin-top: var(--sp-4)">
+    @if (hasNext()) {
+      <button type="button" class="btn" [disabled]="store.loading()" (click)="store.loadMore()">
+        {{ store.loading() ? 'Loading…' : 'Load more' }}
+      </button>
+    }
+    <span class="caption num">{{ store.items().length }} shown</span>
+  </div>
+}

@@ -1,0 +1,23 @@
+{
+  "latitude": 48.8553,
+  "longitude": 2.3444,
+  "generationtime_ms": 0.06341934204101562,
+  "utc_offset_seconds": 3600,
+  "timezone": "Europe/Paris",
+  "timezone_abbreviation": "CET",
+  "elevation": 42.0,
+  "daily_units": {
+    "time": "iso8601",
+    "temperature_2m_max": "°C",
+    "temperature_2m_min": "°C",
+    "precipitation_sum": "mm",
+    "et0_fao_evapotranspiration": "mm"
+  },
+  "daily": {
+    "time": ["2026-11-02"],
+    "temperature_2m_max": [12.9],
+    "temperature_2m_min": null,
+    "precipitation_sum": null,
+    "et0_fao_evapotranspiration": [1.9]
+  }
+}

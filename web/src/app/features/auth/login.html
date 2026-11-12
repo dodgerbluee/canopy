@@ -1,0 +1,45 @@
+<div class="login-wrap">
+  <header class="login-top">
+    <div class="shell-brand">Canopy</div>
+    <button type="button" class="btn" (click)="toggleTheme()">
+      <ui-icon [name]="theme.theme() === 'dark' ? 'sun' : 'moon'" [size]="16" />
+      Theme: {{ theme.theme() }}
+    </button>
+  </header>
+
+  <main class="login-card">
+    <div class="login-brand">
+      <span class="brand-mark" aria-hidden="true">
+        <ui-icon name="sprout" [size]="24" />
+      </span>
+      <h1 class="editorial">Sign in</h1>
+    </div>
+
+    @if (session.ended() === 'expired') {
+      <p class="notice" role="status">Your session ended. Sign in again to continue.</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label class="field-label" for="password">Password</label>
+      <input
+        id="password"
+        class="input"
+        type="password"
+        formControlName="password"
+        autocomplete="current-password"
+        required
+        [attr.aria-invalid]="showFieldError()"
+        [attr.aria-describedby]="errorId()"
+      />
+      @if (showFieldError()) {
+        <p class="field-error" [id]="errorId()">Enter your password.</p>
+      }
+      @if (serverError()) {
+        <p class="field-error" role="alert">{{ serverError() }}</p>
+      }
+      <button type="submit" class="btn btn-primary" [disabled]="busy()">
+        {{ busy() ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+  </main>
+</div>

@@ -1,0 +1,129 @@
+<section class="garden-overview" aria-labelledby="garden-overview-title">
+  <header>
+    <div>
+      <p class="eyebrow">THE BIG PICTURE</p>
+      <h2 id="garden-overview-title">Your whole garden, at a glance.</h2>
+    </div>
+    <span class="garden-total"
+      >{{ plants().length }} {{ plants().length === 1 ? 'plant' : 'plants' }} in view</span
+    >
+  </header>
+  <p class="overview-intro">
+    One shared rhythm. Pick a month to see care to consider and what might be growing.
+  </p>
+  <div class="garden-tube" role="group" aria-label="Whole garden by month">
+    @for (item of months(); track item.month) {
+      <button
+        type="button"
+        class="garden-month"
+        [class.selected]="month() === item.month"
+        [attr.aria-pressed]="month() === item.month"
+        [attr.title]="fullMonths[item.month - 1]"
+        (click)="selectMonth(item.month)"
+      >
+        <span class="month-name">{{ monthNames[item.month - 1] }}</span>
+        <span class="month-colors" aria-hidden="true">
+          @for (group of item.groups; track group.kind) {
+            <span
+              [class]="'month-color kind-' + group.kind"
+              [style.flex-grow]="group.plants.length"
+            ></span>
+          }
+          @if (!item.groups.length) {
+            <span class="month-unknown"></span>
+          }
+        </span>
+        <span class="month-count"
+          >{{ item.carePlants
+          }}<span class="visually-hidden">
+            {{ item.carePlants === 1 ? 'plant' : 'plants' }} with care or harvest windows</span
+          ></span
+        >
+      </button>
+    }
+  </div>
+  <div class="month-heading">
+    <h3>
+      {{ fullMonths[month() - 1] }} <span>{{ year() }}</span>
+    </h3>
+    <p>
+      {{ selected().carePlants }} {{ selected().carePlants === 1 ? 'plant' : 'plants' }} with care
+      or harvest windows
+    </p>
+  </div>
+  <div class="garden-groups">
+    @for (group of selected().groups; track group.kind) {
+      <button
+        type="button"
+        [class]="'garden-group kind-' + group.kind"
+        (click)="selectedKind.set(group.kind)"
+      >
+        <span class="group-icon"><ui-icon [name]="group.icon" [size]="20" /></span>
+        <span class="group-copy"
+          ><strong>{{ group.label }}</strong
+          ><small>
+            @for (plant of group.plants; track plant.plantId; let last = $last) {
+              {{ plant.name }}{{ last ? '' : ', ' }}
+            }
+          </small></span
+        >
+        <span class="group-count"
+          >{{ group.plants.length }}<span class="visually-hidden"> plants</span></span
+        >
+        <ui-icon name="arrow-up-right" [size]="15" />
+      </button>
+    } @empty {
+      <p class="overview-empty">
+        No sourced windows for this month with these filters. This does not confirm that no care is
+        needed.
+      </p>
+    }
+  </div>
+  <p class="overview-note">
+    Numbers count plants with care or harvest guidance, not overdue tasks. Colors include growth,
+    bloom and dormancy. Plant search and type filters apply here too.
+    @if (missingTiming()) {
+      {{ missingTiming() }} plants in view have no dated guidance with these filters.
+    }
+  </p>
+</section>
+<ui-entry-dialog
+  [open]="!!detail()"
+  [title]="detail()?.label ?? 'Garden guidance'"
+  [description]="
+    fullMonths[month() - 1] +
+    ' ' +
+    year() +
+    ' · Typical source windows. Check conditions before acting.'
+  "
+  size="wide"
+  [dirty]="false"
+  (dismissed)="selectedKind.set(null)"
+>
+  @if (detail(); as group) {
+    <div class="overview-details">
+      @for (window of group.windows; track window.plant.plantId + ':' + window.fact.id) {
+        <button type="button" class="overview-fact" (click)="openSource(window)">
+          <span [class]="'group-icon kind-' + group.kind"
+            ><ui-icon [name]="group.icon" [size]="20"
+          /></span>
+          <span
+            ><strong>{{ window.plant.name }}</strong
+            ><span>{{ window.fact.label }}</span
+            ><small>{{ window.fact.summary }}</small
+            ><small
+              >{{ window.fact.publisher }} ·
+              {{
+                window.fact.timingBasis === 'SEASON' ? 'Approximate season' : 'Source month'
+              }}</small
+            ></span
+          >
+          <ui-icon name="arrow-up-right" [size]="17" />
+        </button>
+      }
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary" (click)="selectedKind.set(null)">Done</button>
+    </div>
+  }
+</ui-entry-dialog>

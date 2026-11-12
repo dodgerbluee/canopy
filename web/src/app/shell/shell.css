@@ -1,0 +1,142 @@
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--touch-min);
+  padding: 0 var(--sp-3);
+  margin-bottom: var(--sp-6);
+  color: var(--nav-brand);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 21px;
+  letter-spacing: -0.02em;
+}
+.brand-mark,
+.brand-dot {
+  color: var(--nav-accent);
+}
+.brand:hover .brand-word {
+  text-decoration: underline;
+}
+
+/* The rail is a fixed forest surface in both themes, so the page's focus ring
+   would sit on it unchanged; only its color follows the rail. Width and offset
+   stay whatever the token scale says. */
+.shell-nav a:focus-visible {
+  outline-color: var(--nav-accent);
+}
+
+/* axe catches nav links mid-transition while the active pill moves (the
+   foreground/background pair inverts through low-contrast frames). Keep every
+   active/hover/focus color; make the swap instant. */
+.shell-nav .nav-link {
+  transition: none;
+}
+
+/* Workspace card (mock .workspace): where you are, and the way to its settings. */
+.workspace {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--touch-min);
+  margin: 0 var(--sp-1) var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--nav-hairline);
+  border-radius: var(--radius-field);
+  background: var(--nav-hover);
+  color: var(--nav-brand);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color var(--dur-control) var(--ease-out);
+}
+.workspace:hover {
+  border-color: var(--nav-accent);
+  color: var(--nav-brand);
+}
+.workspace-mark {
+  color: var(--nav-accent);
+  flex: none;
+}
+.workspace-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.workspace-name small {
+  display: block;
+  margin-top: 2px;
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+  font-weight: 400;
+  color: var(--nav-muted);
+}
+
+/* Quiet closer at the foot of the rail; .nav-foot keeps it pinned to the bottom. */
+.nav-note {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: auto var(--sp-1) 0;
+  color: var(--nav-muted);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.nav-note ui-icon {
+  color: var(--nav-accent);
+  flex: none;
+}
+
+.crumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-width: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}
+.crumbs ui-icon {
+  color: var(--text-muted);
+}
+.crumb-current {
+  color: var(--text-primary);
+  font-weight: 700;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .brand {
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 15px;
+    padding: 0;
+    margin-bottom: var(--sp-4);
+  }
+  /* Compact rail: the card keeps its icon and a short label, decoration steps out. */
+  .workspace {
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    text-align: center;
+    padding: var(--sp-2) var(--sp-1);
+  }
+  .workspace-name {
+    font-size: var(--fs-caption);
+  }
+  .workspace-name small {
+    display: none;
+  }
+  .nav-note {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .crumbs {
+    font-size: var(--fs-caption);
+    gap: var(--sp-2);
+  }
+}

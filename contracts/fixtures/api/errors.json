@@ -1,0 +1,97 @@
+{
+  "note": "Negative fixtures required by T01 acceptance: stale revision CONFLICT, invalid cursor, scalar boundary VALIDATION, NOT_FOUND, IDEMPOTENCY_CONFLICT. Shape mirrors GraphQL envelope: data null + typed problems inside payload (mutations) or top-level errors with extensions.code (transport/query level).",
+  "cases": [
+    {
+      "case": "REVISION_CONFLICT",
+      "operation": "UpdatePlant",
+      "variables": { "input": { "id": "5f0c1b6e-1111-4aaa-8bbb-000000000001", "expectedRevision": 2, "name": "Renamed" } },
+      "data": {
+        "updatePlant": {
+          "plant": null,
+          "problems": [
+            {
+              "code": "CONFLICT",
+              "field": "input.expectedRevision",
+              "message": "Plant was modified by another request.",
+              "currentRevision": 3
+            }
+          ],
+          "clientMutationId": "cmid-42"
+        }
+      }
+    },
+    {
+      "case": "INVALID_CURSOR",
+      "operation": "Plants",
+      "variables": { "first": 25, "after": "not-a-valid-cursor" },
+      "errors": [
+        {
+          "message": "Invalid pagination cursor.",
+          "extensions": { "code": "VALIDATION" }
+        }
+      ],
+      "data": null
+    },
+    {
+      "case": "SCALAR_BOUNDARY_DECIMAL_EXPONENT",
+      "operation": "RecordMeasurement",
+      "variables": {
+        "input": { "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001", "quantityKind": "LENGTH", "value": "1e3", "unit": "CM", "observedAt": "2026-11-01T10:00:00Z", "method": "MANUAL" }
+      },
+      "errors": [
+        {
+          "message": "Value cannot be coerced for type \"Decimal\": exponent notation is not allowed.",
+          "extensions": { "code": "VALIDATION" }
+        }
+      ],
+      "data": null
+    },
+    {
+      "case": "SCALAR_BOUNDARY_DATE_LOCALDATE",
+      "operation": "CreatePlant",
+      "variables": {
+        "input": { "name": "X", "type": "INDIVIDUAL", "category": "OTHER", "plantedOn": "2026-11-01T00:00:00Z" }
+      },
+      "errors": [
+        {
+          "message": "Value cannot be coerced for type \"LocalDate\": expected YYYY-MM-DD.",
+          "extensions": { "code": "VALIDATION" }
+        }
+      ],
+      "data": null
+    },
+    {
+      "case": "NOT_FOUND_CROSS_WORKSPACE",
+      "operation": "ArchivePlant",
+      "variables": { "input": { "id": "00000000-0000-4000-8000-000000000000", "expectedRevision": 1 } },
+      "data": {
+        "archivePlant": {
+          "plant": null,
+          "problems": [
+            { "code": "NOT_FOUND", "field": "input.id", "message": "Plant not found.", "currentRevision": null }
+          ],
+          "clientMutationId": null
+        }
+      }
+    },
+    {
+      "case": "IDEMPOTENCY_CONFLICT",
+      "operation": "CreatePurchase",
+      "variables": { "input": { "currency": "USD", "totalMinor": "100", "lines": [] }, "clientMutationId": "cmid-dup-diff-body" },
+      "data": {
+        "createPurchase": {
+          "purchase": null,
+          "problems": [
+            {
+              "code": "IDEMPOTENCY_CONFLICT",
+              "field": "clientMutationId",
+              "message": "This clientMutationId was already used with a different request body.",
+              "currentRevision": null
+            }
+          ],
+          "clientMutationId": "cmid-dup-diff-body"
+        }
+      }
+    }
+  ]
+}

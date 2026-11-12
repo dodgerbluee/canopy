@@ -1,0 +1,129 @@
+/* Design tokens (docs/plan/04-experience.md, UI01 official-mock revision).
+   Components must consume these custom properties; raw hex values outside this
+   file are a design-system change. Contrast pairs are asserted by
+   web/src/app/ui/tokens-contrast.spec.ts. */
+
+:root {
+  /* spacing scale */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* radii — mock uses restrained 7–11px corners; kept slightly larger for
+     44px touch targets so controls do not look cramped. */
+  --radius-field: 8px;
+  --radius-card: 12px;
+  --radius-hero: 16px;
+  --radius-pill: 999px;
+
+  /* type — Manrope for UI, Georgia for editorial display only.
+     Nothing essential renders below 12px. */
+  --font-ui: 'Manrope', system-ui, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', monospace;
+  --font-editorial: Georgia, 'Times New Roman', serif;
+  --fs-h1: 32px;
+  --lh-h1: 40px;
+  --fs-h2: 26px;
+  --lh-h2: 32px;
+  --fs-body: 16px;
+  --lh-body: 24px;
+  --fs-small: 14px;
+  --lh-small: 20px;
+  --fs-caption: 12px;
+  --lh-caption: 16px; /* floor: nothing essential below 12px */
+
+  /* motion */
+  --dur-control: 150ms;
+  --dur-page: 230ms;
+  --ease-out: cubic-bezier(0.2, 0.6, 0.35, 1);
+
+  /* layout */
+  --content-max: 1440px;
+  --gutter-desktop: 32px;
+  --gutter-wide: 40px;
+  --gutter-mobile: 16px;
+  --nav-width: 224px;
+  --nav-width-compact: 104px; /* 768–1199: icons keep a visible short label */
+  --topbar-height: 64px;
+  --touch-min: 44px;
+
+  /* focus */
+  --focus-width: 2px;
+  --focus-offset: 3px;
+
+  /* Forest navigation surface — deliberately the same in both themes (the
+     approved mock keeps the sidebar constant), so its contrast pairs are
+     theme-independent. Text pairs are asserted in tokens-contrast.spec.ts. */
+  --nav-surface: #193d32;
+  --nav-fg: #cfdad0;
+  --nav-muted: #a7bca9;
+  --nav-brand: #f6f9ed;
+  --nav-accent: #b2cb7e;
+  --nav-icon: #afc6b4;
+  --nav-active-bg: #dce8b0;
+  --nav-active-fg: #264331;
+  --nav-hover: rgba(255, 255, 255, 0.07);
+  --nav-hairline: rgba(255, 255, 255, 0.16);
+}
+
+/* Light is the CSS default (no data-theme attribute) per UI01.a. UiTheme still
+   writes an explicit system/owner choice onto <html> at bootstrap. */
+:root {
+  --surface-canvas: #f7f8f3;
+  --surface-base: #ffffff;
+  --surface-raised: #eff3e8;
+  --border: #6b7e6c; /* >=3:1 vs every light surface: control edges */
+  --border-decorative: #dce3d3; /* card/divider ornament, never a control edge */
+  --text-primary: #243c30;
+  --text-muted: #5e6a59; /* 5.07:1 on the darkest light surface */
+  --accent: #34573b;
+  --accent-hover: #21442d;
+  --accent-fg: #ffffff;
+  --warning: #7a5310;
+  --danger: #8a2b20;
+  --focus-ring: #34573b;
+  --shadow: 0 6px 28px rgba(38, 59, 38, 0.1);
+}
+
+[data-theme='light'] {
+  --surface-canvas: #f7f8f3;
+  --surface-base: #ffffff;
+  --surface-raised: #eff3e8;
+  --border: #6b7e6c;
+  --border-decorative: #dce3d3;
+  --text-primary: #243c30;
+  --text-muted: #5e6a59;
+  --accent: #34573b;
+  --accent-hover: #21442d;
+  --accent-fg: #ffffff;
+  --warning: #7a5310;
+  --danger: #8a2b20;
+  --focus-ring: #34573b;
+  --shadow: 0 6px 28px rgba(38, 59, 38, 0.1);
+}
+
+[data-theme='dark'] {
+  --surface-canvas: #14251e;
+  --surface-base: #1c3026;
+  --surface-raised: #273d2b;
+  --border: #74977a; /* >=3:1 vs all dark surfaces */
+  --border-decorative: #304639; /* hairlines only, never a control edge */
+  --text-primary: #ecf1e1;
+  --text-muted: #b4c2aa;
+  --accent: #c0d69a;
+  --accent-hover: #d2e4b2;
+  --accent-fg: #16200c;
+  --warning: #f1ca7c;
+  --danger: #ffb1aa;
+  --focus-ring: #c0d69a;
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* UI21 seasonal indicators: pair each hue with an icon and text. */
+:root { --season-violet: #67447f; --season-blue: #235e7b; }
+[data-theme='dark'] { --season-violet: #d3b8eb; --season-blue: #a9d8f1; }

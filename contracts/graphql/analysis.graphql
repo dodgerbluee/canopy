@@ -1,0 +1,437 @@
+# AI/analysis contract surface — frozen by T01.ai (depends T28).
+# Scope per 03 "AI, identification, and OCR": run lifecycle with polling,
+# provider capability + budget status, suggestions with owner accept/dismiss,
+# and the InsightEntry journal member. Server wiring lands with the surfaces
+# that can resolve these (T29 runs/capability, T30 drafts, T33 suggestions);
+# until then no resolver returns them.
+#
+# Invariants (03):
+# - Runs are asynchronous: QUEUED -> RUNNING -> SUCCEEDED/FAILED/CANCELLED/STALE.
+#   Clients poll analysisRun(id) (2s active, exponential to 15s; stop on
+#   terminal state or route leave). No subscriptions.
+# - A deleted/modified target or a cancelled run makes results STALE; a late
+#   provider response cannot resurrect data. STALE is terminal and readable.
+# - Budget: every billable attempt reserves max cost BEFORE dispatch; a
+#   timeout/cancel after dispatch may still be charged, so encumbrances stay
+#   until reconciliation. costActualMicroUsd null means "not yet known" —
+#   never render null as zero.
+# - Provider output is untrusted data: results are only ever the validated,
+#   typed shapes below; raw provider payloads are never exposed.
+# - Suggestions are advice, never logged care. acceptSuggestion creates a
+#   task; it never records an action as already done.
+
+# ---------- enums ----------
+
+enum AnalysisKind {
+  "Text analysis over bounded plant history + approved guidance (T29)."
+  TEXT
+  "Vision observation over an explicit photo pair (T31)."
+  VISION
+  "Identification candidates from a photo; owner confirms names (T30)."
+  IDENTIFICATION
+  "Receipt extraction to an editable draft; never a confirmed purchase (T30)."
+  RECEIPT_EXTRACTION
+  "Cross-record cost/care/history synthesis (T33)."
+  SYNTHESIS
+}
+
+enum AnalysisRunState {
+  QUEUED
+  RUNNING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+  "Terminal: target changed/deleted, run cancelled-then-late-arrived, or snapshot superseded. Readable, never actionable."
+  STALE
+}
+
+enum AnalysisFailureCode {
+  "No provider configured or owner opt-in missing; retriable once capability exists."
+  PROVIDER_UNAVAILABLE
+  TIMEOUT
+  "Provider 429/5xx; retried up to 3 attempts with bounded exponential jitter."
+  PROVIDER_UNAVAILABLE_RETRYABLE
+  "Provider answered but output failed length/schema/enum/evidence validation."
+  INVALID_OUTPUT
+  "Schema-repair attempt also failed (one bounded repair only)."
+  REPAIR_FAILED
+  BUDGET_EXCEEDED
+  "Superseded by a newer run or invalidated by target change; result discarded."
+  SUPERSEDED
+  INTERNAL
+}
+
+enum Confidence {
+  "Model label, not a calibrated probability; UI copy must not imply statistics."
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum SuggestionKind {
+  HEALTH
+  CARE
+  COST
+  OTHER
+}
+
+enum SuggestionStatus {
+  PROPOSED
+  ACCEPTED
+  DISMISSED
+  EXPIRED
+}
+
+enum SuggestionSeverity {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+# ---------- run ----------
+
+type AnalysisRun {
+  id: ID!
+  "Increments on state transitions that the client may race (cancel); expectedRevision for cancelAnalysis."
+  revision: Int!
+  kind: AnalysisKind!
+  "Set for TEXT, VISION, IDENTIFICATION, SYNTHESIS."
+  plantId: ID
+  "Set for RECEIPT_EXTRACTION."
+  receiptAssetId: ID
+  state: AnalysisRunState!
+  "Provider attempts so far (retries + the single schema repair count, per 03)."
+  attempts: Int!
+  requestedAt: DateTime!
+  startedAt: DateTime
+  finishedAt: DateTime
+  "Set when state is FAILED; safe code only — no provider bodies, SQL, or secrets."
+  failureCode: AnalysisFailureCode
+  failureMessage: String
+  "Provider/model/prompt/schema versions of the attempt that produced the result; null until a provider answered."
+  provider: String
+  model: String
+  promptVersion: String
+  resultSchemaVersion: String
+  "Maximum cost reserved for outstanding attempts, integer micro-USD as string (never binary floats). Encumbered until reconciliation even after timeout/cancel."
+  costReservedMicroUsd: String
+  "Authoritative usage when known; null means unknown/unreconciled, NOT zero."
+  costActualMicroUsd: String
+  "What was actually sent, so the user sees what was included (03 bounded selection)."
+  evidence: AnalysisEvidence!
+  "Validated result; null unless state is SUCCEEDED."
+  result: AnalysisResult
+  "Actionable proposals this run produced (advice only until accepted)."
+  suggestions: [Suggestion!]!
+}
+
+type AnalysisEvidence {
+  "Bounded snapshot contents (03: latest 12 relevant activities, at most 4 image derivatives, retrieved approved guidance, weather freshness, missing facts)."
+  activityIds: [ID!]!
+  measurementIds: [ID!]!
+  photoIds: [ID!]!
+  sourceVersionIds: [ID!]!
+  weatherSnapshotIds: [ID!]!
+  "Facts the engine knew were missing at snapshot time; shown, never guessed around."
+  missingFacts: [String!]!
+  "Hash of the input snapshot. Same hash + no forceRerun re-uses the prior run instead of re-billing."
+  inputHash: String!
+}
+
+# ---------- results (validated shapes only) ----------
+
+union AnalysisResult =
+  | ObservationAnalysisResult
+  | IdentificationResult
+  | ReceiptExtractionResult
+
+"""
+Shared shape for TEXT, VISION and SYNTHESIS results (03 result schema).
+Vision results never assert growth rate without scale/reference or name a
+definitive disease; that discipline is enforced by the validator, and the
+typed shape here carries no field that could claim it.
+"""
+type ObservationAnalysisResult {
+  visibleObservations: [Observation!]!
+  hypotheses: [Hypothesis!]!
+  missingInformation: [String!]!
+  followUpChecks: [String!]!
+  "Every citation must reference a supplied source version; unsupported claims are flagged and cannot become actionable care automatically."
+  citations: [Citation!]!
+}
+
+type Observation {
+  text: String!
+  "IDs into AnalysisRun.evidence; the engine validates every reference before persistence."
+  evidenceIds: [ID!]!
+}
+
+type Hypothesis {
+  text: String!
+  confidence: Confidence!
+  evidenceIds: [ID!]!
+}
+
+type Citation {
+  sourceId: ID!
+  sourceVersionId: ID!
+  title: String!
+  publisher: String
+  retrievedOn: LocalDate
+  region: String
+  license: String
+}
+
+"""
+Identification output is candidates, never facts: names stay unconfirmed
+until the owner accepts; cultivar is null unless label evidence exists.
+"""
+type IdentificationResult {
+  candidates: [IdentificationCandidate!]!
+  "Null = cultivar unconfirmed; never invented from species priors."
+  cultivar: String
+  "True only when a label in the supplied photos evidences the cultivar."
+  cultivarEvidenced: Boolean!
+}
+
+type IdentificationCandidate {
+  "1 = best. Ranked, with the model's confidence label."
+  rank: Int!
+  scientificName: String!
+  commonName: String
+  confidence: Confidence!
+  "What in the supplied evidence supports this candidate (may be empty: abstention is honest)."
+  evidenceNote: String
+}
+
+"""
+Receipt extraction produces an editable draft only. The original receipt is
+preserved; confirming the draft goes through the normal createPurchase /
+reconciliation flow. Text inside a receipt is untrusted data, never
+instructions — there is deliberately no field that could carry an imperative.
+"""
+type ReceiptExtractionResult {
+  currency: String
+  lines: [ExtractedLine!]!
+  "Null when the receipt total is illegible or disagrees with lines; needsReconciliation is then true."
+  totalMinor: String
+  shippingMinor: String
+  taxMinor: String
+  purchasedOn: LocalDate
+  seller: String
+  "True when totals/lines do not reconcile exactly or any value is uncertain; the owner must correct before confirming."
+  needsReconciliation: Boolean!
+}
+
+type ExtractedLine {
+  description: String!
+  "Integer minor units as string; null = amount not legible."
+  amountMinor: String
+}
+
+# ---------- capability + budget ----------
+
+type ProviderCapabilities {
+  text: ProviderCapability!
+  vision: ProviderCapability!
+  identification: ProviderCapability!
+  receiptExtraction: ProviderCapability!
+  budget: AnalysisBudgetStatus!
+}
+
+type ProviderCapability {
+  "False when no provider is configured or the owner has not opted in to sending data externally."
+  available: Boolean!
+  "Configured model name only; endpoints, keys and credentials are never exposed."
+  model: String
+  "True when using this capability sends workspace data outside the deployment; drives the opt-in UI."
+  externalData: Boolean!
+  "Why it is unavailable, in owner language (e.g. 'no vision provider configured'); null when available."
+  unavailableReason: String
+}
+
+type AnalysisBudgetStatus {
+  "Runs started in the current workspace-local day vs the configured daily limit (default 10)."
+  dailyRunsUsed: Int!
+  dailyRunLimit: Int!
+  "Max one concurrent run per provider (03)."
+  concurrentRunLimit: Int!
+  "UTC calendar month the monetary figures belong to; reservations never migrate months."
+  monthUtc: String!
+  "Configured monthly external-cost ceiling in integer micro-USD as string; null = no monetary ceiling (e.g. local-only provider)."
+  monthCeilingMicroUsd: String
+  "Reserved-but-unreconciled attempts this month (encumbered, may still be charged)."
+  monthReservedMicroUsd: String!
+  "Reconciled spend this month."
+  monthSpentMicroUsd: String!
+}
+
+# ---------- suggestions (advice, separate from logged care) ----------
+
+type Suggestion {
+  id: ID!
+  "Exact version accept/dismiss must reference; context or source changes bump it and require owner review."
+  revision: Int!
+  plantId: ID!
+  "Null for deterministic guidance-derived suggestions; set for analysis-produced ones."
+  runId: ID
+  kind: SuggestionKind!
+  severity: SuggestionSeverity!
+  status: SuggestionStatus!
+  "Structured advice parts (03 guidance+suggestions): what is visible, what it might mean, what to do."
+  observation: String
+  hypothesis: String
+  action: String!
+  "Traceable evidence references; the UI must show an unsupported warning when empty."
+  evidenceIds: [ID!]!
+  missingFacts: [String!]!
+  createdAt: DateTime!
+  "Null = no expiry. Expired suggestions cannot be accepted."
+  expiresAt: DateTime
+  "True when a referenced source was retired or the plant context changed: still PROPOSED, but the owner must review before accepting."
+  needsReview: Boolean!
+  "Set when ACCEPTED: the single task this acceptance created (idempotent replays return the same one)."
+  acceptedTaskId: ID
+  "Optional reason captured on dismissal."
+  dismissReason: String
+}
+
+input SuggestionFilter {
+  plantId: ID
+  status: [SuggestionStatus!]
+  kinds: [SuggestionKind!]
+}
+
+type SuggestionConnection {
+  items: [Suggestion!]!
+  pageInfo: PageInfo!
+}
+
+# ---------- journal union member (frozen by T01.ai; wired in T33) ----------
+
+# journal.graphql's note assigns the InsightEntry union member to the AI lane.
+# Insight journal lines are projected from accepted synthesis so the owner's
+# journey shows what advice entered. Per the T01.care precedent, the
+# `extend union JournalEntry = InsightEntry` and
+# `extend enum JournalEntryType { INSIGHT }` lines land with T33's server
+# surface: the web ships contracts/operations documents at runtime, and a
+# union member the live server cannot resolve would break the journal page
+# and the Today composition. Until then no resolver returns this member.
+
+type InsightEntry {
+  id: ID!
+  plantId: ID!
+  occurredAt: DateTime!
+  createdAt: DateTime!
+  summary: String!
+  tombstonedAt: DateTime
+  runId: ID!
+  kind: AnalysisKind!
+}
+
+# The union/enum extension lands with T33's server surface (the note above
+# and journal.graphql both assign it here): acceptSuggestion projects the
+# INSIGHT journal line, so the live server can resolve this member.
+extend union JournalEntry = InsightEntry
+extend enum JournalEntryType { INSIGHT }
+
+# ---------- root surface ----------
+
+extend type Query {
+  "Null when absent or cross-workspace (behaves as NOT_FOUND for cancel)."
+  analysisRun(id: ID!): AnalysisRun
+  "Capability + budget for settings and request-time gating; never exposes credentials."
+  providerCapabilities: ProviderCapabilities!
+  "Newest first, order (createdAt DESC, id DESC); keyset cursors bound to filter signature."
+  suggestions(filter: SuggestionFilter, first: Int = 25, after: String): SuggestionConnection!
+}
+
+extend type Mutation {
+  requestAnalysis(input: RequestAnalysisInput!, clientMutationId: String): RequestAnalysisPayload!
+  cancelAnalysis(input: CancelAnalysisInput!, clientMutationId: String): CancelAnalysisPayload!
+  acceptSuggestion(input: AcceptSuggestionInput!, clientMutationId: String): AcceptSuggestionPayload!
+  dismissSuggestion(input: DismissSuggestionInput!, clientMutationId: String): DismissSuggestionPayload!
+}
+
+input RequestAnalysisInput {
+  kind: AnalysisKind!
+  "Required for TEXT, VISION, IDENTIFICATION, SYNTHESIS; rejected for RECEIPT_EXTRACTION."
+  plantId: ID
+  "VISION: exactly two READY photo ids of the same plant (comparison pair); rejected for other kinds."
+  photoIds: [ID!]
+  "RECEIPT_EXTRACTION: READY receipt asset in this workspace; required for that kind, rejected otherwise."
+  receiptAssetId: ID
+  "03: no repeat analyses without a new input hash unless the owner explicitly reruns. Same-hash requests without this return the existing run with IDEMPOTENCY_CONFLICT."
+  forceRerun: Boolean
+}
+
+input CancelAnalysisInput {
+  runId: ID!
+  expectedRevision: Int!
+}
+
+input AcceptSuggestionInput {
+  suggestionId: ID!
+  "Exact suggestion version (03: acceptSuggestion references the exact suggestion version)."
+  expectedRevision: Int!
+  "Workspace-local due date for the created task; default today. Rejected when in the past."
+  dueOn: LocalDate
+}
+
+input DismissSuggestionInput {
+  suggestionId: ID!
+  expectedRevision: Int!
+  "Optional, owner-supplied; stored verbatim (bounded length), never required."
+  reason: String
+}
+
+type RequestAnalysisPayload {
+  """
+  The queued run. Problem semantics:
+  - CAPABILITY_UNAVAILABLE: kind has no configured/opted-in provider; nothing queued.
+  - RATE_LIMITED: daily run limit or monthly cost ceiling reached (message says which).
+  - IDEMPOTENCY_CONFLICT: an active run with the same semantic key exists, or the
+    input hash is unchanged without forceRerun; `run` carries the existing run.
+  - VALIDATION: target/kind mismatch (missing plantId/receiptAssetId, bad photo pair).
+  """
+  run: AnalysisRun
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type CancelAnalysisPayload {
+  """
+  CONFLICT when the run is already terminal (state + currentRevision returned;
+  nothing changed). A cancel after dispatch may still be charged: the run
+  becomes CANCELLED while its reservation stays encumbered until
+  reconciliation — costReservedMicroUsd reflects that honestly.
+  """
+  run: AnalysisRun
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type AcceptSuggestionPayload {
+  """
+  Creates exactly one explicit care task (a one-off occurrence on the plant's
+  plan) — never a completed activity. Problems:
+  - CONFLICT: suggestion revision moved (context/source changed); currentRevision
+    returned, nothing created.
+  - VALIDATION: suggestion EXPIRED, or the plant has no care plan to host the
+    task (the UI asks the owner to create/choose a plan first — this is the
+    "asks for confirmation" path).
+  Duplicate accepts (same clientMutationId) replay the same task; a second
+  accept with a fresh key on an ACCEPTED suggestion returns CONFLICT with the
+  suggestion whose acceptedTaskId already names the created task.
+  """
+  suggestion: Suggestion
+  occurrence: CareOccurrence
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type DismissSuggestionPayload {
+  suggestion: Suggestion
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}

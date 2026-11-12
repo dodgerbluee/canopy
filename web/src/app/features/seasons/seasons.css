@@ -1,0 +1,185 @@
+:host {
+  display: block;
+}
+.seasons-page {
+  max-width: 1440px;
+  margin: auto;
+}
+.seasons-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+.kicker {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--text-muted);
+  margin: 0;
+}
+.seasons-heading h1 {
+  font-family: var(--font-editorial);
+  font-size: 44px;
+  line-height: 1.2;
+  font-weight: 400;
+  margin: 10px 0;
+}
+.seasons-heading h1 span {
+  color: var(--accent);
+}
+.intro {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+.heading-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.heading-actions .btn {
+  font-size: 12px;
+}
+.year-overview {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  margin-bottom: 22px;
+}
+.year-selector {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.year-selector h2 {
+  font-family: var(--font-editorial);
+  font-weight: 400;
+  font-size: 32px;
+  margin: 0;
+}
+.year-overview p {
+  font-size: 12px;
+  color: var(--text-muted);
+  flex: 1;
+  line-height: 1.8;
+  margin: 0;
+}
+.year-overview p strong {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.year-overview p span {
+  margin: 0 9px;
+}
+.research-button {
+  font-size: 12px;
+}
+.knowledge-setup {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 20px 24px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-decorative);
+  border-radius: 12px;
+  margin-bottom: 24px;
+  color: var(--accent);
+}
+.knowledge-setup > div {
+  flex: 1;
+}
+.knowledge-setup h3 {
+  font-family: var(--font-editorial);
+  font-size: 21px;
+  font-weight: 400;
+  margin: 0 0 6px;
+}
+.knowledge-setup p {
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 620px;
+}
+.knowledge-setup .btn {
+  font-size: 12px;
+}
+.season-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin: 0 0 14px;
+}
+.season-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  background: var(--surface-base);
+}
+.season-search input {
+  border: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 12px;
+  min-height: 42px;
+  width: 140px;
+}
+.season-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex: 1;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid color-mix(in srgb, var(--kind-color) 30%, var(--border-decorative));
+  border-radius: var(--radius-pill);
+  min-height: 36px;
+  padding: 6px 10px;
+  background: color-mix(in srgb, var(--kind-color) 10%, var(--surface-base));
+  color: var(--kind-color);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+.legend-item.is-muted {
+  background: var(--surface-base);
+  color: var(--text-muted);
+  border-style: dashed;
+}
+.season-explanation,
+.season-foot {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--text-muted);
+  margin: 0 0 18px;
+}
+.season-foot {
+  margin: 18px 0 0;
+}
+.seasons-empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.seasons-error {
+  border: 1px solid var(--border-decorative);
+  border-radius: 10px;
+  padding: 14px 18px;
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}

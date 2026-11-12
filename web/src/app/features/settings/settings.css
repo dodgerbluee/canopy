@@ -1,0 +1,86 @@
+/* Settings (UI01.d): editorial head + consistent card sections, tokens only. */
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-6);
+}
+.page-head-main {
+  display: grid;
+  gap: var(--sp-2);
+}
+.page-head h1 {
+  margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.page-head-main > p:last-child {
+  margin: 0;
+  max-width: 62ch;
+}
+.section {
+  margin-bottom: var(--sp-4);
+  max-width: 520px;
+  display: grid;
+  gap: var(--sp-3);
+}
+.section-head h2 {
+  margin: 0 0 var(--sp-1);
+}
+.theme-set {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.theme-set legend {
+  margin-bottom: var(--sp-2);
+}
+.theme-option {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-field);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+.theme-option input {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+.theme-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--surface-base);
+}
+dl.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--sp-1) var(--sp-4);
+  margin: 0;
+}
+dt {
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}
+dd {
+  margin: 0;
+  font-size: var(--fs-small);
+}
+.save-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}

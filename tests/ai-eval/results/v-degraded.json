@@ -1,0 +1,110 @@
+{
+  "caseId": "v-degraded",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:b3823fe5b142669389dd6ea2625f6bc9f4c0e4f8716a85b8604d0696b5274246",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "60e36d9d-044a-40fd-913a-23b1d59a40ec",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "1fdc2410-b602-4da8-9caa-3b60ede9f3be",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "16d72fce-0722-4a00-8726-d6a3b2dd9bf8",
+        "takenAt": "2026-10-04T08:20:54Z"
+      },
+      {
+        "id": "f957f317-818d-45f1-ad3c-b5ae165254b9",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "e4a25215-04f3-4d89-bbf4-9558ccb740ab",
+        "takenAt": "2026-11-03T08:20:54Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "0f271324-8ca4-4e95-b071-7899c066021a",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The second image is too blurry to support a reliable visual comparison with the first image.",
+        "confidence": "HIGH",
+        "evidenceIds": [
+          "1fdc2410-b602-4da8-9caa-3b60ede9f3be",
+          "f957f317-818d-45f1-ad3c-b5ae165254b9"
+        ]
+      },
+      {
+        "text": "The two images may depict the same potted plant, but this cannot be confirmed from the available images.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "1fdc2410-b602-4da8-9caa-3b60ede9f3be",
+          "f957f317-818d-45f1-ad3c-b5ae165254b9"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Capture a sharper, well-lit photo of the same plant from a similar angle and distance.",
+      "Include a scale reference such as a ruler or common object.",
+      "Record leaf count, fenestration, leaf color, and any visible damage in a follow-up photo."
+    ],
+    "missingInformation": [
+      "Comparison was refused because the second image is blurry and the images are stylized or low-detail, so leaf count, leaf shape, and plant structure cannot be reliably compared.",
+      "No scale reference is present in either image.",
+      "No measurements, activities, or care guidance are available in the snapshot."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The first image shows a potted plant with green rounded foliage and a brown pot.",
+        "evidenceIds": [
+          "1fdc2410-b602-4da8-9caa-3b60ede9f3be"
+        ]
+      },
+      {
+        "text": "The second image shows a blurry potted plant with green foliage and a brown pot.",
+        "evidenceIds": [
+          "f957f317-818d-45f1-ad3c-b5ae165254b9"
+        ]
+      },
+      {
+        "text": "The second image has much lower sharpness than the first image.",
+        "evidenceIds": [
+          "1fdc2410-b602-4da8-9caa-3b60ede9f3be",
+          "f957f317-818d-45f1-ad3c-b5ae165254b9"
+        ]
+      },
+      {
+        "text": "The snapshot identifies the plant as Monstera, but the images do not show clearly diagnostic Monstera features.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

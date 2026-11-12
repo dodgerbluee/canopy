@@ -1,0 +1,33 @@
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: canopy-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    uses: ./.github/workflows/publish.yml
+    with:
+      channel: release
+  release:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: canopy-release
+          path: release
+      - name: Create GitHub release with deployment files
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.publish.outputs.version }}
+        run: |
+          flags=()
+          if [[ "$VERSION" == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$GITHUB_REF_NAME" release/* --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes --latest=false "${flags[@]}"

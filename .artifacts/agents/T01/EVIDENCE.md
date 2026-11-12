@@ -1,0 +1,7 @@
+# Public acceptance record: T01
+
+This is a source-release summary. Original local execution artifacts remain private because they may include personal garden data. Current GitHub CI reproduces the verification gates.
+
+| T01.r1 | 2026-11-01 | integrator re-run | `.artifacts/agents/T01/validation.txt` | SDL+operations frozen; digests recorded |
+| T01.care | 2026-11-02 | implementer suite + integrator gate | `.artifacts/agents/T01/care-validation.txt` | care/source/profile/notification SDL+ops+fixtures frozen; union wiring deferred to T24 |
+| T01.ai | 2026-11-02 | implementer suite + integrator gate | `.artifacts/agents/T01/ai-validation.txt` (+ make-check-t01ai.txt, dispatch-check.txt) | AI/analysis SDL+ops+fixtures frozen: run lifecycle QUEUED/RUNNING/SUCCEEDED/FAILED/CANCELLED/STALE with generation-fenced STALE, capability+budget (micro-USD strings, encumbered reservations, null actual != zero), suggestions PROPOSED/ACCEPTED/DISMISSED/EXPIRED with exact-revision accept/dismiss + acceptedTaskId replay, validated result unions (observation/hypothesis/citation, ranked identification candidates, receipt draft needsReconciliation never confirmed), InsightEntry type; 7 named ops incl. polling AnalysisRunStatus; lifecycle + 7 negative fixtures. Deviation (T01.care precedent): union/enum extension + op selections deferred to T33 - first make-check proved live-server rejection of unresolvable union member (2/15 e2e failed), reverted; gqlgen spike generate+build+vet green with panic stubs; analysis.graphql joins server schema at T29/T33 |

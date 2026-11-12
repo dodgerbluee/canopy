@@ -1,0 +1,5 @@
+# Public acceptance record: T08
+
+This is a source-release summary. Original local execution artifacts remain private because they may include personal garden data. Current GitHub CI reproduces the verification gates.
+
+| T08 | 2026-11-01 | Go integration over real HTTP + web unit + e2e round-trip + full gate | `.artifacts/agents/T08/validation.txt` | gqlgen v0.17.98 + gqlparser v2.5.64 tool-pinned, generated code committed and gen-check clean; strict scalars (DateTime/Date/Decimal/MinorUnits boundaries); limits enforced pre-execution (depth ≤12, aliases ≤30, first ≤100, complexity 5000 charged at requested page size, 64KiB body) with CAPABILITY_UNAVAILABLE for unshipped fields; auth (401/403 problem envelope) vs payload (200 typed problems) differentiated; web GraphQLClient (generated TypedDocumentNode + CSRF + AbortSignal + ok/auth/network/aborted kinds) and PageStore (destroyed store never updates) driven by contracts fixtures; settings page renders real workspace; e2e asserts generated-TS→gqlgen round-trip ("My garden"); 94 web unit + 8 e2e + 45 visual all green |

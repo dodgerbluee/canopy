@@ -1,0 +1,143 @@
+<div class="shell">
+  <aside class="shell-nav">
+    <a class="brand" routerLink="/" title="Today">
+      <ui-icon class="brand-mark" name="sprout" [size]="26" />
+      <span class="brand-word">canopy<span class="brand-dot">.</span></span>
+    </a>
+    <!-- Workspace card (mock .workspace): the space you are in, and the way to
+          the garden itself. Kept outside nav[aria-label="Primary"] — it is
+          context, not one of the seven destinations. Settings stays in the nav. -->
+    <a class="workspace" routerLink="/plants">
+      <ui-icon class="workspace-mark" name="leaf" [size]="17" />
+      <span class="workspace-name">Your garden<small>Personal workspace</small></span>
+    </a>
+    <div class="nav-label">Your space</div>
+    <nav aria-label="Primary">
+      <a
+        class="nav-link"
+        routerLink="/"
+        routerLinkActive="is-active"
+        [routerLinkActiveOptions]="{ exact: true }"
+        ariaCurrentWhenActive="page"
+      >
+        <ui-icon name="overview" [size]="18" /><span class="nav-text">Today</span>
+      </a>
+      <a
+        class="nav-link"
+        routerLink="/plants"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+      >
+        <ui-icon name="leaf" [size]="18" /><span class="nav-text">Plants</span>
+      </a>
+      <a
+        class="nav-link"
+        routerLink="/year"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        ><ui-icon name="sprout" [size]="18" /><span class="nav-text">Garden year</span></a
+      >
+      <a
+        class="nav-link"
+        routerLink="/calendar"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        ><ui-icon name="calendar" [size]="18" /><span class="nav-text">Calendar</span></a
+      >
+      <a
+        class="nav-link"
+        routerLink="/journal"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+      >
+        <ui-icon name="book" [size]="18" /><span class="nav-text">Journal</span>
+      </a>
+      <a
+        class="nav-link"
+        routerLink="/care"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+      >
+        <ui-icon name="check" [size]="18" /><span class="nav-text">Care</span>
+      </a>
+      <a
+        class="nav-link"
+        routerLink="/insights"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+        ><ui-icon name="sparkles" [size]="18" /><span class="nav-text">AI assistant</span></a
+      >
+      <a
+        class="nav-link"
+        routerLink="/inbox"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+      >
+        <ui-icon name="inbox" [size]="18" /><span class="nav-text">Inbox</span>
+      </a>
+      <a
+        class="nav-link"
+        routerLink="/purchases"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+      >
+        <ui-icon name="receipt" [size]="18" /><span class="nav-text">Purchases</span>
+      </a>
+      <a
+        class="nav-link"
+        routerLink="/settings"
+        routerLinkActive="is-active"
+        ariaCurrentWhenActive="page"
+      >
+        <ui-icon name="settings" [size]="18" /><span class="nav-text">Settings</span>
+      </a>
+    </nav>
+
+    <!-- Quiet closer: the same note the mock keeps at the foot of the rail. -->
+    <p class="nav-foot nav-note">
+      <ui-icon name="sprout" [size]="14" /><span>A little care goes a long way.</span>
+    </p>
+  </aside>
+
+  <main class="shell-main">
+    <header class="topbar">
+      <div class="crumbs">
+        <ui-icon name="home" [size]="16" />
+        <span class="crumb-sep" aria-hidden="true">/</span>
+        <span class="crumb-current">{{ routeLabel() }}</span>
+      </div>
+      <div class="row top-actions">
+        <ui-menu label="Account">
+          <button uiMenuItem (triggered)="signOut()">Sign out</button>
+        </ui-menu>
+      </div>
+    </header>
+    <div class="page">
+      <router-outlet />
+    </div>
+  </main>
+</div>
+
+<nav class="bottom-nav" aria-label="Primary mobile">
+  <a
+    class="nav-link"
+    routerLink="/"
+    routerLinkActive="is-active"
+    [routerLinkActiveOptions]="{ exact: true }"
+    ariaCurrentWhenActive="page"
+    ><ui-icon name="overview" [size]="20" /><span>Today</span></a
+  >
+  <a class="nav-link" routerLink="/plants" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+    ><ui-icon name="leaf" [size]="20" /><span>Plants</span></a
+  >
+  <a class="nav-link" routerLink="/rounds" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+    ><ui-icon name="camera" [size]="20" /><span>Rounds</span></a
+  >
+  <a class="nav-link" routerLink="/year" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+    ><ui-icon name="sprout" [size]="20" /><span>Year</span></a
+  >
+  <a class="nav-link" routerLink="/more" routerLinkActive="is-active" ariaCurrentWhenActive="page"
+    ><ui-icon name="ellipsis" [size]="20" /><span>More</span></a
+  >
+</nav>
+<ui-toast-region />

@@ -1,0 +1,7 @@
+{
+  "type": "mcp",
+  "server_label": "canopy",
+  "server_url": "https://garden.example.com/mcp",
+  "allowed_tools": ["garden_overview", "plants_list", "plant_get", "garden_year"],
+  "headers": {"Authorization": "Bearer <inject-dedicated-agent-token-at-runtime>"}
+}

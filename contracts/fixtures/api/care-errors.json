@@ -1,0 +1,192 @@
+{
+  "note": "Care negative fixtures required by T01.care acceptance: plan CONFLICT, stale occurrence revision, linked-completion activity edit rejection, past snooze VALIDATION, multi-member recurrence VALIDATION, timezone save without preview, profile publish CONFLICT.",
+  "cases": [
+    {
+      "case": "PLAN_ALREADY_EXISTS",
+      "operation": "CreateCarePlan",
+      "variables": {
+        "input": {
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "timezone": "America/Los_Angeles"
+        }
+      },
+      "data": {
+        "createCarePlan": {
+          "plan": null,
+          "problems": [
+            {
+              "code": "CONFLICT",
+              "field": "input.plantId",
+              "message": "This plant already has a care plan; edit it instead.",
+              "currentRevision": 2
+            }
+          ],
+          "clientMutationId": "cmid-plan-1"
+        }
+      }
+    },
+    {
+      "case": "OCCURRENCE_STALE_REVISION",
+      "operation": "CompleteOccurrence",
+      "variables": {
+        "input": {
+          "occurrenceId": "5f0c1b6e-2222-4aaa-8bbb-000000000001",
+          "expectedRevision": 1
+        }
+      },
+      "data": {
+        "completeOccurrence": {
+          "occurrence": null,
+          "activity": null,
+          "nextOccurrence": null,
+          "problems": [
+            {
+              "code": "CONFLICT",
+              "field": "input.expectedRevision",
+              "message": "This task was resolved by another request.",
+              "currentRevision": 2
+            }
+          ],
+          "clientMutationId": "cmid-complete-1"
+        }
+      }
+    },
+    {
+      "case": "LINKED_COMPLETION_USE_CORRECTION",
+      "operation": "UpdateActivity",
+      "variables": {
+        "input": {
+          "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000aa",
+          "expectedRevision": 1,
+          "note": "edited through the wrong door"
+        }
+      },
+      "data": {
+        "updateActivity": {
+          "activity": null,
+          "problems": [
+            {
+              "code": "LINKED_COMPLETION_USE_CORRECTION",
+              "field": "input.id",
+              "message": "This activity records a care completion; correct it through correctOccurrenceCompletion (occurrence 5f0c1b6e-2222-4aaa-8bbb-000000000001).",
+              "currentRevision": 1
+            }
+          ],
+          "clientMutationId": "cmid-activity-1"
+        }
+      }
+    },
+    {
+      "case": "SNOOZE_IN_PAST",
+      "operation": "SnoozeOccurrence",
+      "variables": {
+        "input": {
+          "occurrenceId": "5f0c1b6e-2222-4aaa-8bbb-000000000001",
+          "expectedRevision": 1,
+          "until": "2026-10-20"
+        }
+      },
+      "data": {
+        "snoozeOccurrence": {
+          "occurrence": null,
+          "nextOccurrence": null,
+          "problems": [
+            {
+              "code": "VALIDATION",
+              "field": "input.until",
+              "message": "Snooze date must not be earlier than the current due date (2026-11-04).",
+              "currentRevision": null
+            }
+          ],
+          "clientMutationId": "cmid-snooze-1"
+        }
+      }
+    },
+    {
+      "case": "RECURRENCE_MULTIPLE_MEMBERS",
+      "operation": "CreateCareProfileDraft",
+      "variables": {
+        "input": {
+          "category": "FIG",
+          "rules": [
+            {
+              "ruleKey": "fig-water",
+              "kind": "ACTION",
+              "activityKind": "WATER",
+              "recurrence": {
+                "everyNDays": { "days": 3, "anchor": "PLAN_START" },
+                "weeklyDays": { "weekdays": ["MONDAY"] }
+              },
+              "guidanceText": "Ambiguous cadence."
+            }
+          ]
+        }
+      },
+      "data": {
+        "createCareProfileDraft": {
+          "profile": null,
+          "problems": [
+            {
+              "code": "VALIDATION",
+              "field": "input.rules[0].recurrence",
+              "message": "Exactly one recurrence form must be set; found 2.",
+              "currentRevision": null
+            }
+          ],
+          "clientMutationId": "cmid-draft-1"
+        }
+      }
+    },
+    {
+      "case": "TIMEZONE_SAVE_NEEDS_PREVIEW",
+      "operation": "UpdateCarePlan",
+      "variables": {
+        "input": {
+          "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000a1",
+          "expectedRevision": 2,
+          "timezone": "America/Denver"
+        }
+      },
+      "data": {
+        "updateCarePlan": {
+          "plan": null,
+          "problems": [
+            {
+              "code": "VALIDATION",
+              "field": "input.timezone",
+              "message": "Timezone changes require a previewCarePlan run and confirmRecalculation=true.",
+              "currentRevision": null
+            }
+          ],
+          "clientMutationId": "cmid-plan-2"
+        }
+      }
+    },
+    {
+      "case": "PROFILE_PUBLISH_STALE",
+      "operation": "PublishCareProfile",
+      "variables": {
+        "input": {
+          "profileId": "5f0c1b6e-2222-4aaa-8bbb-0000000000d1",
+          "expectedRevision": 3,
+          "reviewerLabel": "dodgerbluee",
+          "reviewedOn": "2026-11-02"
+        }
+      },
+      "data": {
+        "publishCareProfile": {
+          "profile": null,
+          "problems": [
+            {
+              "code": "CONFLICT",
+              "field": "input.expectedRevision",
+              "message": "The profile was modified by another request.",
+              "currentRevision": 4
+            }
+          ],
+          "clientMutationId": "cmid-publish-1"
+        }
+      }
+    }
+  ]
+}

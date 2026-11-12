@@ -1,0 +1,14 @@
+{
+  "note": "03 exact-arithmetic example: one $100.00 purchase incl $5 tax + $5 shipping, two $45.00 lines allocated to two different figs; each fig shows $50.00; workspace total remains one $100.00 expense.",
+  "operation": "Spending",
+  "variables": { "filter": null },
+  "data": {
+    "spending": {
+      "knownSpendingByCurrency": [
+        { "currency": "USD", "total": { "minorUnits": "10000", "currency": "USD" } }
+      ],
+      "unknownAcquisitionCostCount": 1,
+      "missingAcquisitionRecordCount": 1
+    }
+  }
+}

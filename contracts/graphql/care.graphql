@@ -1,0 +1,717 @@
+# Care domain: sources, reviewed knowledge profiles, plans, occurrences, agenda,
+# notifications, weather evidence. Frozen by T01.care.
+# Semantics authoritative from docs/plan/03-contracts.md ("Care scheduling",
+# "Correcting a completed occurrence", recurrence/cursor rules).
+# This file joins the server gqlgen schema at T24 (care resolvers land there);
+# contract validation and TS codegen consume it from T01.care onward.
+
+# ---------- sources ----------
+
+enum SourceKind {
+  "Owner-entered without any scraping service."
+  OWNER_NOTE
+  BOOK
+  ARTICLE
+  EXTENSION_PUBLICATION
+  OTHER
+}
+
+type Source {
+  id: ID!
+  kind: SourceKind!
+  title: String!
+  publisher: String
+  url: String
+  "Free-text region label the guidance was gathered for; applicability lives on versions/rules."
+  region: String
+  "Reuse policy note. No inferred permission to mirror whole extension sites."
+  license: String
+  "Retired sources are excluded from new plans; pinned versions stay inspectable."
+  retiredAt: DateTime
+  revision: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  "Newest first."
+  versions: [SourceVersion!]!
+  currentVersion: SourceVersion!
+}
+
+type SourceVersion {
+  id: ID!
+  sourceId: ID!
+  citation: String!
+  "Owner-approved summary or small excerpt; never a full mirror."
+  summary: String!
+  retrievedOn: LocalDate
+  "Hex sha256 of the referenced content when recorded."
+  contentSha256: String
+  createdAt: DateTime!
+}
+
+input CreateSourceInput {
+  kind: SourceKind!
+  title: String!
+  publisher: String
+  url: String
+  region: String
+  license: String
+  citation: String!
+  summary: String!
+  retrievedOn: LocalDate
+  contentSha256: String
+}
+
+"Every update appends a new immutable SourceVersion; old versions remain inspectable."
+input UpdateSourceInput {
+  id: ID!
+  expectedRevision: Int!
+  "Null keeps the existing aggregate value."
+  title: String
+  publisher: String
+  url: String
+  region: String
+  license: String
+  citation: String!
+  summary: String!
+  retrievedOn: LocalDate
+  contentSha256: String
+}
+
+input RetireSourceInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+type SourcePayload {
+  source: Source
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+input SourceFilter {
+  kind: SourceKind
+  "Default false: retired sources hidden."
+  includeRetired: Boolean
+}
+
+type SourceConnection {
+  items: [Source!]!
+  pageInfo: PageInfo!
+}
+
+# ---------- reviewed knowledge profiles ----------
+
+enum ProfileStatus {
+  DRAFT
+  REVIEWED
+  RETIRED
+}
+
+enum RuleKind {
+  "Advisory: prompts an inspection; completing it logs an OBSERVE-type check, never an activity."
+  CHECK
+  "Completing it records the matching activity."
+  ACTION
+}
+
+enum Weekday {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+enum AnchorPolicy {
+  "Interval anchored to the plan start date."
+  PLAN_START
+  "Interval anchored to the last qualifying completion local date."
+  LAST_QUALIFYING_COMPLETION
+}
+
+"Plant facts a rule needs; a rule fails closed to 'needs context' while any is missing."
+enum ContextFact {
+  CULTIVAR
+  SCIENTIFIC_NAME
+  PLACEMENT
+  LOCATION_SITUATION
+  POT_VOLUME
+  REGION
+  HEMISPHERE
+}
+
+"Weather is advisory only: it can elevate a check, never complete work automatically."
+enum WeatherSensitivity {
+  NONE
+  RAINFALL
+  FROST
+}
+
+enum SeasonHemisphere {
+  NORTHERN
+  SOUTHERN
+}
+
+# ---------- recurrence (exactly the supported forms; no arbitrary RRULE) ----------
+
+"Exactly one member must be set; zero or several return VALIDATION."
+input RecurrenceSpecInput {
+  everyNDays: EveryNDaysInput
+  weeklyDays: WeeklyDaysInput
+  annualWindow: AnnualWindowInput
+  oneTime: OneTimeInput
+}
+
+input EveryNDaysInput {
+  "1..365."
+  days: Int!
+  anchor: AnchorPolicy!
+}
+
+input WeeklyDaysInput {
+  weekdays: [Weekday!]!
+}
+
+input AnnualWindowInput {
+  "month 1..12, day 1..31 (validated against the month). Feb 29 maps to Feb 28 in non-leap years, recorded in reason."
+  month: Int!
+  day: Int!
+  "Window length in days from the anchor date; default 1."
+  windowDays: Int
+  "Cadence in years; default 1. Windows spanning New Year use explicit dates/region."
+  everyYears: Int
+}
+
+input OneTimeInput {
+  date: LocalDate!
+}
+
+type EveryNDaysRecurrence {
+  days: Int!
+  anchor: AnchorPolicy!
+}
+
+type WeeklyDaysRecurrence {
+  weekdays: [Weekday!]!
+}
+
+type AnnualWindowRecurrence {
+  month: Int!
+  day: Int!
+  windowDays: Int!
+  everyYears: Int!
+}
+
+type OneTimeRecurrence {
+  date: LocalDate!
+}
+
+union RecurrenceSpec = EveryNDaysRecurrence | WeeklyDaysRecurrence | AnnualWindowRecurrence | OneTimeRecurrence
+
+# ---------- profile types ----------
+
+type CareProfile {
+  id: ID!
+  category: PlantCategory!
+  species: String
+  cultivar: String
+  "Draft lifecycle state of the aggregate; published versions carry their own status."
+  status: ProfileStatus!
+  revision: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  "Newest first."
+  versions: [CareProfileVersion!]!
+  "Highest REVIEWED, non-retired version; null when none published."
+  currentVersion: CareProfileVersion
+}
+
+type CareProfileVersion {
+  id: ID!
+  profileId: ID!
+  version: Int!
+  status: ProfileStatus!
+  environment: ProfileEnvironment!
+  rules: [CareRule!]!
+  reviewerLabel: String
+  reviewedOn: LocalDate
+  publishedAt: DateTime
+  retiredAt: DateTime
+  createdAt: DateTime!
+}
+
+type ProfileEnvironment {
+  "Empty list = any situation."
+  situations: [LocationSituation!]!
+  "Empty list = any hemisphere; unknown region leaves sensitive rules inactive."
+  hemispheres: [SeasonHemisphere!]!
+}
+
+type CareRule {
+  "Stable within a profile; plans, overrides and occurrences reference it."
+  ruleKey: String!
+  kind: RuleKind!
+  "Set exactly when kind = ACTION; null for CHECK."
+  activityKind: ActivityKind
+  recurrence: RecurrenceSpec!
+  requiredFacts: [ContextFact!]!
+  weatherSensitivity: WeatherSensitivity!
+  guidanceText: String!
+  "Pinned citations; empty for owner-authored rules."
+  sourceVersions: [SourceVersion!]!
+}
+
+input ProfileEnvironmentInput {
+  "Null = any situation."
+  situations: [LocationSituation!]
+  "Null = any hemisphere."
+  hemispheres: [SeasonHemisphere!]
+}
+
+input CareRuleInput {
+  ruleKey: String!
+  kind: RuleKind!
+  "Required exactly when kind = ACTION; rejected otherwise."
+  activityKind: ActivityKind
+  recurrence: RecurrenceSpecInput!
+  "Default empty."
+  requiredFacts: [ContextFact!]
+  "Default NONE."
+  weatherSensitivity: WeatherSensitivity
+  guidanceText: String!
+  "Citations must belong to non-retired sources; default empty."
+  sourceVersionIds: [ID!]
+}
+
+input CreateCareProfileDraftInput {
+  category: PlantCategory!
+  species: String
+  cultivar: String
+  environment: ProfileEnvironmentInput
+  rules: [CareRuleInput!]!
+}
+
+"Editable only while DRAFT and unreferenced; published content is immutable — edits fork a new draft version."
+input UpdateCareProfileDraftInput {
+  id: ID!
+  expectedRevision: Int!
+  species: String
+  cultivar: String
+  environment: ProfileEnvironmentInput
+  "Full replacement of the draft rule set when set."
+  rules: [CareRuleInput!]
+}
+
+"Permitted only while unpublished and unreferenced."
+input DeleteCareProfileDraftInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+"Freezes the draft content as a new immutable REVIEWED version; existing pinned plans are unaffected."
+input PublishCareProfileInput {
+  profileId: ID!
+  expectedRevision: Int!
+  "Owner-visible reviewer attribution; required for REVIEWED status."
+  reviewerLabel: String!
+  reviewedOn: LocalDate!
+}
+
+"Blocks new selection; plans pinned to the version keep it until explicit upgrade review."
+input RetireCareProfileVersionInput {
+  profileId: ID!
+  expectedRevision: Int!
+  profileVersionId: ID!
+}
+
+type CareProfilePayload {
+  profile: CareProfile
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type DeleteCareProfileDraftPayload {
+  deletedProfileId: ID
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+input CareProfileFilter {
+  category: PlantCategory
+  "Matches species or cultivar text."
+  query: String
+  "Default false: published aggregates only; true also lists DRAFT ones."
+  includeDrafts: Boolean
+}
+
+type CareProfileConnection {
+  items: [CareProfile!]!
+  pageInfo: PageInfo!
+}
+
+# ---------- plans ----------
+
+type CarePlan {
+  id: ID!
+  plantId: ID!
+  "Pinned profile version; null = owner-defined plan only. Plans pin the version until explicit upgrade review."
+  profileVersion: CareProfileVersion
+  "IANA zone; occurrence due dates are local dates in it."
+  timezone: String!
+  enabled: Boolean!
+  "HH:MM local in the plan timezone; default 09:00. DST nonexistent time moves to the next valid instant; ambiguous time uses the earlier offset."
+  notificationTime: String!
+  overrides: [PlanRuleOverride!]!
+  revision: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PlanRuleOverride {
+  ruleKey: String!
+  enabled: Boolean!
+  "Owner replacement for the profile rule cadence; null = profile cadence."
+  recurrenceOverride: RecurrenceSpec
+}
+
+input PlanRuleOverrideInput {
+  ruleKey: String!
+  enabled: Boolean
+  recurrenceOverride: RecurrenceSpecInput
+}
+
+"One plan per plant; a second create returns CONFLICT with the existing plan's revision."
+input CreateCarePlanInput {
+  plantId: ID!
+  "Must be a REVIEWED, non-retired version. Null = owner-defined rules only."
+  profileVersionId: ID
+  "IANA zone."
+  timezone: String!
+  "HH:MM local; default 09:00."
+  notificationTime: String
+  "Default true."
+  enabled: Boolean
+  overrides: [PlanRuleOverrideInput!]
+}
+
+"Saving cancels only future uncompleted affected occurrences and regenerates transactionally; history is preserved. Timezone changes require a prior previewCarePlan and confirmRecalculation=true."
+input UpdateCarePlanInput {
+  id: ID!
+  expectedRevision: Int!
+  "Null = unchanged; explicit unpin via clearProfileVersion."
+  profileVersionId: ID
+  clearProfileVersion: Boolean
+  timezone: String
+  notificationTime: String
+  enabled: Boolean
+  "Full replacement when set."
+  overrides: [PlanRuleOverrideInput!]
+  "Must be true whenever timezone changes; false returns VALIDATION with field 'input.timezone'."
+  confirmRecalculation: Boolean
+}
+
+type CarePlanPayload {
+  plan: CarePlan
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- occurrences ----------
+
+enum OccurrenceStatus {
+  DUE
+  COMPLETED
+  SKIPPED
+  "Future work cancelled by plan edit or plant archive/death."
+  CANCELLED
+  "Completion undone after a later resolved decision kept history authoritative."
+  COMPLETION_RETRACTED
+}
+
+type CareOccurrence {
+  id: ID!
+  planId: ID!
+  plantId: ID!
+  ruleKey: String!
+  kind: RuleKind!
+  activityKind: ActivityKind
+  "Stable logical key (plan/rule + logical date/ordinal). Never changes with snooze."
+  occurrenceKey: String!
+  originalDueDate: LocalDate!
+  "Effective due date; equals original unless snoozed. Snooze is a field, not a new occurrence."
+  currentDueDate: LocalDate!
+  snoozedUntil: LocalDate
+  status: OccurrenceStatus!
+  completedActivityId: ID
+  resolvedAt: DateTime
+  "Plan timezone at resolution."
+  planTimezone: String!
+  "Why this occurrence exists and when it applies; typed evidence, never free-form only."
+  reason: OccurrenceReason
+}
+
+type OccurrenceReason {
+  text: String!
+  evidence: [ReasonEvidence!]!
+  "Facts the rule needs but the plant lacks; non-empty means the advisory abstains."
+  missingFacts: [ContextFact!]!
+}
+
+type ReasonEvidence {
+  sourceVersion: SourceVersion
+  weatherSnapshot: WeatherSnapshot
+  note: String
+}
+
+enum SnapshotFreshness {
+  "fetchedAt within 6h of now."
+  FRESH
+  "within 24h; shown as stale."
+  STALE
+  "older than 24h or absent; treated unavailable."
+  UNAVAILABLE
+}
+
+type WeatherSnapshot {
+  id: ID!
+  locationId: ID!
+  provider: String!
+  fetchedAt: DateTime!
+  validFrom: DateTime!
+  validUntil: DateTime!
+  "Null member = provider did not supply it."
+  highTempC: Decimal
+  lowTempC: Decimal
+  rainfallMm: Decimal
+  et0Mm: Decimal
+  "Computed against now per 03 freshness bands."
+  freshness: SnapshotFreshness!
+  license: String
+}
+
+input CareAgendaFilter {
+  plantId: ID
+}
+
+type CareOccurrenceConnection {
+  items: [CareOccurrence!]!
+  pageInfo: PageInfo!
+}
+
+# ---------- plan preview (dry run; generates nothing) ----------
+
+input PreviewCarePlanInput {
+  "Context and existing-plan source; the preview changes nothing."
+  plantId: ID!
+  profileVersionId: ID
+  timezone: String!
+  notificationTime: String
+  overrides: [PlanRuleOverrideInput!]
+  "Include open occurrences the save would cancel. Default true."
+  includeWouldCancel: Boolean
+}
+
+type CarePlanPreview {
+  "Occurrences the draft would materialize within the 60-day horizon, dueDate ASC."
+  occurrences: [PreviewOccurrence!]!
+  "Open (DUE) occurrences on the current plan that saving this draft would cancel."
+  wouldCancel: [CareOccurrence!]!
+  "Facts missing across draft rules; affected advisory rules abstain while listed."
+  missingFacts: [ContextFact!]!
+}
+
+type PreviewOccurrence {
+  ruleKey: String!
+  kind: RuleKind!
+  activityKind: ActivityKind
+  dueDate: LocalDate!
+  reason: OccurrenceReason
+}
+
+type CarePlanPreviewPayload {
+  preview: CarePlanPreview
+  problems: [MutationProblem!]!
+}
+
+# ---------- occurrence task actions ----------
+
+input CompleteOccurrenceInput {
+  occurrenceId: ID!
+  expectedRevision: Int!
+  "Backdated completion local date in the plan timezone; default today. Completion-relative cadence anchors on this date."
+  occurredOn: LocalDate
+  "Applied to the single activity created atomically with completion. quantity/unit/product only for WATER and FERTILIZE actions."
+  note: String
+  quantity: Decimal
+  unit: Unit
+  product: String
+}
+
+type CompleteOccurrencePayload {
+  occurrence: CareOccurrence
+  "The single activity created atomically with completion (ACTION rules only; null for CHECK)."
+  activity: Activity
+  "Next materialized occurrence for the rule, when the plan is enabled."
+  nextOccurrence: CareOccurrence
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+"Skip advances one original cycle without an activity; no field edits accepted."
+input SkipOccurrenceInput {
+  occurrenceId: ID!
+  expectedRevision: Int!
+}
+
+"Snooze changes the effective due date only; cadence and the logical key never change."
+input SnoozeOccurrenceInput {
+  occurrenceId: ID!
+  expectedRevision: Int!
+  "Must be >= currentDueDate; past dates return VALIDATION."
+  until: LocalDate!
+}
+
+type OccurrencePayload {
+  occurrence: CareOccurrence
+  nextOccurrence: CareOccurrence
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+"The general activity update/void commands reject activities linked to a completion with LINKED_COMPLETION_USE_CORRECTION; this is the only path to edit or undo a completion. Exactly one of undo or field edits."
+input CorrectOccurrenceCompletionInput {
+  occurrenceId: ID!
+  expectedRevision: Int!
+  "Undo voids the linked activity; per 03 the occurrence reopens only when no later resolved decision exists, otherwise COMPLETION_RETRACTED."
+  undo: Boolean
+  note: String
+  "Recalculates completion-relative cadence when the local date changes; scheduled-calendar cadence stays fixed."
+  occurredAt: DateTime
+  "IANA zone in which occurredAt was entered; default the activity's zone."
+  timezone: String
+  quantity: Decimal
+  unit: Unit
+  product: String
+}
+
+type CorrectOccurrenceCompletionPayload {
+  occurrence: CareOccurrence
+  "Corrected activity; null after undo (the activity is voided)."
+  activity: Activity
+  "Current uncompleted work after recalculation, when applicable."
+  nextOccurrence: CareOccurrence
+  "True when a later resolved decision kept newer history authoritative."
+  retracted: Boolean
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- notifications ----------
+
+enum NotificationChannel {
+  INAPP
+  EMAIL
+}
+
+enum NotificationRefKind {
+  OCCURRENCE
+  SUGGESTION
+}
+
+type Notification {
+  id: ID!
+  channel: NotificationChannel!
+  "Stable dedup key; unique per occurrence/date/channel."
+  dedupKey: String!
+  refKind: NotificationRefKind!
+  refId: ID!
+  title: String!
+  body: String!
+  "Set for daily digest intents."
+  digestDate: LocalDate
+  createdAt: DateTime!
+  readAt: DateTime
+}
+
+type NotificationConnection {
+  items: [Notification!]!
+  pageInfo: PageInfo!
+}
+
+input MarkNotificationReadInput {
+  notificationId: ID!
+}
+
+type NotificationPayload {
+  notification: Notification
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- journal union member (frozen by T01.care; wired in T24) ----------
+
+# journal.graphql's note assigns the CareEntry union member to the care lane.
+# The wiring lands here with the server surface that resolves it: CARE journal
+# entries are projected from check completions, so the union member is real
+# before web ships the extended operation documents at runtime.
+
+type CareEntry {
+  id: ID!
+  plantId: ID!
+  occurredAt: DateTime!
+  createdAt: DateTime!
+  summary: String!
+  tombstonedAt: DateTime
+  occurrenceId: ID!
+  kind: RuleKind!
+  activityKind: ActivityKind
+}
+
+extend union JournalEntry = CareEntry
+extend enum JournalEntryType { CARE }
+
+# ---------- Plant extension (read path for the plan editor / detail tab) ----------
+
+extend type Plant {
+  "Null when the plant has no care plan."
+  carePlan: CarePlan
+}
+
+# ---------- root surface ----------
+
+extend type Query {
+  "Due work as local dates shown in workspace timezone; plan timezone available per occurrence. Default range today..+60d (schedule horizon). Order (currentDueDate ASC, id ASC); keyset cursors bound to filter signature."
+  careAgenda(from: LocalDate, to: LocalDate, plantId: ID, first: Int = 25, after: String): CareOccurrenceConnection!
+  careProfiles(filter: CareProfileFilter, first: Int = 25, after: String): CareProfileConnection!
+  "Null when absent or cross-workspace."
+  careProfile(id: ID!): CareProfile
+  sources(filter: SourceFilter, first: Int = 25, after: String): SourceConnection!
+  "Dry run of a draft plan against the plant's current context and history; materializes nothing. Required before timezone-changing plan saves."
+  previewCarePlan(input: PreviewCarePlanInput!): CarePlanPreviewPayload!
+  "Newest first. Default includes read notifications."
+  notifications(unreadOnly: Boolean, first: Int = 25, after: String): NotificationConnection!
+}
+
+extend type Mutation {
+  createSource(input: CreateSourceInput!, clientMutationId: String): SourcePayload!
+  updateSource(input: UpdateSourceInput!, clientMutationId: String): SourcePayload!
+  retireSource(input: RetireSourceInput!, clientMutationId: String): SourcePayload!
+
+  createCareProfileDraft(input: CreateCareProfileDraftInput!, clientMutationId: String): CareProfilePayload!
+  updateCareProfileDraft(input: UpdateCareProfileDraftInput!, clientMutationId: String): CareProfilePayload!
+  deleteCareProfileDraft(input: DeleteCareProfileDraftInput!, clientMutationId: String): DeleteCareProfileDraftPayload!
+  publishCareProfile(input: PublishCareProfileInput!, clientMutationId: String): CareProfilePayload!
+  retireCareProfileVersion(input: RetireCareProfileVersionInput!, clientMutationId: String): CareProfilePayload!
+
+  createCarePlan(input: CreateCarePlanInput!, clientMutationId: String): CarePlanPayload!
+  updateCarePlan(input: UpdateCarePlanInput!, clientMutationId: String): CarePlanPayload!
+
+  completeOccurrence(input: CompleteOccurrenceInput!, clientMutationId: String): CompleteOccurrencePayload!
+  skipOccurrence(input: SkipOccurrenceInput!, clientMutationId: String): OccurrencePayload!
+  snoozeOccurrence(input: SnoozeOccurrenceInput!, clientMutationId: String): OccurrencePayload!
+  correctOccurrenceCompletion(input: CorrectOccurrenceCompletionInput!, clientMutationId: String): CorrectOccurrenceCompletionPayload!
+
+  markNotificationRead(input: MarkNotificationReadInput!, clientMutationId: String): NotificationPayload!
+}

@@ -1,0 +1,403 @@
+<header class="page-head">
+  <div>
+    <p class="eyebrow">{{ today | date: 'EEEE, MMMM d' }}</p>
+    <h1>Your garden, at a glance.</h1>
+    <p class="caption">A few things to notice. A little room to grow.</p>
+  </div>
+  <div class="row wrap head-actions">
+    <a class="btn" routerLink="/journal">Add a moment</a>
+    <a class="btn btn-primary" routerLink="/plants/new">Add plant</a>
+  </div>
+</header>
+
+<!-- Check it off / Complete / Snooze open the shared entry dialog instead of
+     expanding the row. One form per mode, native fields and exact payload
+     shapes unchanged, and the dialog stays mounted while the mutation runs. -->
+<ui-entry-dialog
+  #entry
+  [open]="!!activeId()"
+  [title]="entryTitle()"
+  [description]="entryDescription()"
+  [busy]="busy()"
+  (dismissed)="onEntryDismissed()"
+>
+  @if (entryItem(); as o) {
+    @if (mode() === 'complete') {
+      <form #cForm novalidate (submit)="$event.preventDefault(); confirmComplete(o, cForm)">
+        <div class="form-section">
+          @if (unitsFor(o.activityKind).length) {
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label" for="tq-{{ o.id }}">Quantity</label>
+                <input
+                  id="tq-{{ o.id }}"
+                  class="input"
+                  name="quantity"
+                  inputmode="decimal"
+                  placeholder="2.5"
+                  required
+                />
+              </div>
+              <div class="field">
+                <label class="field-label" for="tu-{{ o.id }}">Unit</label>
+                <select id="tu-{{ o.id }}" class="input" name="unit" required>
+                  @for (u of unitsFor(o.activityKind); track u.value) {
+                    <option [value]="u.value">{{ u.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" (click)="requestCancel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">Confirm</button>
+        </div>
+      </form>
+    } @else {
+      <form #sForm novalidate (submit)="$event.preventDefault(); confirmSnooze(o, sForm)">
+        <div class="form-section">
+          <div class="field">
+            <label class="field-label" for="ts-{{ o.id }}">Snooze until</label>
+            <input
+              id="ts-{{ o.id }}"
+              class="input"
+              type="date"
+              name="until"
+              [min]="o.currentDueDate"
+              required
+            />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" (click)="requestCancel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">Confirm</button>
+        </div>
+      </form>
+    }
+  }
+</ui-entry-dialog>
+
+@if (loadError()) {
+  <section class="card" role="alert" aria-labelledby="td-err" style="max-width: 640px">
+    <h2 id="td-err">Today failed to load</h2>
+    <p class="caption">{{ loadError() }} This is not an empty day — nothing was changed.</p>
+    <div>
+      <button type="button" class="btn btn-primary" (click)="reload()">Retry</button>
+    </div>
+  </section>
+} @else if (loading()) {
+  <div class="stack" aria-busy="true">
+    @for (i of [1, 2, 3]; track i) {
+      <ui-skeleton ar="auto" maxW="100%" />
+    }
+  </div>
+} @else if (plantCount() === 0) {
+  <section class="card" aria-labelledby="td-starter" style="max-width: 560px">
+    <h2 id="td-starter">Start with a curated collection?</h2>
+    <p>
+      A starter set of five trees and two groups is available. Nothing is added to your garden
+      unless you opt in — you stay in control.
+    </p>
+    <div class="row">
+      <button type="button" class="btn btn-primary" [disabled]="opting()" (click)="optIn()">
+        {{ opting() ? 'Adding starter set…' : 'Opt in to starter collection' }}
+      </button>
+      <a class="btn" routerLink="/plants/new">Add one plant instead</a>
+    </div>
+    <p class="field-hint">Berry groups keep their count unknown.</p>
+  </section>
+} @else {
+  <div class="today-grid">
+    <div class="main-col">
+      <!-- photo-led hero: a plant that actually has an uploaded cover -->
+      @if (hero(); as p) {
+        <section class="hero hero-panel" aria-labelledby="hero-title">
+          <ui-photo
+            class="hero-photo"
+            [src]="heroPhoto()"
+            [expandable]="true"
+            [originalSrc]="
+              p.coverPhoto ? '/api/media/' + p.coverPhoto.asset.id + '/original' : null
+            "
+            [alt]="'Photo of ' + p.name"
+            category="plant"
+            framing="auto"
+          />
+          <div class="hero-content">
+            <p class="eyebrow">
+              <ui-icon name="leaf" [size]="14" />
+              {{ heroLabel(p) }}
+            </p>
+            <h2 id="hero-title" class="editorial">{{ heroTitle(p) }}</h2>
+            @if (heroPhoto()) {
+              <p>
+                {{ p.photoCount }} {{ p.photoCount === 1 ? 'photo' : 'photos' }} on record
+                @if (p.currentContext?.location?.name) {
+                  · {{ p.currentContext.location.name }}
+                }
+              </p>
+            } @else {
+              <p>
+                No photo on record for this one yet. A single good shot makes the change visible
+                later.
+              </p>
+            }
+            <div class="row wrap">
+              <a class="btn" [routerLink]="['/plants', p.id]">Open {{ p.name }}</a>
+              @if (!heroPhoto()) {
+                <a
+                  class="btn btn-primary"
+                  [routerLink]="['/plants', p.id]"
+                  [queryParams]="{ tab: 'details', dialog: 'photos' }"
+                  fragment="photo-h"
+                  >Add a photo</a
+                >
+              }
+            </div>
+          </div>
+        </section>
+      }
+
+      <!-- metric strip: counts of what is loaded, never invented lifetimes -->
+      <div class="metrics" role="group" aria-label="Collection at a glance">
+        <div class="metric">
+          <span>Plants</span>
+          <strong class="num">{{ displayPlantCount() }}</strong>
+          @if (plantsTruncated()) {
+            <small>more pages exist</small>
+          }
+        </div>
+        <div class="metric">
+          <span>On the agenda</span>
+          <strong class="num">{{ dueLabel() }}</strong>
+        </div>
+        <div class="metric">
+          <span>Photos</span>
+          <strong class="num">{{ photoLabel() }}</strong>
+        </div>
+        <div class="metric">
+          <span>Locations</span>
+          <strong class="num">{{ locationLabel() }}</strong>
+        </div>
+      </div>
+
+      <!-- up to three real collection cards -->
+      <section class="section-block" aria-labelledby="td-plants">
+        <div class="section-heading">
+          <div>
+            <h2 id="td-plants">From your collection</h2>
+            <p class="caption">A few familiar faces from the collection.</p>
+          </div>
+          <a class="btn" routerLink="/plants">See all</a>
+        </div>
+        <ul class="plant-grid" aria-label="Plants">
+          @for (p of featured(); track p.id) {
+            <li>
+              <ui-plant-card
+                [link]="['/plants', p.id]"
+                [name]="p.name"
+                [photo]="p.coverPhoto ? cardUrl(p) : null"
+                [meta]="cardMeta(p)"
+                [cultivar]="p.cultivar"
+                [badge]="p.status === 'ARCHIVED' ? 'Archived' : p.status === 'DEAD' ? 'Dead' : ''"
+                [photoCount]="p.photoCount"
+                [since]="cardSince(p)"
+              />
+            </li>
+          }
+        </ul>
+      </section>
+
+      <!-- recent journal -->
+      <section class="card" aria-labelledby="td-journal">
+        <div class="section-heading">
+          <h2 id="td-journal">Recent journey</h2>
+          <a class="btn" routerLink="/journal">Open journal</a>
+        </div>
+        @if (entries().length) {
+          <ul class="journal-list" aria-label="Recent journal entries">
+            @for (e of entries(); track e.id) {
+              <li>
+                <span class="journal-text">
+                  <strong>{{ e.summary }}</strong>
+                  <span class="caption"> · {{ plantName(e.plantId) }}</span>
+                </span>
+                <time class="caption num">{{ e.occurredAt | date: 'MMM d' }}</time>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="caption">Nothing logged yet — completed tasks and photos land here.</p>
+        }
+      </section>
+    </div>
+
+    <aside class="aside-col" aria-label="Context">
+      <div class="card">
+        <div class="section-heading">
+          <h2>Current conditions</h2>
+          <span class="caption">{{ conditions() ? 'daily record' : 'not set up' }}</span>
+        </div>
+        @if (conditions(); as c) {
+          <div class="row spread wrap">
+            <span class="num weather-temp">
+              @if (c.snapshot.highTempC) {
+                {{ c.snapshot.highTempC }}°C
+              } @else {
+                —
+              }
+            </span>
+            <span class="caption">
+              @if (c.snapshot.rainfallMm) {
+                rain {{ c.snapshot.rainfallMm }} mm ·
+              }
+              {{ c.locationName }}
+            </span>
+          </div>
+          <p class="caption weather-note">
+            Daytime high from the {{ c.snapshot.provider }} record — not a live reading.
+          </p>
+          <div>
+            @switch (c.snapshot.freshness) {
+              @case ('FRESH') {
+                <span class="caption">updated {{ c.snapshot.fetchedAt | date: 'HH:mm' }}</span>
+              }
+              @case ('STALE') {
+                <ui-status kind="warn" label="Stale" />
+                <span class="caption"
+                  >last fetched {{ c.snapshot.fetchedAt | date: 'MMM d, HH:mm' }} — shown as
+                  older</span
+                >
+              }
+              @default {
+                <ui-status kind="warn" label="Unavailable" />
+                <span class="caption">the last fetch is too old to advise from</span>
+              }
+            }
+          </div>
+        } @else {
+          <p class="caption">
+            No location with coordinates yet — set them on a plant and the latest conditions will
+            appear here. The day works fully without them.
+          </p>
+        }
+      </div>
+
+      <section class="card" aria-labelledby="td-due">
+        <div class="section-heading">
+          <h2 id="td-due">A little attention</h2>
+          @if (dueCount() > 0) {
+            <span class="badge num" aria-live="polite">{{ dueLabel() }} due shown</span>
+          }
+        </div>
+        @if (dueCount() === 0) {
+          <h3 class="no-due">Nothing due today</h3>
+          <p class="caption">
+            Plans roll their next dates in automatically.
+            <a routerLink="/care">Open the agenda</a> to see further ahead.
+          </p>
+        } @else {
+          <ul class="due-list" aria-label="Tasks due">
+            @for (g of groups(); track g.key) {
+              <li class="due-group">
+                <h3>{{ g.label }}</h3>
+                @for (o of g.items; track o.id) {
+                  <div class="due-item" [class.is-check]="isCheck(o)">
+                    <div class="row spread wrap">
+                      <div>
+                        <strong class="small">{{ o.ruleKey }}</strong>
+                        <span class="caption"> · {{ plantName(o.plantId) }}</span>
+                      </div>
+                      <span class="row wrap">
+                        <span class="badge" [class.badge-check]="isCheck(o)">{{
+                          kindLabel(o)
+                        }}</span>
+                        <span class="badge num">{{ dueNote(o) }}</span>
+                      </span>
+                    </div>
+                    @if (o.reason?.text) {
+                      <p class="caption">{{ o.reason.text }}</p>
+                    }
+                    @if (missingFactsOf(o).length) {
+                      <p class="caption">
+                        <strong>Needs context:</strong>
+                        {{ missingFactsOf(o).map(factLabel).join(', ') }} — the plan will not guess
+                        a schedule without it.
+                      </p>
+                    }
+                    <div class="row wrap">
+                      <button
+                        type="button"
+                        class="btn btn-primary"
+                        [disabled]="busy()"
+                        (click)="startComplete(o)"
+                      >
+                        {{ isCheck(o) ? 'Check it off' : 'Complete' }}
+                      </button>
+                      <button
+                        type="button"
+                        class="btn"
+                        [disabled]="busy()"
+                        (click)="startSnooze(o)"
+                      >
+                        Snooze
+                      </button>
+                    </div>
+                  </div>
+                }
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <div class="card">
+        <div class="section-heading">
+          <h2>Suggestions</h2>
+          @if (caps(); as c) {
+            <span class="caption">
+              @if (c.text.available) {
+                {{ openSuggestions().length }} open
+              } @else {
+                no text engine
+              }
+            </span>
+          }
+        </div>
+        @for (s of openSuggestions(); track s.id) {
+          <div style="margin-top: var(--sp-3)">
+            <insight-suggestion-card
+              [suggestion]="s"
+              [plantLink]="true"
+              (changed)="onSuggestionChanged($event)"
+            />
+          </div>
+        }
+        @if (sugNote()) {
+          <p role="status" class="caption" style="margin-top: var(--sp-2)">
+            {{ sugNote() }}
+          </p>
+        }
+        @if (moreSuggestions()) {
+          <p class="caption" style="margin-top: var(--sp-2)">
+            More open advice lives on each plant’s insights tab — this list stays short on purpose.
+          </p>
+        }
+        @if (!openSuggestions().length) {
+          @if (caps() && !caps()!.text.available) {
+            <p class="caption">
+              {{ caps()!.text.unavailableReason ?? 'No analysis engine is configured.' }}
+              Evidence-backed suggestions appear once one is.
+            </p>
+          } @else {
+            <p class="caption">
+              Nothing to suggest yet. Evidence-backed suggestions appear once a review has run —
+              start one from a plant’s insights tab.
+            </p>
+          }
+        }
+      </div>
+    </aside>
+  </div>
+}

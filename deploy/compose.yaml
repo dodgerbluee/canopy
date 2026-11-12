@@ -1,0 +1,142 @@
+name: canopy
+
+x-environment: &environment
+  CANOPY_ENV: prod
+  DATABASE_URL: postgres://canopy:${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}@db:5432/canopy?sslmode=verify-full&sslrootcert=/var/lib/canopy/dbtls/server.crt
+  CANOPY_STORAGE_ROOT: /var/lib/canopy/media
+  CANOPY_TRUST_PROXY: "1"
+  CANOPY_MEDIA_IMAGE: ${CANOPY_IMAGE_PREFIX:?Set CANOPY_IMAGE_PREFIX}-media:${CANOPY_VERSION:?Set CANOPY_VERSION}
+  TMPDIR: ${CANOPY_WORK_DIR:?Set an absolute CANOPY_WORK_DIR}
+  CANOPY_MCP_ENABLED: ${CANOPY_MCP_ENABLED:-true}
+  CANOPY_MCP_PUBLIC_URL: ${CANOPY_MCP_PUBLIC_URL:-https://${CANOPY_SITE:?Set CANOPY_SITE}/mcp}
+  CANOPY_MCP_ALLOWED_HOSTS: ${CANOPY_MCP_ALLOWED_HOSTS:-${CANOPY_SITE}}
+
+x-server: &server
+  image: ${CANOPY_IMAGE_PREFIX}-server:${CANOPY_VERSION}
+  environment: *environment
+  volumes:
+    - media:/var/lib/canopy/media
+    - database-ca:/var/lib/canopy/dbtls:ro
+    - ${CANOPY_WORK_DIR}:${CANOPY_WORK_DIR}
+  networks: [private]
+  stop_grace_period: 3m
+
+services:
+  database-tls:
+    image: postgres:17
+    user: "0:0"
+    entrypoint: [/bin/bash, -ec]
+    command:
+      - |
+        if [ ! -s /tls/server.key ]; then
+          openssl req -x509 -nodes -newkey rsa:3072 -sha256 -days 3650 -subj /CN=db -addext subjectAltName=DNS:db -keyout /tls/server.key -out /tls/server.crt
+          chown postgres:postgres /tls/server.key /tls/server.crt
+          chmod 600 /tls/server.key
+        fi
+        cp /tls/server.crt /ca/server.crt
+        chmod 644 /ca/server.crt
+    volumes: [database-tls:/tls, database-ca:/ca]
+    network_mode: none
+    restart: "no"
+
+  db:
+    image: postgres:17
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: canopy
+      POSTGRES_USER: canopy
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    command: [postgres, -c, ssl=on, -c, ssl_cert_file=/tls/server.crt, -c, ssl_key_file=/tls/server.key]
+    depends_on:
+      database-tls: {condition: service_completed_successfully}
+    volumes: [database:/var/lib/postgresql/data, database-tls:/tls:ro]
+    networks: [private]
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U canopy -d canopy"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  initialize:
+    <<: *server
+    user: "0:0"
+    entrypoint: [/bin/sh, -ec]
+    environment:
+      CANOPY_WORK_DIR: ${CANOPY_WORK_DIR}
+    command:
+      - 'install -d -o 10001 -g 10001 /var/lib/canopy/media "$$CANOPY_WORK_DIR"'
+    restart: "no"
+
+  migrate:
+    <<: *server
+    entrypoint: [/usr/local/bin/migrate]
+    command: [up]
+    restart: "no"
+    depends_on:
+      db: {condition: service_healthy}
+      initialize: {condition: service_completed_successfully}
+
+  media-image:
+    image: ${CANOPY_IMAGE_PREFIX}-media:${CANOPY_VERSION}
+    entrypoint: [/bin/true]
+    network_mode: none
+    restart: "no"
+
+  api:
+    <<: *server
+    restart: unless-stopped
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: [CMD, wget, -q, -O, /dev/null, http://127.0.0.1:8080/readyz]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  worker:
+    <<: *server
+    entrypoint: [/usr/local/bin/worker]
+    restart: unless-stopped
+    # The worker launches resource-limited sibling codec containers. Their
+    # bind paths must exist identically on the Docker host and in this worker.
+    group_add: ["${DOCKER_GID:-0}"]
+    volumes:
+      - media:/var/lib/canopy/media
+      - database-ca:/var/lib/canopy/dbtls:ro
+      - ${CANOPY_WORK_DIR}:${CANOPY_WORK_DIR}
+      - ${DOCKER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      media-image: {condition: service_completed_successfully}
+
+  web:
+    image: ${CANOPY_IMAGE_PREFIX}-web:${CANOPY_VERSION}
+    restart: unless-stopped
+    environment:
+      CANOPY_SITE: ${CANOPY_SITE}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - certificates:/data
+      - caddy-config:/config
+    networks: [private]
+    depends_on:
+      api: {condition: service_healthy}
+
+  admin:
+    <<: *server
+    profiles: [tools]
+    entrypoint: [/usr/local/bin/admin]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+
+networks:
+  private:
+volumes:
+  database:
+  database-tls:
+  database-ca:
+  media:
+  certificates:
+  caddy-config:

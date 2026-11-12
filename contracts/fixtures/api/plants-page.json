@@ -1,0 +1,82 @@
+{
+  "operation": "Plants",
+  "variables": { "first": 25, "order": "NAME_ASC" },
+  "data": {
+    "plants": {
+      "items": [
+        {
+          "id": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "name": "Meyer lemon",
+          "scientificName": "Citrus × meyerensis",
+          "cultivar": "Meyer",
+          "rootstock": "Citrus range",
+          "type": "INDIVIDUAL",
+          "count": null,
+          "category": "CITRUS",
+          "acquiredOn": null,
+          "plantedOn": "2023-04-15",
+          "estimatedAgeYears": "3",
+          "status": "ACTIVE",
+          "revision": 2,
+          "createdAt": "2023-04-15T10:00:00Z",
+          "updatedAt": "2026-06-01T09:30:00Z",
+          "tags": [{ "id": "5f0c1b6e-2222-4aaa-8bbb-000000000001", "label": "patio" }],
+          "photoCount": 3,
+          "coverPhoto": null,
+          "currentContext": {
+            "id": "5f0c1b6e-3333-4aaa-8bbb-000000000001",
+            "effectiveFrom": "2023-04-15T10:00:00Z",
+            "location": {
+              "id": "5f0c1b6e-4444-4aaa-8bbb-000000000001",
+              "name": "Patio",
+              "parent": null,
+              "situation": "OUTDOOR",
+              "latitude": null,
+              "longitude": null,
+              "label": null,
+              "revision": 1,
+              "createdAt": "2023-04-15T10:00:00Z",
+              "updatedAt": "2023-04-15T10:00:00Z"
+            },
+            "placement": "CONTAINER",
+            "potVolumeLiters": "25",
+            "mediumNote": "Citrus mix",
+            "lightNote": "Full sun",
+            "createdAt": "2023-04-15T10:00:00Z"
+          },
+          "acquisition": {
+            "id": "5f0c1b6e-5555-4aaa-8bbb-000000000001",
+            "seller": "Local nursery",
+            "acquiredOn": null,
+            "pricingState": "UNKNOWN",
+            "revision": 1,
+            "initialPurchaseAllocation": null
+          }
+        },
+        {
+          "id": "5f0c1b6e-1111-4aaa-8bbb-000000000002",
+          "name": "Blackberry group",
+          "scientificName": null,
+          "cultivar": null,
+          "rootstock": null,
+          "type": "GROUP",
+          "count": null,
+          "category": "BLACKBERRY",
+          "acquiredOn": null,
+          "plantedOn": null,
+          "estimatedAgeYears": null,
+          "status": "ACTIVE",
+          "revision": 1,
+          "createdAt": "2024-03-01T08:00:00Z",
+          "updatedAt": "2024-03-01T08:00:00Z",
+          "tags": [],
+          "photoCount": 0,
+          "coverPhoto": null,
+          "currentContext": null,
+          "acquisition": null
+        }
+      ],
+      "pageInfo": { "endCursor": "bmFtZUFzY3w1ZjBjMWI2ZQ", "hasNextPage": false }
+    }
+  }
+}

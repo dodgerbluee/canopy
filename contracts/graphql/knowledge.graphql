@@ -1,0 +1,77 @@
+"""Opt-in garden geography. Timezone never implies climate or hardiness zone."""
+type GardenKnowledgeSettings {
+  country: String!
+  region: String!
+  place: String!
+  latitude: Decimal
+  longitude: Decimal
+  timezone: String!
+  hardinessZone: String
+  zoneSystem: String
+  enabled: Boolean!
+  revision: Int!
+}
+input SaveGardenKnowledgeSettingsInput {
+  country: String!
+  region: String!
+  place: String!
+  latitude: Decimal
+  longitude: Decimal
+  timezone: String!
+  hardinessZone: String
+  zoneSystem: String
+  enabled: Boolean!
+  expectedRevision: Int!
+}
+type GardenPlace {
+  name: String!
+  country: String!
+  region: String!
+  latitude: Decimal!
+  longitude: Decimal!
+  timezone: String!
+}
+enum KnowledgeState { PENDING PROCESSING READY NEEDS_LOCATION DISABLED UNSUPPORTED FAILED }
+enum SeasonalKind { GROWTH BLOOM HARVEST FERTILIZE WATER_CHECK PRUNE DORMANCY PROTECT }
+enum TimingBasis { MONTH SEASON UNSPECIFIED }
+type SeasonalFact {
+  id: ID!
+  kind: SeasonalKind!
+  label: String!
+  summary: String!
+  months: [Int!]!
+  timingBasis: TimingBasis!
+  scope: String!
+  sourceTitle: String!
+  sourceUrl: String!
+  publisher: String!
+  sourceRegion: String!
+  retrievedAt: DateTime!
+  contentSha256: String!
+}
+type PlantKnowledge {
+  plantId: ID!
+  name: String!
+  cultivar: String
+  category: PlantCategory!
+  photoAssetId: ID
+  state: KnowledgeState!
+  message: String!
+  facts: [SeasonalFact!]!
+  updatedAt: DateTime!
+}
+type GardenMonthRecord { plantId: ID!, month: Int!, waterings: Int!, photos: Int!, harvests: Int!, fertilizations: Int! }
+type GardenKnowledge { settings: GardenKnowledgeSettings!, plants: [PlantKnowledge!]!, records: [GardenMonthRecord!]! }
+type GardenKnowledgeSettingsPayload { settings: GardenKnowledgeSettings, problems: [MutationProblem!]!, clientMutationId: String }
+type RefreshKnowledgePayload { queued: Int!, problems: [MutationProblem!]!, clientMutationId: String }
+type GardenAnswer { answer: String!, facts: [SeasonalFact!]!, plantIds: [ID!]! }
+extend type Query {
+  gardenKnowledge(year: Int!): GardenKnowledge!
+  gardenPlaces(search: String!): [GardenPlace!]!
+}
+extend type Mutation {
+  saveGardenKnowledgeSettings(input: SaveGardenKnowledgeSettingsInput!, clientMutationId: String): GardenKnowledgeSettingsPayload!
+  refreshGardenKnowledge(plantId: ID, clientMutationId: String): RefreshKnowledgePayload!
+  """Read-only answer over cited guidance and recorded counts. No care actions are applied."""
+  askGarden(question: String!, year: Int!): GardenAnswer!
+}

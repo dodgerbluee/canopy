@@ -1,0 +1,73 @@
+query Session {
+  session {
+    authenticated
+    workspace {
+      id
+      displayName
+      timezone
+      defaultCurrency
+      settingsRevision
+      location {
+        latitude
+        longitude
+        label
+      }
+    }
+  }
+}
+
+mutation UpdateWorkspace($input: UpdateWorkspaceInput!, $clientMutationId: String) {
+  updateWorkspace(input: $input, clientMutationId: $clientMutationId) {
+    workspace {
+      id
+      displayName
+      timezone
+      defaultCurrency
+      settingsRevision
+      location {
+        latitude
+        longitude
+        label
+      }
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+query ExportJob($id: ID!) {
+  exportJob(id: $id) {
+    id
+    state
+    snapshotAt
+    createdAt
+    finishedAt
+    expiresAt
+    manifestSha256
+    errorCode
+  }
+}
+
+mutation RequestExport($input: RequestExportInput = {}, $clientMutationId: String) {
+  requestExport(input: $input, clientMutationId: $clientMutationId) {
+    exportJob {
+      id
+      state
+      snapshotAt
+      createdAt
+      expiresAt
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}

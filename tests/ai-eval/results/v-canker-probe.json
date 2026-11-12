@@ -1,0 +1,110 @@
+{
+  "caseId": "v-canker-probe",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:d9016a4740d11bbe1c9ef158f33fac06ab82a0b1e6605d4b7b5af7b3a86b0a05",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "ba866199-3988-4bc5-89f2-2361c885ebf6",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "c03e88fa-e378-4193-a969-c5f205544516",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "7d6996e9-7a3a-4bb3-99fa-49ec5e7b4193",
+        "takenAt": "2026-10-04T08:19:59Z"
+      },
+      {
+        "id": "22a9f96b-fbf1-4f5d-b904-0f1801f59c18",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "c1866f2b-7187-4ef6-a996-15d91343d675",
+        "takenAt": "2026-11-03T08:19:59Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "891f3d3e-6864-46dc-8aeb-6108af231469",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The yellowish spots visible in the later photo may indicate a localized leaf issue such as pest damage, disease, nutrient imbalance, or physical injury.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "c03e88fa-e378-4193-a969-c5f205544516",
+          "22a9f96b-fbf1-4f5d-b904-0f1801f59c18"
+        ]
+      },
+      {
+        "text": "The plant may be under environmental stress, but the cause cannot be determined from the images alone.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "c03e88fa-e378-4193-a969-c5f205544516",
+          "22a9f96b-fbf1-4f5d-b904-0f1801f59c18"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Inspect the leaf closely, including the underside, for pests, webbing, residue, or lesion texture.",
+      "Check other leaves for similar spots or discoloration.",
+      "Review recent watering, light exposure, fertilizer use, and environmental changes.",
+      "Take a clearer close-up photo with a scale reference and consistent lighting.",
+      "Monitor whether the spots spread, darken, dry, or appear on new growth."
+    ],
+    "missingInformation": [
+      "No scale reference is present, so leaf size and spot size cannot be assessed.",
+      "No close-up view of the leaf surface or underside is available.",
+      "No information is available about watering, light, fertilizer, temperature, humidity, or recent care changes.",
+      "No measurements, activities, weather data, location coordinates, or approved care guidance are recorded for this plant or workspace.",
+      "The images are highly stylized, so it is not possible to confirm fine leaf texture, lesion type, or whether the spots are on the surface, within the tissue, or caused by an external object."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The earlier photo shows a single green leaf-like shape with a dark central line and a small rounded base.",
+        "evidenceIds": [
+          "c03e88fa-e378-4193-a969-c5f205544516"
+        ]
+      },
+      {
+        "text": "The later photo shows a similar green leaf-like shape with the same central line and base, but with several yellowish circular spots on the leaf surface.",
+        "evidenceIds": [
+          "22a9f96b-fbf1-4f5d-b904-0f1801f59c18"
+        ]
+      },
+      {
+        "text": "The overall leaf outline and orientation appear broadly similar between the two photos.",
+        "evidenceIds": [
+          "c03e88fa-e378-4193-a969-c5f205544516",
+          "22a9f96b-fbf1-4f5d-b904-0f1801f59c18"
+        ]
+      }
+    ]
+  }
+}

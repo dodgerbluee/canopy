@@ -1,0 +1,112 @@
+{
+  "caseId": "v-berry",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:2b81f584dd7f5621287d6d5c42da24bd1774c1ae2e350fc12df2fc462b83f274",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "04d13ef5-98ae-430a-86f3-ea63009dce9f",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "a32bbb70-7911-4dd8-aaf9-3a4290ab0fda",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "529add66-fe3b-410a-a630-1a071880e275",
+        "takenAt": "2026-10-04T08:19:27Z"
+      },
+      {
+        "id": "7b939f7f-d979-411d-b51c-a1335377e6af",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "2c054535-dba6-4cdf-a17a-6fa45cb9707c",
+        "takenAt": "2026-11-03T08:19:27Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "b9dd9b67-b27b-446d-8902-733d7929548b",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "If the two captures are independent observations, the plant may have shown no visible change between the capture times.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "a32bbb70-7911-4dd8-aaf9-3a4290ab0fda",
+          "7b939f7f-d979-411d-b51c-a1335377e6af"
+        ]
+      },
+      {
+        "text": "The two photo records may represent duplicate captures of the same image rather than separate observations.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "a32bbb70-7911-4dd8-aaf9-3a4290ab0fda",
+          "7b939f7f-d979-411d-b51c-a1335377e6af"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Confirm whether the two photo records are independent captures or duplicate images.",
+      "Record plant measurements with a scale reference.",
+      "Inspect the plant for new growth, leaf changes, pests, or damage.",
+      "Log care activities such as watering, feeding, repotting, or pruning.",
+      "Add location or weather context if available."
+    ],
+    "missingInformation": [
+      "Whether the two photo records are independent captures or the same image reused.",
+      "No scale reference is present in the photos.",
+      "No measurements are recorded for this plant.",
+      "No care activities are recorded for this plant.",
+      "No fresh weather snapshot exists for this location.",
+      "The workspace has no location coordinates.",
+      "No approved care guidance is published for this workspace."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The earlier capture shows a diagonal brown stem-like line with four green oval leaf-like shapes and two small maroon shapes.",
+        "evidenceIds": [
+          "a32bbb70-7911-4dd8-aaf9-3a4290ab0fda"
+        ]
+      },
+      {
+        "text": "The later capture shows the same diagonal brown stem-like line with four green oval leaf-like shapes and two small maroon shapes.",
+        "evidenceIds": [
+          "7b939f7f-d979-411d-b51c-a1335377e6af"
+        ]
+      },
+      {
+        "text": "The two captures appear visually identical, with no plainly visible change in leaf arrangement, stem orientation, or color.",
+        "evidenceIds": [
+          "a32bbb70-7911-4dd8-aaf9-3a4290ab0fda",
+          "7b939f7f-d979-411d-b51c-a1335377e6af"
+        ]
+      }
+    ]
+  }
+}

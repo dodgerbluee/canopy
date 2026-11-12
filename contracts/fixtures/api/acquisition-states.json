@@ -1,0 +1,77 @@
+{
+  "note": "Required acquisition fixture set from 03: known price, unknown price, free (zero-total), no acquisition record. Decimal zero is never used for missing information.",
+  "operation": "PlantDetail",
+  "cases": [
+    {
+      "case": "KNOWN_PRICE",
+      "plant": {
+        "id": "5f0c1b6e-1111-4aaa-8bbb-000000000010",
+        "name": "Fig 'Brown Turkey'",
+        "acquiredOn": "2026-03-10",
+        "acquisition": {
+          "id": "acq-0010",
+          "seller": "Fig nursery",
+          "acquiredOn": "2026-03-10",
+          "pricingState": "KNOWN",
+          "revision": 1,
+          "initialPurchaseAllocation": {
+            "id": "7a2b0000-0000-4000-8000-0000000000c1",
+            "purchaseLineId": "7a2b0000-0000-4000-8000-0000000000b1",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000010",
+            "lineMinor": "4500",
+            "taxMinor": "250",
+            "shippingMinor": "250"
+          }
+        }
+      }
+    },
+    {
+      "case": "UNKNOWN_PRICE",
+      "plant": {
+        "id": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+        "name": "Meyer lemon",
+        "acquiredOn": null,
+        "acquisition": {
+          "id": "acq-0001",
+          "seller": "Local nursery",
+          "acquiredOn": null,
+          "pricingState": "UNKNOWN",
+          "revision": 1,
+          "initialPurchaseAllocation": null
+        }
+      }
+    },
+    {
+      "case": "FREE_ZERO_TOTAL",
+      "plant": {
+        "id": "5f0c1b6e-1111-4aaa-8bbb-000000000012",
+        "name": "Fig cutting from friend",
+        "acquiredOn": "2025-07-01",
+        "acquisition": {
+          "id": "acq-0012",
+          "seller": "Friend",
+          "acquiredOn": "2025-07-01",
+          "pricingState": "KNOWN",
+          "revision": 1,
+          "initialPurchaseAllocation": {
+            "id": "7a2b0000-0000-4000-8000-0000000000f1",
+            "purchaseLineId": "7a2b0000-0000-4000-8000-0000000000f2",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000012",
+            "lineMinor": "0",
+            "taxMinor": "0",
+            "shippingMinor": "0"
+          }
+        }
+      }
+    },
+    {
+      "case": "NO_ACQUISITION_RECORD",
+      "plant": {
+        "id": "5f0c1b6e-1111-4aaa-8bbb-000000000002",
+        "name": "Blackberry group",
+        "acquiredOn": null,
+        "acquisition": null
+      }
+    }
+  ]
+}

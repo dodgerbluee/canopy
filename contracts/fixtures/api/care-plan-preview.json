@@ -1,0 +1,101 @@
+{
+  "note": "Plan preview fixture (T01.care): dry run lists materializable horizon dates, open work the save would cancel, and missing facts that keep advisory rules abstaining. Preview generates nothing.",
+  "operation": "PreviewCarePlan",
+  "variables": {
+    "input": {
+      "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+      "profileVersionId": "5f0c1b6e-2222-4aaa-8bbb-0000000000e2",
+      "timezone": "America/Los_Angeles",
+      "notificationTime": "07:30",
+      "overrides": [
+        {
+          "ruleKey": "water-meyer-lemon",
+          "enabled": true,
+          "recurrenceOverride": {
+            "everyNDays": { "days": 5, "anchor": "LAST_QUALIFYING_COMPLETION" }
+          }
+        }
+      ]
+    }
+  },
+  "data": {
+    "previewCarePlan": {
+      "preview": {
+        "occurrences": [
+          {
+            "ruleKey": "water-meyer-lemon",
+            "kind": "ACTION",
+            "activityKind": "WATER",
+            "dueDate": "2026-11-04",
+            "reason": {
+              "text": "Every 5 days since last watering (owner override).",
+              "evidence": [
+                {
+                  "sourceVersion": {
+                    "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000b1",
+                    "sourceId": "5f0c1b6e-2222-4aaa-8bbb-0000000000c1",
+                    "citation": "UC CEFAEN, Citrus Irrigation Guidance (2024)",
+                    "summary": "Container citrus: water when top 2-3 cm of medium is dry; reduce frequency in cool months.",
+                    "retrievedOn": "2026-10-01",
+                    "contentSha256": "3d4f5e6a7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f80",
+                    "createdAt": "2026-10-01T18:00:00Z"
+                  },
+                  "weatherSnapshot": null,
+                  "note": null
+                }
+              ],
+              "missingFacts": []
+            }
+          },
+          {
+            "ruleKey": "water-meyer-lemon",
+            "kind": "ACTION",
+            "activityKind": "WATER",
+            "dueDate": "2026-11-09",
+            "reason": {
+              "text": "Next interval anchors on the actual completion date, not this preview.",
+              "evidence": [],
+              "missingFacts": []
+            }
+          },
+          {
+            "ruleKey": "citrus-weekly-inspect",
+            "kind": "CHECK",
+            "activityKind": null,
+            "dueDate": "2026-11-07",
+            "reason": {
+              "text": "Every Saturday.",
+              "evidence": [],
+              "missingFacts": []
+            }
+          }
+        ],
+        "wouldCancel": [
+          {
+            "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000f1",
+            "planId": "5f0c1b6e-2222-4aaa-8bbb-0000000000a1",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+            "ruleKey": "water-meyer-lemon",
+            "kind": "ACTION",
+            "activityKind": "WATER",
+            "occurrenceKey": "5f0c1b6e-2222-4aaa-8bbb-0000000000a1:water-meyer-lemon:2026-11-06",
+            "originalDueDate": "2026-11-06",
+            "currentDueDate": "2026-11-06",
+            "snoozedUntil": null,
+            "status": "DUE",
+            "completedActivityId": null,
+            "resolvedAt": null,
+            "planTimezone": "America/Los_Angeles",
+            "reason": {
+              "text": "Scheduled by the current 7-day cadence; the 5-day override replaces it.",
+              "evidence": [],
+              "missingFacts": []
+            }
+          }
+        ],
+        "missingFacts": ["POT_VOLUME"]
+      },
+      "problems": []
+    }
+  }
+}

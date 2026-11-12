@@ -1,0 +1,5 @@
+# Public acceptance record: T09
+
+This is a source-release summary. Original local execution artifacts remain private because they may include personal garden data. Current GitHub CI reproduces the verification gates.
+
+| T09 | 2026-11-01 | 16 use-case tests + 9 HTTP integration tests + full gate | `.artifacts/agents/T09/validation.txt` | commit 013ef89; `server/internal/collection` service: tx + advisory-lock + mutation_receipts idempotency (replay vs IDEMPOTENCY_CONFLICT), revision guards (CONFLICT + currentRevision, no partial writes), audit rows; plants CRUD/archive/restore/purge (confirm phrase + allocation-FK RESTRICT protection), unknown acquisition provenance retained (KNOWN pricing → CAPABILITY_UNAVAILABLE), tags (case-insensitive labels), immutable context history, cross-workspace links → NOT_FOUND; locations cycle + depth≤5 with presence-aware parent/label (inline literal or JSON-variable presence); keyset cursors bound to order (INVALID_CURSOR top-level error per errors.json); sqlc statuses as text[]-cast (pgx enum-array limitation); dispatch_check negative fixture moved T09→T16 (stale transient assumption, recorded in evidence) |

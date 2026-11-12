@@ -1,0 +1,204 @@
+<header class="page-head">
+  <div>
+    <p class="eyebrow">Your collection</p>
+    <h1>Every plant you keep.</h1>
+    <p class="caption">A growing record of the plants in your care.</p>
+  </div>
+</header>
+
+<div class="collection-tools">
+  <p class="caption">{{ activeFilterCount() ? filterSummary() : 'Your collection' }}</p>
+  <div class="row">
+    @if (activeFilterCount()) {
+      <button
+        type="button"
+        class="icon-button"
+        aria-label="Clear collection filters"
+        (click)="clearAll()"
+      >
+        <ui-icon name="close" [size]="16" />
+      </button>
+    }
+    <button
+      type="button"
+      class="btn btn-quiet"
+      #filterBtn
+      aria-haspopup="dialog"
+      (click)="toggleFilters()"
+    >
+      <ui-icon name="filter" [size]="16" />Find & filter
+      @if (activeFilterCount()) {
+        <span class="filter-badge">{{ activeFilterCount() }}</span>
+      }
+    </button>
+  </div>
+</div>
+<ui-entry-dialog
+  [open]="filtersOpen()"
+  title="Find your plants"
+  description="Search your collection and choose what to show."
+  [dirty]="false"
+  (dismissed)="closeFilters()"
+>
+  <form class="collection-filter-form" (ngSubmit)="applyCollectionFilters()">
+    <label for="plant-search"
+      >Search<input
+        id="plant-search"
+        class="input"
+        type="search"
+        name="query"
+        [(ngModel)]="draft.q"
+        maxlength="200"
+        placeholder="Name, scientific name or cultivar"
+    /></label>
+    <fieldset class="filter-section">
+      <legend>Status</legend>
+      <div class="choice-row">
+        @for (option of statusOptions; track option.value) {
+          <button
+            type="button"
+            class="choice"
+            [attr.aria-pressed]="draft.status === option.value"
+            (click)="draft.status = option.value"
+          >
+            {{ option.label }}
+          </button>
+        }
+      </div>
+    </fieldset>
+    <fieldset class="filter-section">
+      <legend>Plant type</legend>
+      <div class="choice-row">
+        <button
+          type="button"
+          class="choice"
+          [attr.aria-pressed]="!draft.category"
+          (click)="draft.category = ''"
+        >
+          All types
+        </button>
+        @for (category of categories; track category) {
+          <button
+            type="button"
+            class="choice"
+            [attr.aria-pressed]="draft.category === category"
+            (click)="draft.category = category"
+          >
+            {{ category.charAt(0) + category.slice(1).toLowerCase() }}
+          </button>
+        }
+      </div>
+    </fieldset>
+    <details class="view-options">
+      <summary>Sort & layout</summary>
+      <div class="form-grid">
+        <label for="plant-sort"
+          >Sort by<select id="plant-sort" class="input" name="order" [(ngModel)]="draft.order">
+            @for (option of orders; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select></label
+        >
+        <label for="plant-layout"
+          >Layout<select id="plant-layout" class="input" name="view" [(ngModel)]="draft.view">
+            @for (option of viewOptions; track option.value) {
+              <option [value]="option.value">{{ option.label }}</option>
+            }
+          </select></label
+        >
+      </div>
+    </details>
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="resetDraft()">Reset all</button
+      ><button type="button" class="btn" (click)="closeFilters()">Cancel</button
+      ><button type="submit" class="btn btn-primary">Apply filters</button>
+    </div>
+  </form>
+</ui-entry-dialog>
+
+@if (store.error()) {
+  <section class="card" role="alert" aria-labelledby="err-h" style="max-width: 560px">
+    <h2 id="err-h">Collection failed to load</h2>
+    <p class="caption">
+      {{ store.error() }} This is not an empty collection — nothing was changed.
+    </p>
+    <div>
+      <button type="button" class="btn btn-primary" (click)="retry()">Retry</button>
+    </div>
+  </section>
+} @else if (store.loading() && store.items().length === 0) {
+  <div class="grid-cards" aria-busy="true">
+    @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+      <ui-skeleton ar="4 / 3" />
+    }
+  </div>
+} @else {
+  <h2 class="visually-only">Plants in your collection</h2>
+  @if (store.items().length === 0) {
+    <section class="card empty-note">
+      @if (isTrueEmpty()) {
+        <h2>No plants yet</h2>
+        <p class="caption">
+          Start with one plant — everything else grows from there. A curated starter set is
+          available on the overview screen.
+        </p>
+      } @else if (status() === 'active') {
+        <h2>No matching plants</h2>
+        <p class="caption">
+          Nothing matches the current search and filters. Try a different spelling, or open Filters
+          and choose another category or sort order.
+        </p>
+      } @else {
+        <h2>No matching plants</h2>
+        <p class="caption">Change Status in Filters to see another part of your collection.</p>
+      }
+    </section>
+  }
+  <ul [class]="listLike() ? 'rows' : 'plant-grid'" aria-label="Plants">
+    @for (p of store.items(); track p.id) {
+      <li>
+        <ui-plant-card
+          [link]="['/plants', p.id]"
+          [name]="p.name"
+          [photo]="coverUrl(p)"
+          [meta]="meta(p)"
+          [cultivar]="p.cultivar"
+          [badge]="badge(p)"
+          [quiet]="quiet(p)"
+          [photoCount]="p.photoCount"
+          [since]="since(p)"
+          [showActions]="false"
+          [layout]="listLike() ? 'list' : 'grid'"
+        >
+        </ui-plant-card>
+        @if (p.tags.length) {
+          <div class="row wrap tags">
+            @for (t of p.tags; track t.id) {
+              <span class="badge">{{ t.label }}</span>
+            }
+          </div>
+        }
+      </li>
+    }
+    <li>
+      <a class="add-plant-card" [class.list]="listLike()" routerLink="/plants/new">
+        <ui-icon name="plus" [size]="24" />
+        <span>Add Plant</span>
+      </a>
+    </li>
+  </ul>
+  @if (store.items().length > 0) {
+    <div class="row spread summary">
+      <span class="caption num">{{ store.items().length }} shown</span>
+      @if (hasNext()) {
+        <button type="button" class="btn" [disabled]="store.loading()" (click)="store.loadMore()">
+          {{ store.loading() ? 'Loading…' : 'Load more' }}
+        </button>
+      }
+    </div>
+  }
+}
+
+<!-- Child outlet for the plant form modal (nesting lands in a later pass).
+     When the form deactivates, the list re-reads so saved data is on screen. -->
+<router-outlet (deactivate)="onOutletDeactivate()" />

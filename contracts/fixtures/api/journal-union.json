@@ -1,0 +1,117 @@
+{
+  "note": "Journal page exercising every R1 union member plus a tombstoned activity summary.",
+  "operation": "Journal",
+  "variables": { "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001", "first": 25 },
+  "data": {
+    "journal": {
+      "items": [
+        {
+          "__typename": "MeasurementEntry",
+          "id": "je-0001",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "occurredAt": "2026-10-30T15:00:00Z",
+          "createdAt": "2026-10-30T15:00:10Z",
+          "summary": "Height 82.5 cm (MANUAL)",
+          "tombstonedAt": null,
+          "measurement": {
+            "id": "m-0001",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+            "quantityKind": "LENGTH",
+            "value": "82.5",
+            "unit": "CM",
+            "observedAt": "2026-10-30T15:00:00Z",
+            "method": "MANUAL",
+            "uncertainty": "0.5",
+            "activityId": null,
+            "revision": 1,
+            "createdAt": "2026-10-30T15:00:10Z",
+            "updatedAt": "2026-10-30T15:00:10Z"
+          }
+        },
+        {
+          "__typename": "PhotoEntry",
+          "id": "je-0002",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "occurredAt": "2026-10-28T09:12:00Z",
+          "createdAt": "2026-10-28T09:15:00Z",
+          "summary": "Photo added (date from upload)",
+          "tombstonedAt": null,
+          "photo": {
+            "id": "p-0001",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+            "takenAt": "2026-10-28T09:12:00Z",
+            "dateSource": "UPLOAD_FALLBACK",
+            "timezone": null,
+            "caption": null,
+            "viewpoint": "WHOLE",
+            "isCover": true,
+            "revision": 1,
+            "deletedAt": null,
+            "createdAt": "2026-10-28T09:15:00Z",
+            "updatedAt": "2026-10-28T09:15:00Z",
+            "asset": {
+              "id": "a-0001",
+              "purpose": "PHOTO",
+              "state": "READY",
+              "byteCount": 2400000,
+              "mimeType": "image/jpeg",
+              "sha256": "d1b3c9a0e5f6778899aabbccddeeff00112233445566778899aabbccddeeff00",
+              "displayName": "IMG_1234.jpg",
+              "errorCode": null,
+              "expiresAt": null,
+              "variants": [
+                { "name": "thumb", "widthPx": 256, "heightPx": 341 },
+                { "name": "medium", "widthPx": 1024, "heightPx": 1365 },
+                { "name": "display", "widthPx": 2048, "heightPx": 2731 }
+              ],
+              "createdAt": "2026-10-28T09:14:00Z",
+              "updatedAt": "2026-10-28T09:16:00Z"
+            }
+          }
+        },
+        {
+          "__typename": "ActivityEntry",
+          "id": "je-0003",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "occurredAt": "2026-10-27T07:30:00Z",
+          "createdAt": "2026-10-27T07:30:00Z",
+          "summary": "Watered 2 L",
+          "tombstonedAt": null,
+          "activity": {
+            "id": "act-0001",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+            "kind": "WATER",
+            "occurredAt": "2026-10-27T07:30:00Z",
+            "timezone": "America/Los_Angeles",
+            "note": null,
+            "quantity": "2",
+            "unit": "L",
+            "product": null,
+            "revision": 1,
+            "voidedAt": null,
+            "createdAt": "2026-10-27T07:30:00Z",
+            "updatedAt": "2026-10-27T07:30:00Z"
+          }
+        },
+        {
+          "__typename": "PurchaseEntry",
+          "id": "je-0004",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "occurredAt": "2023-04-15T00:00:00Z",
+          "createdAt": "2023-04-15T10:05:00Z",
+          "summary": "Purchase recorded: $39.00",
+          "tombstonedAt": null,
+          "allocation": {
+            "id": "7a2b0000-0000-4000-8000-0000000000d1",
+            "purchaseLineId": "7a2b0000-0000-4000-8000-0000000000e1",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+            "lineMinor": "3900",
+            "taxMinor": "0",
+            "shippingMinor": "0"
+          }
+        }
+      ],
+      "pageInfo": { "endCursor": "b2NjdXJyZWRBdERFU0N8amUtMDAwNA", "hasNextPage": false }
+    }
+  }
+}

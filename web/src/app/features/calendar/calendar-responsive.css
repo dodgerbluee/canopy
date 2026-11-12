@@ -1,0 +1,146 @@
+@media (min-width: 1600px) {
+  .day-cell {
+    min-height: 130px;
+  }
+}
+@media (max-width: 1100px) {
+  .calendar-layout {
+    grid-template-columns: 190px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .plant-sidebar {
+    padding: 18px 12px;
+  }
+  .plant-avatar {
+    display: none;
+  }
+  .month-toolbar {
+    padding: 20px;
+  }
+  .day-cell {
+    min-height: 102px;
+    padding: 8px 5px;
+  }
+  .event-marker {
+    padding: 2px 3px;
+    gap: 2px;
+  }
+  .day-markers {
+    gap: 3px;
+  }
+  .month-meta span {
+    display: block;
+  }
+}
+@media (max-width: 767px) {
+  .calendar-heading {
+    margin-bottom: 24px;
+    align-items: flex-end;
+  }
+  .calendar-heading h1 {
+    font-size: 36px;
+  }
+  .calendar-heading > .btn {
+    font-size: 12px;
+    padding: 10px 12px;
+    gap: 6px;
+  }
+  .intro {
+    font-size: 12px;
+  }
+  .calendar-layout {
+    display: block;
+  }
+  .plant-sidebar {
+    display: none;
+  }
+  .month-toolbar {
+    padding: 20px 14px 12px;
+    gap: 6px;
+    align-items: flex-start;
+  }
+  .month-toolbar h2 {
+    font-size: 23px;
+  }
+  .month-meta {
+    font-size: 11px;
+  }
+  .today-btn {
+    margin-right: 0;
+    padding: 8px;
+    font-size: 11px;
+  }
+  .month-controls {
+    gap: 0;
+  }
+  .month-controls .icon-button {
+    width: 36px;
+    min-width: 36px;
+  }
+  .mobile-filter-bar {
+    display: flex;
+    padding: 0 14px 14px;
+  }
+  .mobile-filter-bar .btn {
+    font-size: 12px;
+    padding: 6px 10px;
+    gap: 8px;
+    min-height: 40px;
+  }
+  .weekdays span {
+    font-size: 10px;
+    padding: 11px 0;
+  }
+  .day-cell {
+    min-height: 98px;
+    padding: 6px 3px;
+    gap: 4px;
+  }
+  .day-number {
+    font-size: 11px;
+    width: 25px;
+    line-height: 25px;
+  }
+  .day-markers {
+    gap: 3px;
+  }
+  .event-marker {
+    font-size: 10px;
+    gap: 2px;
+    padding: 2px;
+  }
+  .event-marker ui-icon {
+    width: 12px;
+  }
+  .calendar-legend {
+    gap: 12px;
+    padding: 13px 12px;
+    font-size: 10px;
+  }
+  .day-panel {
+    padding: 18px 14px;
+    margin-top: 16px;
+  }
+  .day-heading h2 {
+    font-size: 15px;
+  }
+  .calendar-entry {
+    gap: 10px;
+  }
+  .entry-icon {
+    width: 36px;
+    height: 36px;
+  }
+  .remove-rain {
+    padding: 6px 8px;
+    min-height: 44px;
+  }
+  .kicker {
+    font-size: 10px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .day-cell {
+    transition: none;
+  }
+}

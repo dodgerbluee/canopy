@@ -1,0 +1,142 @@
+{
+  "caseId": "t-basic",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:d4a29ec6f2556cdec0d87cf5115fc22a0b7eec63171101b8a2eca2fd7d31febd",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "645422c1-b617-49ef-93a8-12e7a63924a4",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "27f8ee80-4d58-4805-b9d4-9c1d04b6bc6a",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "4011d2a0-a12d-463a-bdb2-36f3e22aefd3",
+        "kind": "WATER",
+        "note": "watered thoroughly, top 2cm of soil was dry",
+        "occurredAt": "2026-10-31T08:21:26Z"
+      },
+      {
+        "id": "76e6d0f7-c476-4576-af8f-3198dcf4c4d9",
+        "kind": "FERTILIZE",
+        "note": "half-strength balanced liquid feed",
+        "occurredAt": "2026-10-22T08:21:26Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The watering note is consistent with a moisture-based watering approach, where the top 2 cm of soil being dry may have been used as a cue to water.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "4011d2a0-a12d-463a-bdb2-36f3e22aefd3"
+        ]
+      },
+      {
+        "text": "The fertilizing note describes a half-strength balanced liquid feed and may be associated with routine feeding rather than a corrective treatment.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "76e6d0f7-c476-4576-af8f-3198dcf4c4d9"
+        ]
+      },
+      {
+        "text": "The plant may be in a basic care routine that includes periodic watering and fertilizing, but the record does not show enough detail to confirm frequency or adequacy.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "4011d2a0-a12d-463a-bdb2-36f3e22aefd3",
+          "76e6d0f7-c476-4576-af8f-3198dcf4c4d9"
+        ]
+      },
+      {
+        "text": "If the top 2 cm dry observation was accurate, the watering may have been timed to avoid prolonged dryness, but post-watering soil moisture and drainage are not recorded.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "4011d2a0-a12d-463a-bdb2-36f3e22aefd3"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Before the next watering, check the top 2-3 cm of soil with a finger or moisture meter and water only if dry.",
+      "Over the next 1-2 weeks, observe leaves for new growth, yellowing, browning, drooping, or unusual spots and note changes.",
+      "Take a whole-plant photo and close-up leaf photos in good light, including undersides of leaves.",
+      "Record pot size, drainage holes, soil mix, and approximate light conditions near the plant.",
+      "Check for pests under leaves and in leaf axils during a routine inspection.",
+      "If fertilizing regularly, record the dilution, frequency, and whether the soil was moist before feeding."
+    ],
+    "missingInformation": [
+      "The record lacks photos, measurements, weather, and guidance, so current plant condition cannot be assessed from this snapshot alone.",
+      "No leaf color, leaf texture, growth, drooping, yellowing, browning, or pest observations are recorded.",
+      "No pot size, drainage, soil mix, repotting history, or root condition information is recorded.",
+      "No light, temperature, humidity, or seasonal environmental conditions are recorded.",
+      "No watering frequency, soil moisture after watering, or fertilizing schedule is recorded beyond the two activities.",
+      "No location coordinates or weather snapshot are available to contextualize care needs."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The plant is recorded as an active Monstera.",
+        "evidenceIds": []
+      },
+      {
+        "text": "A watering activity was recorded on 2026-10-31 with the note: watered thoroughly, top 2cm of soil was dry.",
+        "evidenceIds": [
+          "4011d2a0-a12d-463a-bdb2-36f3e22aefd3"
+        ]
+      },
+      {
+        "text": "A fertilizing activity was recorded on 2026-10-22 with the note: half-strength balanced liquid feed.",
+        "evidenceIds": [
+          "76e6d0f7-c476-4576-af8f-3198dcf4c4d9"
+        ]
+      },
+      {
+        "text": "The snapshot contains no photos for this plant.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no measurements for this plant.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no weather data for this location.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no approved care guidance entries.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The workspace is recorded as having no location coordinates.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

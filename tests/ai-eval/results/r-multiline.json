@@ -1,0 +1,68 @@
+{
+  "caseId": "r-multiline",
+  "kind": "RECEIPT",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:13ee0bd2b5bf174b18a235fe580b0abd8196a269b878ed229ae1099ece86b1c1",
+  "snapshot": {
+    "kind": "RECEIPT_EXTRACTION",
+    "costs": [],
+    "plant": {
+      "id": "",
+      "name": "",
+      "status": "",
+      "revision": 0
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "c918a085-3754-476e-bb7f-6259bb9446c0",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "lines": [
+      {
+        "amountMinor": "3450",
+        "description": "Fig 'Brown Turkey'"
+      },
+      {
+        "amountMinor": "2275",
+        "description": "Citrus Meyer 5in"
+      },
+      {
+        "amountMinor": "1199",
+        "description": "Potting mix 40qt"
+      },
+      {
+        "amountMinor": "519",
+        "description": "TAX"
+      }
+    ],
+    "seller": "URBAN LEAF CO",
+    "currency": "USD",
+    "taxMinor": "519",
+    "totalMinor": "7443",
+    "purchasedOn": "2026-06-02",
+    "shippingMinor": "",
+    "needsReconciliation": false
+  }
+}

@@ -1,0 +1,136 @@
+{
+  "caseId": "v-viewpoint",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:0472c680af4b8f96b2d40f5ae1ee921ac733b3758ec337d3656e1b932adb40bb",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "b9a9e649-507e-423b-a3c3-5b738af50e9f",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "9c4a0ee2-31cd-4384-90c1-1254ff723305",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "74373800-35ab-4e74-8b8d-950dfc163dc5",
+        "takenAt": "2026-10-04T08:16:21Z"
+      },
+      {
+        "id": "9e5dd6a2-98d4-4717-a041-4b4ac1537779",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "773fef22-0e21-4797-ad47-5c0c4c3fdcc9",
+        "takenAt": "2026-11-03T08:16:21Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "4370f01c-6a8d-4dae-bd86-cab382b5ff32",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The later image may show additional smaller leaf-like growth compared with the earlier image.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "9c4a0ee2-31cd-4384-90c1-1254ff723305",
+          "9e5dd6a2-98d4-4717-a041-4b4ac1537779"
+        ]
+      },
+      {
+        "text": "The apparent difference between the photos could be due to framing, editing, or graphic representation rather than actual plant growth.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "9c4a0ee2-31cd-4384-90c1-1254ff723305",
+          "9e5dd6a2-98d4-4717-a041-4b4ac1537779"
+        ]
+      },
+      {
+        "text": "If the additional leaf-like shapes are real new growth, the plant may be actively producing foliage, but overall health cannot be assessed from these images alone.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "9c4a0ee2-31cd-4384-90c1-1254ff723305",
+          "9e5dd6a2-98d4-4717-a041-4b4ac1537779"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Confirm that both photos show the same plant from a comparable angle and distance.",
+      "Take a close-up photo of the lower smaller leaf-like structures to determine whether they are new leaves, existing leaves, or artifacts.",
+      "Record pot size, stem height, leaf count, and leaf dimensions using a scale reference.",
+      "Check for Monstera-specific features such as splits, holes, or fenestrations.",
+      "Inspect the plant for pests, yellowing, drooping, brown edges, or other stress signs.",
+      "Add care activities and measurements so future comparisons can be grounded in recorded data."
+    ],
+    "missingInformation": [
+      "Whether the two photos are of the same physical plant and taken from the same angle and distance.",
+      "No scale reference is present, so size, growth rate, and leaf dimensions cannot be determined.",
+      "No measurements are recorded for this plant.",
+      "No care activities are recorded for this plant.",
+      "No approved care guidance is published for this workspace.",
+      "No fresh weather snapshot exists for this location.",
+      "The workspace has no location coordinates.",
+      "The actual species or variety cannot be confirmed from the stylized images."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The earlier photo shows a potted plant with a single upright stem and three large rounded green leaf-like shapes.",
+        "evidenceIds": [
+          "9c4a0ee2-31cd-4384-90c1-1254ff723305"
+        ]
+      },
+      {
+        "text": "The later photo shows a potted plant with a single upright stem, three large rounded green leaf-like shapes, and two smaller lighter green leaf-like shapes lower on the plant.",
+        "evidenceIds": [
+          "9e5dd6a2-98d4-4717-a041-4b4ac1537779"
+        ]
+      },
+      {
+        "text": "Both photos show a brown pot and a plain light background.",
+        "evidenceIds": [
+          "9c4a0ee2-31cd-4384-90c1-1254ff723305",
+          "9e5dd6a2-98d4-4717-a041-4b4ac1537779"
+        ]
+      },
+      {
+        "text": "No flowers, fruit, obvious pests, or obvious leaf damage are visible in either photo.",
+        "evidenceIds": [
+          "9c4a0ee2-31cd-4384-90c1-1254ff723305",
+          "9e5dd6a2-98d4-4717-a041-4b4ac1537779"
+        ]
+      },
+      {
+        "text": "The images are stylized and do not show clear Monstera-specific features such as fenestrations or splits.",
+        "evidenceIds": [
+          "9c4a0ee2-31cd-4384-90c1-1254ff723305",
+          "9e5dd6a2-98d4-4717-a041-4b4ac1537779"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+{
+  "caseId": "v-incompatible",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:68bad33d9b14bf2d6a295172988c91890c3de86b4a5f308e66ecce8420a5ff29",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "33c190b5-3d19-4e7b-a3a9-03631fdcd6a2",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "97689547-5893-4fc1-a0cd-abdd342581ab",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "ee0a6bf9-f358-48e4-b32e-4a22e3d8ed3c",
+        "takenAt": "2026-10-04T08:20:28Z"
+      },
+      {
+        "id": "2b54fb03-fb61-4ad2-9f00-8626588eaf92",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "390e616a-a373-4ba6-a53d-d1f8b7717031",
+        "takenAt": "2026-11-03T08:20:28Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "9529d4be-6781-479f-85f0-1ed034384adf",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The second photo may be an unrelated object or an incorrect capture for this plant record.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "2b54fb03-fb61-4ad2-9f00-8626588eaf92"
+        ]
+      },
+      {
+        "text": "The first photo may be a stylized or placeholder plant image rather than a detailed photograph of a live plant.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "97689547-5893-4fc1-a0cd-abdd342581ab"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Recapture the plant from a consistent angle and distance.",
+      "Verify that the second photo asset is correctly associated with this plant record.",
+      "Check for upload or camera errors that may have replaced the plant image with an unrelated object."
+    ],
+    "missingInformation": [
+      "The two photos do not show the same plant or a comparable plant view, so temporal comparison was refused.",
+      "No measurements, activities, weather, coordinates, or approved care guidance are available in the snapshot."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The first photo shows a simple green plant-like shape with three rounded leaf forms and a short stem in a terracotta-colored pot against a plain light background.",
+        "evidenceIds": [
+          "97689547-5893-4fc1-a0cd-abdd342581ab"
+        ]
+      },
+      {
+        "text": "The second photo shows a blue mug-like object with a handle on the right side against a plain light background.",
+        "evidenceIds": [
+          "2b54fb03-fb61-4ad2-9f00-8626588eaf92"
+        ]
+      }
+    ]
+  }
+}

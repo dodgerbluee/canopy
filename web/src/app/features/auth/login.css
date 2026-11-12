@@ -1,0 +1,63 @@
+/* Login (UI01.d): deliberate, calm entry screen; tokens only. */
+:host {
+  display: block;
+}
+.login-wrap {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--sp-4);
+}
+.login-top {
+  position: absolute;
+  top: var(--sp-4);
+  left: var(--sp-4);
+  right: var(--sp-4);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+/* Global .shell-brand uses --nav-muted for the dark rail; the login page sits
+   on the light canvas, so the brand needs the page's text color. */
+.login-top .shell-brand {
+  color: var(--text-primary);
+}
+.login-card {
+  width: min(380px, 100%);
+  display: grid;
+  gap: var(--sp-4);
+}
+.login-brand {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-3);
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-card);
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+.login-card h1 {
+  margin: 0;
+  font-size: var(--fs-h1);
+  line-height: 1.1;
+}
+form {
+  display: grid;
+  gap: var(--sp-2);
+}
+.btn-primary {
+  margin-top: var(--sp-2);
+  min-height: 44px;
+}
+.notice {
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-field);
+  padding: var(--sp-2) var(--sp-3);
+  font-size: var(--fs-small);
+}

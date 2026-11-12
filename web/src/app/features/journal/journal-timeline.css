@@ -1,0 +1,245 @@
+/* UI01 pass C — journey timeline: month heads, date rail, entry cards.
+ * UI03 — toolbar grid and card internals. Design tokens only.
+ * This component carries no page width: the workspace page caps its own
+ * column (journal.ts), and the plant detail's Journey tab keeps inheriting
+ * the width it is given. */
+
+.timeline-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.timeline-tools .icon-button {
+  position: relative;
+}
+.filter-count {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 16px;
+  font-size: 10px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-radius: 8px;
+}
+.journey-filter-form {
+  display: grid;
+  gap: 24px;
+}
+.journey-filter-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.journey-filter-form legend {
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.journey-filter-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+.entry-type-choices {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+.entry-type-choice {
+  padding: 12px 16px;
+  min-height: 44px;
+  text-align: left;
+  background: var(--surface-base);
+  border: 1px solid var(--border-decorative);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.entry-type-choice[aria-pressed='true'] {
+  background: var(--accent);
+  color: var(--accent-fg);
+  border-color: var(--accent);
+}
+.journey-filter-form .include-voided {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.month-head {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  margin: var(--sp-6) 0 var(--sp-4);
+}
+/* first group sits under the toolbar, not under a double header gap */
+.month-head:first-child {
+  margin-top: 0;
+}
+
+.journey-list {
+  display: grid;
+  /* 16px card gaps */
+  gap: var(--sp-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.journey-entry {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: var(--sp-4);
+  align-items: start;
+}
+/* Journey entries sit back from the raised cards around them (mock .entry-card). */
+.journey-entry.card {
+  background: var(--surface-base);
+}
+@media (max-width: 560px) {
+  .journey-entry {
+    grid-template-columns: 1fr;
+    gap: var(--sp-2);
+  }
+}
+
+/* Date rail: one quiet column, day number leading, hairline separating it
+ * from the content on wide layouts. */
+.entry-date {
+  display: grid;
+  gap: 2px;
+  padding-right: var(--sp-3);
+  border-right: 1px solid var(--border-decorative);
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+  line-height: var(--lh-caption);
+}
+.entry-date strong {
+  font-size: var(--fs-h2);
+  line-height: var(--lh-h2);
+  font-weight: 500;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+@media (max-width: 560px) {
+  /* stacked: the rail reads as a horizontal line of quiet metadata */
+  .entry-date {
+    grid-auto-flow: column;
+    justify-content: start;
+    align-items: baseline;
+    gap: var(--sp-2);
+    padding-right: 0;
+    border-right: 0;
+  }
+}
+
+/* Card internals: title row, metadata badges, note, actions — one spacing
+ * rhythm, no inline margins. */
+.entry-body {
+  display: grid;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.entry-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.entry-title {
+  font-size: var(--fs-body);
+  font-weight: 650;
+}
+
+.entry-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.entry-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.entry-kind ui-icon {
+  color: var(--accent);
+}
+
+.entry-note {
+  margin: 0;
+}
+
+.entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+/* The event's own photo, kept to a readable editorial size. */
+.entry-photo {
+  margin: 0;
+  max-width: 420px;
+}
+.entry-photo ui-photo {
+  display: block;
+  /* ui-photo reads its ratio from this host custom property; 4/3 is the
+   * mock's editorial crop and object-fit:cover keeps it undistorted. */
+  --photo-ratio: 4 / 3;
+  border-radius: var(--radius-field);
+  overflow: hidden;
+  border: 1px solid var(--border-decorative);
+}
+.entry-photo figcaption {
+  margin-top: var(--sp-1);
+}
+
+/* Load-more row under the groups. */
+.timeline-foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+
+.is-tombstoned {
+  opacity: 0.6;
+}
+
+.journey-month-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 24px 0 16px;
+}
+.journey-month-heading.first-month {
+  margin-top: 0;
+}
+.journey-month-heading .month-head {
+  margin: 0;
+  font-size: clamp(20px, 4vw, 26px);
+  line-height: 44px;
+}
+.journey-filter-summary {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.journey-tools-fallback {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}

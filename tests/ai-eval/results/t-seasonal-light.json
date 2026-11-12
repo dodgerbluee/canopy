@@ -1,0 +1,160 @@
+{
+  "caseId": "t-seasonal-light",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:afa494693170d9a462f5e48099498b40b3b326eff3833c5539fe2953a2fbdd86",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "a0048f42-569b-4051-a24e-6939eb33ada4",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "d0b24b62-f169-45e1-aaac-4162d9d7dcb7",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "3f31b138-a83a-4cca-8c7c-91f8fd3e7f5f",
+        "kind": "WATER",
+        "note": "watered, soil stayed wetter longer than usual",
+        "occurredAt": "2026-10-28T08:30:23Z"
+      },
+      {
+        "id": "a12e9689-4cb1-45cd-a9fe-15e8ad5a14e4",
+        "kind": "NOTE",
+        "note": "moved the plant to a darker north-facing window for winter",
+        "occurredAt": "2026-10-24T08:30:23Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The plant may be in a lower-light environment than before, based on the recorded note about moving it to a darker north-facing window.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "a12e9689-4cb1-45cd-a9fe-15e8ad5a14e4"
+        ]
+      },
+      {
+        "text": "The observation that soil stayed wetter longer than usual may be associated with a change in environmental conditions, such as lower light, but this is not confirmed.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "3f31b138-a83a-4cca-8c7c-91f8fd3e7f5f",
+          "a12e9689-4cb1-45cd-a9fe-15e8ad5a14e4"
+        ]
+      },
+      {
+        "text": "The plant may be at increased risk of overwatering if watering frequency is not adjusted when soil remains wet longer, but no measurements or visual signs are available.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "3f31b138-a83a-4cca-8c7c-91f8fd3e7f5f"
+        ]
+      },
+      {
+        "text": "The plant's recent care pattern may be shifting toward less frequent drying between waterings, consistent with the recorded note and the move to a darker window.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "3f31b138-a83a-4cca-8c7c-91f8fd3e7f5f",
+          "a12e9689-4cb1-45cd-a9fe-15e8ad5a14e4"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Check soil moisture before watering by feeling the top few centimeters or using a moisture meter, and record the result.",
+      "Observe how many days it takes for the soil to dry between waterings and compare that to previous watering intervals.",
+      "Inspect the pot for drainage holes and check whether water collects in a saucer after watering.",
+      "Look at leaves for color changes, drooping, yellowing, or new growth over the next 1 to 2 weeks.",
+      "Measure or estimate light at the north-facing window, for example with a phone light meter or by noting distance from the window.",
+      "Add photos and measurements to the record so future assessments can compare condition over time."
+    ],
+    "missingInformation": [
+      "The record lacks photos, measurements, and guidance, so the plant's current condition cannot be assessed from this snapshot.",
+      "No soil moisture measurements or watering schedule details are recorded.",
+      "No light level measurements or detailed window orientation/light intensity data are recorded.",
+      "No pot size, drainage status, soil type, or root condition information is recorded.",
+      "No temperature, humidity, or weather data are available for the location.",
+      "No visual signs such as leaf color, leaf drop, growth, or pests are recorded.",
+      "No location coordinates are available to obtain local weather context."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The plant record identifies the plant as Monstera with status ACTIVE.",
+        "evidenceIds": []
+      },
+      {
+        "text": "A WATER activity was recorded on 2026-10-28 with the note: watered, soil stayed wetter longer than usual.",
+        "evidenceIds": [
+          "3f31b138-a83a-4cca-8c7c-91f8fd3e7f5f"
+        ]
+      },
+      {
+        "text": "A NOTE activity was recorded on 2026-10-24 with the note: moved the plant to a darker north-facing window for winter.",
+        "evidenceIds": [
+          "a12e9689-4cb1-45cd-a9fe-15e8ad5a14e4"
+        ]
+      },
+      {
+        "text": "The snapshot contains no photos.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no measurements.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no guidance entries.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no weather entries.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The workspace record indicates it has no location coordinates.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The missingFacts list states that no purchases with costs allocated to this plant are recorded.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The missingFacts list states that no approved care guidance is published for this workspace.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The missingFacts list states that no fresh weather snapshot exists for this location.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The missingFacts list states that no measurements are recorded for this plant.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

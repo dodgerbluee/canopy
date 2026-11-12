@@ -1,0 +1,4 @@
+go test fuzz v1
+string("{\"form\":\"EVERY_N_DAYS\",\"days\":365,\"anchor\":\"PLAN_START\"}")
+string("2026-01-01")
+string("2825-06-15")

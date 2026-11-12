@@ -1,0 +1,143 @@
+# Journal domain: activities, measurements, unified timeline. Frozen by T01.r1.
+
+enum ActivityKind {
+  WATER
+  FERTILIZE
+  PRUNE
+  REPOT
+  HARVEST
+  OBSERVE
+  NOTE
+}
+
+"Physical quantity kind; unit must be compatible (DB + service validation)."
+enum QuantityKind {
+  VOLUME
+  MASS
+  LENGTH
+  COUNT
+  TEMPERATURE
+}
+
+enum Unit {
+  ML
+  L
+  G
+  KG
+  MM
+  CM
+  COUNT
+  C
+  F
+}
+
+enum MeasurementMethod {
+  MANUAL
+  SENSOR
+  IMAGE_ESTIMATE
+}
+
+type Activity {
+  id: ID!
+  plantId: ID!
+  kind: ActivityKind!
+  "Event time, separate from createdAt."
+  occurredAt: DateTime!
+  "IANA timezone in which occurredAt was entered."
+  timezone: String!
+  note: String
+  "Water/fertilize carry quantity+unit+optional product; other kinds leave both null. Never one untyped numeric field shared across kinds."
+  quantity: Decimal
+  unit: Unit
+  product: String
+  revision: Int!
+  "Deletes void rather than erase."
+  voidedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Measurement {
+  id: ID!
+  plantId: ID!
+  quantityKind: QuantityKind!
+  value: Decimal!
+  unit: Unit!
+  observedAt: DateTime!
+  "IMAGE_ESTIMATE never appears as a measured fact in UI copy."
+  method: MeasurementMethod!
+  uncertainty: Decimal
+  activityId: ID
+  revision: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+# ---- Unified timeline projection (typed union; every member must be selectable) ----
+
+type ActivityEntry {
+  id: ID!
+  plantId: ID!
+  occurredAt: DateTime!
+  createdAt: DateTime!
+  summary: String!
+  tombstonedAt: DateTime
+  activity: Activity!
+}
+
+type PhotoEntry {
+  id: ID!
+  plantId: ID!
+  "Unknown photo dates use upload instant, visibly labeled via photo.dateSource."
+  occurredAt: DateTime!
+  createdAt: DateTime!
+  summary: String!
+  tombstonedAt: DateTime
+  photo: PlantPhoto!
+}
+
+type PurchaseEntry {
+  id: ID!
+  "Plant attributed through this allocation; purchases on several plants project one entry per allocation without changing workspace aggregates."
+  plantId: ID!
+  occurredAt: DateTime!
+  createdAt: DateTime!
+  summary: String!
+  tombstonedAt: DateTime
+  allocation: PurchaseAllocation!
+}
+
+type MeasurementEntry {
+  id: ID!
+  plantId: ID!
+  occurredAt: DateTime!
+  createdAt: DateTime!
+  summary: String!
+  tombstonedAt: DateTime
+  measurement: Measurement!
+}
+
+# CareEntry and InsightEntry types are frozen by T01.care / T01.ai; the union
+# extension lands with the server surface that can resolve them (T24 / T33),
+# because operation documents here are shipped by the web at runtime.
+union JournalEntry = ActivityEntry | PhotoEntry | PurchaseEntry | MeasurementEntry
+
+type JournalConnection {
+  items: [JournalEntry!]!
+  pageInfo: PageInfo!
+}
+
+input JournalFilter {
+  entryTypes: [JournalEntryType!]
+  from: DateTime
+  to: DateTime
+  "Default true: tombstoned entries hidden."
+  includeTombstoned: Boolean
+}
+
+enum JournalEntryType {
+  ACTIVITY
+  PHOTO
+  PURCHASE
+  MEASUREMENT
+}

@@ -1,0 +1,164 @@
+fragment PurchaseFields on Purchase {
+  id
+  seller
+  purchasedOn
+  currency
+  totalMinor
+  shippingMinor
+  taxMinor
+  revision
+  voidedAt
+  createdAt
+  updatedAt
+  lines(first: 100) {
+    items {
+      id
+      purchaseId
+      description
+      quantity
+      lineTotalMinor
+      allocations {
+        ...AllocationFields
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+  receipts {
+    id
+    purchaseId
+    asset {
+      ...AssetFields
+    }
+  }
+}
+
+query Purchases($first: Int, $after: String, $filter: PurchaseFilter) {
+  purchases(first: $first, after: $after, filter: $filter) {
+    items {
+      ...PurchaseFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+query PurchaseDetail($id: ID!) {
+  purchase(id: $id) {
+    ...PurchaseFields
+  }
+}
+
+query Spending($filter: SpendingFilter) {
+  spending(filter: $filter) {
+    knownSpendingByCurrency {
+      currency
+      total {
+        minorUnits
+        currency
+      }
+    }
+    unknownAcquisitionCostCount
+    missingAcquisitionRecordCount
+  }
+}
+
+mutation CreatePurchase($input: CreatePurchaseInput!, $clientMutationId: String) {
+  createPurchase(input: $input, clientMutationId: $clientMutationId) {
+    purchase {
+      ...PurchaseFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdatePurchase($input: UpdatePurchaseInput!, $clientMutationId: String) {
+  updatePurchase(input: $input, clientMutationId: $clientMutationId) {
+    purchase {
+      ...PurchaseFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation VoidPurchase($input: VoidPurchaseInput!, $clientMutationId: String) {
+  voidPurchase(input: $input, clientMutationId: $clientMutationId) {
+    purchase {
+      ...PurchaseFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation RecordAcquisition($input: RecordAcquisitionInput!, $clientMutationId: String) {
+  recordAcquisition(input: $input, clientMutationId: $clientMutationId) {
+    acquisition {
+      ...AcquisitionFields
+    }
+    purchase {
+      ...PurchaseFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdateAcquisition($input: UpdateAcquisitionInput!, $clientMutationId: String) {
+  updateAcquisition(input: $input, clientMutationId: $clientMutationId) {
+    acquisition {
+      ...AcquisitionFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation PriceAcquisition($input: PriceAcquisitionInput!, $clientMutationId: String) {
+  priceAcquisition(input: $input, clientMutationId: $clientMutationId) {
+    acquisition {
+      ...AcquisitionFields
+    }
+    purchase {
+      ...PurchaseFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}

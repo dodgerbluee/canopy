@@ -1,0 +1,130 @@
+[
+  {
+    "id": "tamu-citrus",
+    "crop": "citrus",
+    "country": "US",
+    "regions": [
+      "Texas",
+      "TX"
+    ],
+    "title": "Citrus \u2014 Texas Fruit & Nut Resources",
+    "publisher": "Texas A&M AgriLife Extension",
+    "scope": "Texas guide; many outdoor timing examples describe southern Texas. Container and North Texas conditions can differ.",
+    "url": "https://aggie-horticulture.tamu.edu/fruit-nut/fact-sheets/citrus/",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "tamu-fig",
+    "crop": "fig",
+    "country": "US",
+    "regions": [
+      "Texas",
+      "TX"
+    ],
+    "title": "Figs \u2014 Texas Fruit and Nut Production",
+    "publisher": "Texas A&M AgriLife Extension",
+    "scope": "Texas regional guidance; cultivar, age, freeze damage and growing conditions affect timing.",
+    "url": "https://mytexas.ag.tamu.edu/publications/figs-texas-fruit-and-nut-production/",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "tamu-blackberry",
+    "crop": "blackberry",
+    "country": "US",
+    "regions": [
+      "Texas",
+      "TX"
+    ],
+    "title": "Blackberries \u2014 Texas Fruit and Nut Production",
+    "publisher": "Texas A&M AgriLife Extension",
+    "scope": "Texas regional guidance; distinguish primocane and floricane cultivars.",
+    "url": "https://mytexas.ag.tamu.edu/publications/blackberries-texas-fruit-and-nut-production/",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "tamu-pomegranate",
+    "crop": "pomegranate",
+    "country": "US",
+    "regions": [
+      "Texas",
+      "TX"
+    ],
+    "title": "Pomegranates \u2014 Texas Fruit and Nut Production",
+    "publisher": "Texas A&M AgriLife Extension",
+    "scope": "Texas regional guidance; harvest depends on cultivar and plant maturity.",
+    "url": "https://mytexas.ag.tamu.edu/publications/pomegranates-texas-fruit-and-nut-production/",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "tamu-strawberry",
+    "crop": "strawberry",
+    "country": "US",
+    "regions": [
+      "Texas",
+      "TX"
+    ],
+    "title": "Strawberries Crop Guide",
+    "publisher": "Texas A&M AgriLife Extension",
+    "scope": "Texas crop guidance. Production system, bearing type, cultivar and local heat affect timing; adapt commercial practices for home containers.",
+    "url": "https://aggie-horticulture.tamu.edu/smallacreage/crops-guides/fruits-nuts/strawberries/",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "uc-citrus",
+    "crop": "citrus",
+    "country": "US",
+    "regions": [
+      "California",
+      "CA"
+    ],
+    "title": "Cultural Tips for Growing Citrus",
+    "publisher": "UC Statewide IPM",
+    "scope": "California regional citrus guidance; container and inland/coastal conditions differ.",
+    "url": "https://ipm.ucanr.edu/home-and-landscape/cultural-tips-for-growing-citrus/",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "osu-strawberry",
+    "crop": "strawberry",
+    "country": "US",
+    "regions": [
+      "Oregon",
+      "OR",
+      "Washington",
+      "WA"
+    ],
+    "title": "Growing strawberries in your home garden",
+    "publisher": "Oregon State University Extension",
+    "scope": "Pacific Northwest guidance; western and eastern growing areas and bearing types differ.",
+    "url": "https://extension.oregonstate.edu/catalog/ec-1307-growing-strawberries-your-home-garden",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "tamu-avocado",
+    "crop": "avocado",
+    "country": "US",
+    "regions": [
+      "Texas",
+      "TX"
+    ],
+    "title": "Avocados \u2014 Texas Fruit and Nut Production",
+    "publisher": "Texas A&M AgriLife Extension",
+    "scope": "Texas guide centered on protected southern locations. Many cultivars, including Hass, have insufficient cold hardiness for unprotected Texas sites; container protection changes applicability.",
+    "url": "https://mytexas.ag.tamu.edu/publications/avocados-texas-fruit-and-nut-production/",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "tamu-olive",
+    "crop": "olive",
+    "country": "US",
+    "regions": [
+      "Texas",
+      "TX"
+    ],
+    "title": "Olives \u2014 Texas Fruit and Nut Production",
+    "publisher": "Texas A&M AgriLife Extension",
+    "scope": "Texas olive guidance; freeze risk, winter chilling and humidity make flowering and fruit set uncertain, especially outside favorable southwest growing areas.",
+    "url": "https://mytexas.ag.tamu.edu/publications/olives-texas-fruit-and-nut-production/",
+    "hemisphere": "NORTHERN"
+  }
+]

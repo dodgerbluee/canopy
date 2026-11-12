@@ -1,0 +1,87 @@
+# Today dashboard composition (T28). Fixed page sizes server-side; the
+# journal selection stays slim (summary lines, not full payloads) because
+# the card shows one line per entry — activity kind is the only payload
+# detail rendered.
+query TodayOverview {
+  todayOverview {
+    dueTasks {
+      items {
+        ...CareOccurrenceFields
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+    recentEntries {
+      items {
+        __typename
+        ... on ActivityEntry {
+          id
+          plantId
+          occurredAt
+          summary
+          activity {
+            ...ActivityFields
+          }
+        }
+        ... on PhotoEntry {
+          id
+          plantId
+          occurredAt
+          summary
+        }
+        ... on PurchaseEntry {
+          id
+          plantId
+          occurredAt
+          summary
+        }
+        ... on MeasurementEntry {
+          id
+          plantId
+          occurredAt
+          summary
+        }
+        ... on CareEntry {
+          id
+          plantId
+          occurredAt
+          summary
+          kind
+          activityKind
+        }
+        ... on InsightEntry {
+          id
+          plantId
+          occurredAt
+          createdAt
+          summary
+          tombstonedAt
+          runId
+          analysisKind: kind
+        }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
+      }
+    }
+    conditions {
+      locationName
+      snapshot {
+        id
+        provider
+        fetchedAt
+        validFrom
+        validUntil
+        highTempC
+        lowTempC
+        rainfallMm
+        et0Mm
+        freshness
+        license
+      }
+    }
+  }
+}

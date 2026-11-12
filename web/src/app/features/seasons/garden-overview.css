@@ -1,0 +1,227 @@
+:host {
+  display: block;
+  margin: 24px 0 32px;
+}
+.garden-overview {
+  border: 1px solid var(--border-decorative);
+  border-radius: 22px;
+  padding: 28px;
+  background: var(--surface-base);
+}
+header,
+.month-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.eyebrow {
+  font: 10px var(--font-mono);
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin: 0 0 10px;
+}
+h2 {
+  font-size: 23px;
+  font-weight: 500;
+  margin: 0;
+  letter-spacing: -0.03em;
+}
+.garden-total {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.overview-intro,
+.overview-note,
+.overview-empty {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.overview-intro {
+  margin: 12px 0 24px;
+}
+.garden-tube {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  border: 1px solid var(--border-decorative);
+  border-radius: 28px;
+  background: var(--surface-canvas);
+  padding: 5px;
+  gap: 2px;
+}
+.garden-month {
+  min-width: 0;
+  min-height: 108px;
+  border: 1px solid transparent;
+  border-radius: 23px;
+  padding: 12px 3px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  font: inherit;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 11px;
+}
+.garden-month.selected {
+  background: var(--surface-base);
+  border-color: var(--accent);
+  color: var(--text-primary);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--text-primary) 5%, transparent);
+}
+.month-name {
+  font: 11px var(--font-mono);
+}
+.month-colors {
+  display: flex;
+  height: 18px;
+  overflow: hidden;
+  border-radius: 9px;
+  gap: 2px;
+}
+.month-color {
+  background: var(--kind-color);
+  flex: 1;
+  min-width: 3px;
+  opacity: 0.8;
+}
+.month-unknown {
+  border: 1px dashed var(--border);
+  border-radius: inherit;
+  flex: 1;
+}
+.month-count {
+  font-size: 13px;
+  font-weight: 600;
+}
+.month-heading {
+  margin: 25px 0 15px;
+  gap: 6px 16px;
+}
+h3 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 0;
+}
+h3 span,
+.month-heading p {
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 400;
+}
+.month-heading p {
+  margin: 0;
+}
+.garden-groups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.garden-group,
+.overview-fact {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  color: var(--text-primary);
+  font: inherit;
+  border: 1px solid var(--border-decorative);
+  border-radius: 14px;
+  padding: 14px;
+  background: var(--surface-base);
+  cursor: pointer;
+  min-width: 0;
+}
+.group-icon {
+  color: var(--kind-color);
+  background: color-mix(in srgb, var(--kind-color) 10%, var(--surface-base));
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  flex: none;
+}
+.group-copy {
+  flex: 1;
+  min-width: 0;
+}
+.group-copy strong,
+.overview-fact strong {
+  display: block;
+  font-size: 13px;
+}
+.group-copy small {
+  display: block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 5px;
+}
+.group-count {
+  font: 15px var(--font-mono);
+  color: var(--kind-color);
+}
+.overview-note {
+  font-size: 11px;
+  margin: 18px 0 0;
+}
+.overview-empty {
+  grid-column: 1/-1;
+  margin: 0;
+}
+.overview-details {
+  display: grid;
+  gap: 12px;
+}
+.overview-fact {
+  width: 100%;
+  align-items: flex-start;
+}
+.overview-fact > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.overview-fact span span,
+.overview-fact small {
+  display: block;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-top: 6px;
+}
+.overview-fact small {
+  color: var(--text-muted);
+}
+.visually-hidden {
+  position: absolute;
+  clip-path: inset(50%);
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .garden-overview {
+    padding: 20px 14px;
+  }
+  h2 {
+    font-size: 21px;
+  }
+  .garden-tube {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    border-radius: 23px;
+    gap: 5px 2px;
+  }
+  .garden-month {
+    min-height: 92px;
+    gap: 8px;
+  }
+  .garden-groups {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,83 @@
+<ui-entry-dialog
+  #chatDialog
+  [open]="open()"
+  title="Ask your garden"
+  description="Answers use your plant list, cited regional guidance and recorded activity counts."
+  size="wide"
+  [busy]="asking()"
+  [dirty]="false"
+  (dismissed)="dismissed.emit()"
+>
+  <div class="garden-chat">
+    <div class="chat-prompts">
+      <button
+        type="button"
+        [attr.aria-disabled]="asking()"
+        (click)="ask('What should I watch for this month?')"
+      >
+        What’s happening this month?</button
+      ><button
+        type="button"
+        [attr.aria-disabled]="asking()"
+        (click)="ask('Which plants have upcoming harvest windows, and what is uncertain?')"
+      >
+        What might ripen next?</button
+      ><button
+        type="button"
+        [attr.aria-disabled]="asking()"
+        (click)="
+          ask('What fertilizer and moisture checks do the sources support for this time of year?')
+        "
+      >
+        What care should I consider?
+      </button>
+    </div>
+    <form (ngSubmit)="ask()">
+      <label for="garden-question"
+        >Your question<textarea
+          id="garden-question"
+          #questionField
+          name="question"
+          class="input"
+          rows="3"
+          maxlength="2000"
+          [readOnly]="asking()"
+          placeholder="What should I be paying attention to in my garden?"
+          [ngModel]="question()"
+          (ngModelChange)="question.set($event)"
+          [attr.aria-disabled]="asking()"
+        ></textarea>
+      </label>
+      <div class="form-actions">
+        @if (asking()) {
+          <button type="button" class="btn" (click)="cancelQuestion()">Cancel question</button>
+        }
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [attr.aria-disabled]="asking() || question().trim().length < 3"
+        >
+          {{ asking() ? 'Reading your garden…' : 'Ask garden' }}
+        </button>
+      </div>
+    </form>
+    @if (chatError()) {
+      <p class="form-error" role="alert">{{ chatError() }}</p>
+    }
+    @if (answer(); as a) {
+      <div class="garden-answer" aria-live="polite">
+        <p>{{ a.answer }}</p>
+        @if (a.facts.length) {
+          <h3>Sources behind this answer</h3>
+          <div class="answer-sources">
+            @for (fact of a.facts; track fact.id) {
+              <a [href]="fact.sourceUrl" target="_blank" rel="noopener noreferrer"
+                >{{ fact.label }}<small>{{ fact.publisher }} · {{ fact.sourceRegion }}</small></a
+              >
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ui-entry-dialog>

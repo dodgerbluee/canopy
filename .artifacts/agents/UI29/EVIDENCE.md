@@ -1,0 +1,26 @@
+# Public acceptance record: UI29
+
+This is a source-release summary. Original local execution artifacts remain private because they may include personal garden data. Current GitHub CI reproduces the verification gates.
+
+| 2026-11-11 | UI29 | ACCEPTED | Quiet plant controls and section navigation; collection/Journey filters in shared modals; archive/restore inside Edit with explicit confirmation. 50 tests, production build, five accessibility/browser layouts and real read-only phone check pass. Published locally. Evidence: `.artifacts/agents/UI29/`. |
+
+# UI29 — Quiet plant controls, filters and section navigation
+
+Status: ACCEPTED.
+
+Collection search, status, plant type, sort and layout now live in the shared entry modal behind one Find & filter trigger. Draft changes apply together, Cancel discards them, Reset all remains a draft until Apply, and applied filters remain URL-backed with a compact summary/clear action. Invalid enum URL values no longer reach GraphQL. Card archive actions and obsolete drawer controls/styles were removed.
+
+Journey replaces the always-visible chip row with compact filter/log icons and a short summary. Its shared modal supports type, date/time bounds and inclusion of voided entries. Invalid ranges do not query the server; active state is visible and resettable. Native datetime controls explicitly use device timezone before conversion to server instants.
+
+Plant detail has a quiet pencil edit link, a camera icon on its cover, a smaller identity summary, and a responsive underline section-navigation appearance for Journey/Gallery/Care/Insights/Details. All five stay in one row at narrow widths. Archive/Restore now live in Edit → Plant management, with explicit confirmation, optimistic revision handling, stable retry identity and unsaved-edit guards. PlantForm uses the existing LAN-safe request ID helper. Gallery-specific styles were separated from identity/navigation styles; no component style budget warning remains.
+
+Executed evidence under `.artifacts/agents/UI29/`:
+
+- `tests.log`: 50 tests pass across collection, plant form, journal and shared tabs. Tests cover atomic filters, cancel/reset isolation, invalid dates and UTC request bounds, explicit archive confirmation and revision conflicts.
+- `build.log`: production Angular build passes using Node 24 Docker, without warnings.
+- `browser-report.json`: 320/390/1440 widths, light/dark, hidden controls, modal Apply/Cancel, date validation, one-row sections, Edit-only archive/restore and zero axe violations/browser errors. Mutations in these checks use synthetic fixtures.
+- `live-report.json`: actual authenticated garden on Android-emulated phone; hidden filters, successful photo filtering, small pencil, one-row navigation and archive management inside Edit. No garden mutations or browser errors.
+- `published.json`: final frontend published to desktop and Docker progress/phone assets, retaining old chunks and replacing index last.
+- `plan-boundary.log`: plan/packet/dispatch and import checks pass.
+
+Frontend only: existing API, worker, storage and AI configuration were preserved.

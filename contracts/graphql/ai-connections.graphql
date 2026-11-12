@@ -1,0 +1,93 @@
+# UI26 additive owner-only connection management. API keys are write-only.
+enum AIProviderProtocol { OPENAI_COMPATIBLE ANTHROPIC GEMINI }
+enum AIConnectionFeature { GARDEN VISION RECEIPT }
+enum AIBindingMode { DEFAULT DISABLED CONNECTION }
+enum AITokenLimitField { MAX_TOKENS MAX_COMPLETION_TOKENS }
+type AIConnection {
+ id: ID!
+ name: String!
+ protocol: AIProviderProtocol!
+ endpoint: String!
+ model: String!
+ deploymentLocal: Boolean!
+ supportsVision: Boolean!
+ externalConsent: Boolean!
+ hasAPIKey: Boolean!
+ reasoningEffort: String!
+ tokenLimitField: AITokenLimitField!
+ revision: Int!
+ lastTestedAt: DateTime
+ lastTestSucceeded: Boolean
+ lastTestMessage: String
+}
+type AIFeatureBinding {
+ feature: AIConnectionFeature!
+ mode: AIBindingMode!
+ connectionId: ID
+ revision: Int!
+}
+type AIDeploymentConnection {
+ feature: AIConnectionFeature!
+ protocol: AIProviderProtocol!
+ endpoint: String!
+ model: String!
+ deploymentLocal: Boolean!
+ supportsVision: Boolean!
+ hasAPIKey: Boolean!
+ reasoningEffort: String!
+ tokenLimitField: AITokenLimitField!
+}
+type AIConnectionSettings {
+ connections: [AIConnection!]!
+ bindings: [AIFeatureBinding!]!
+ deploymentDefaults: [AIDeploymentConnection!]!
+}
+input SaveAIConnectionInput {
+ id: ID!
+ name: String!
+ protocol: AIProviderProtocol!
+ endpoint: String!
+ model: String!
+ deploymentLocal: Boolean!
+ supportsVision: Boolean!
+ externalConsent: Boolean!
+ "Null/omitted retains a saved key; a non-empty value replaces it. Never returned."
+ apiKey: String
+ clearAPIKey: Boolean = false
+ "Copy the server-held deployment credential only if protocol/endpoint match."
+ copyDeploymentKeyFrom: AIConnectionFeature
+ reasoningEffort: String!
+ tokenLimitField: AITokenLimitField!
+ expectedRevision: Int!
+}
+input AIFeatureBindingInput {
+ feature: AIConnectionFeature!
+ mode: AIBindingMode!
+ connectionId: ID
+ expectedRevision: Int!
+}
+input DeleteAIConnectionInput { id: ID!, expectedRevision: Int! }
+input TestAIConnectionInput {
+ "Test a saved revision, or supply a draft, but never both. Uses synthetic data only."
+ id: ID
+ expectedRevision: Int
+ draft: SaveAIConnectionInput
+ testVision: Boolean = false
+}
+type AIConnectionTest {
+ succeeded: Boolean!
+ message: String!
+ testedAt: DateTime!
+ visionRequest: Boolean!
+}
+type AIConnectionPayload { connection: AIConnection, problems: [MutationProblem!]!, clientMutationId: String }
+type AIConnectionSettingsPayload { settings: AIConnectionSettings, problems: [MutationProblem!]!, clientMutationId: String }
+type AIConnectionTestPayload { result: AIConnectionTest, problems: [MutationProblem!]! }
+extend type Query { aiConnections: AIConnectionSettings! }
+extend type Mutation {
+ saveAIConnection(input: SaveAIConnectionInput!, clientMutationId: String): AIConnectionPayload!
+ saveAIFeatureBindings(input: [AIFeatureBindingInput!]!, clientMutationId: String): AIConnectionSettingsPayload!
+ "Bound features are turned off when their connection is removed."
+ deleteAIConnection(input: DeleteAIConnectionInput!, clientMutationId: String): AIConnectionSettingsPayload!
+ testAIConnection(input: TestAIConnectionInput!): AIConnectionTestPayload!
+}

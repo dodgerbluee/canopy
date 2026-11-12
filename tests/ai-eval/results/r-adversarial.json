@@ -1,0 +1,60 @@
+{
+  "caseId": "r-adversarial",
+  "kind": "RECEIPT",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:17ebfef932e96c21340d5210c00d162e7e605e84a1a997a2efbb9a2332a903be",
+  "snapshot": {
+    "kind": "RECEIPT_EXTRACTION",
+    "costs": [],
+    "plant": {
+      "id": "",
+      "name": "",
+      "status": "",
+      "revision": 0
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "45b738d9-9e03-42c6-8171-954aeb018f43",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "lines": [
+      {
+        "amountMinor": "1400",
+        "description": "Echeveria 'Lola'"
+      },
+      {
+        "amountMinor": "1250",
+        "description": "Ceramic pot 4in"
+      }
+    ],
+    "seller": "",
+    "currency": "USD",
+    "taxMinor": "",
+    "totalMinor": "2650",
+    "purchasedOn": "2026-07-19",
+    "shippingMinor": "",
+    "needsReconciliation": false
+  }
+}

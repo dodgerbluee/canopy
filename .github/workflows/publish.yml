@@ -1,0 +1,162 @@
+name: Publish container set
+on:
+  workflow_call:
+    inputs:
+      channel:
+        required: true
+        type: string
+    outputs:
+      version:
+        value: ${{ jobs.prepare.outputs.version }}
+      prefix:
+        value: ${{ jobs.prepare.outputs.prefix }}
+permissions:
+  contents: read
+  packages: write
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      prefix: ${{ steps.metadata.outputs.prefix }}
+      prerelease: ${{ steps.metadata.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: metadata
+        env:
+          CHANNEL: ${{ inputs.channel }}
+        run: python3 scripts/release/metadata.py --repository "$GITHUB_REPOSITORY" --sha "$GITHUB_SHA" --channel "$CHANNEL" --tag "$GITHUB_REF_NAME" --github-output "$GITHUB_OUTPUT"
+  check:
+    uses: ./.github/workflows/ci.yml
+    permissions:
+      contents: read
+  smoke:
+    needs: [prepare, check]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: server
+          load: true
+          tags: canopy-release-test-server:smoke
+          cache-from: type=gha,scope=server
+          cache-to: type=gha,scope=server,mode=max
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          target: web
+          load: true
+          tags: canopy-release-test-web:smoke
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/media.Dockerfile
+          load: true
+          tags: canopy-release-test-media:smoke
+          cache-from: type=gha,scope=media
+          cache-to: type=gha,scope=media,mode=max
+      - name: Verify actual deployment and queued photo processing
+        run: python3 scripts/release/smoke.py
+  images:
+    needs: [prepare, smoke]
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - component: server
+            file: Dockerfile
+            target: server
+          - component: web
+            file: Dockerfile
+            target: web
+          - component: media
+            file: docker/media.Dockerfile
+            target: ""
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/setup-qemu-action@v4
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Refuse to overwrite an existing version
+        env:
+          PREFIX: ${{ needs.prepare.outputs.prefix }}
+          COMPONENT: ${{ matrix.component }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          if docker buildx imagetools inspect "$PREFIX-$COMPONENT:$VERSION" >/dev/null 2>&1; then
+            echo "Version already exists; use a new version or rerun only failed jobs."
+            exit 1
+          fi
+      - name: Publish immutable version
+        id: build
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: ${{ matrix.file }}
+          target: ${{ matrix.target }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ needs.prepare.outputs.prefix }}-${{ matrix.component }}:${{ needs.prepare.outputs.version }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+            org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
+          provenance: mode=max
+          sbom: true
+          cache-from: type=gha,scope=${{ matrix.component }}
+          cache-to: type=gha,scope=${{ matrix.component }},mode=max
+      - name: Record digest
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
+          COMPONENT: ${{ matrix.component }}
+        run: printf '%s\n' "$DIGEST" > "$COMPONENT.digest"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: image-${{ matrix.component }}
+          path: ${{ matrix.component }}.digest
+  bundle:
+    needs: [prepare, images]
+    runs-on: ubuntu-latest
+    env:
+      PREFIX: ${{ needs.prepare.outputs.prefix }}
+      VERSION: ${{ needs.prepare.outputs.version }}
+      CHANNEL: ${{ inputs.channel }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: image-*
+          merge-multiple: true
+          path: digests
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create deployment bundle and digest manifest
+        run: python3 scripts/release/bundle.py
+      - name: Advance dev only after the whole image set succeeds
+        if: inputs.channel == 'dev'
+        run: |
+          for component in server web media; do
+            digest=$(cat "digests/$component.digest")
+            docker buildx imagetools create --tag "$PREFIX-$component:dev" "$PREFIX-$component@$digest"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: canopy-release
+          path: release/*
+          if-no-files-found: error

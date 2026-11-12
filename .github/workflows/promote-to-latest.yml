@@ -1,0 +1,46 @@
+name: Promote release to latest
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Existing stable version, e.g. 1.0.0 (without v)'
+        required: true
+        type: string
+permissions:
+  contents: read
+  packages: write
+concurrency:
+  group: canopy-publish
+  cancel-in-progress: false
+jobs:
+  promote:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: docker/setup-buildx-action@v4
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Download successful release manifest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          [[ "$VERSION" =~ ^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]] || exit 1
+          gh release download "v$VERSION" --repo "$GITHUB_REPOSITORY" --pattern images.json --dir candidate
+      - name: Verify release images, then promote the recorded digests
+        env:
+          VERSION: ${{ inputs.version }}
+        run: python3 scripts/release/promote.py
+      - name: Mark the verified GitHub release as latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ inputs.version }}
+        run: gh release edit "v$VERSION" --repo "$GITHUB_REPOSITORY" --latest

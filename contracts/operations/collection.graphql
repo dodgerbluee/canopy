@@ -1,0 +1,249 @@
+query Locations {
+  locations {
+    ...LocationFields
+  }
+}
+
+query Tags($first: Int, $after: String, $filter: TagFilter) {
+  tags(first: $first, after: $after, filter: $filter) {
+    items {
+      id
+      label
+      archivedAt
+      revision
+      createdAt
+      updatedAt
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+query Plants($first: Int, $after: String, $filter: PlantFilter, $order: PlantOrder) {
+  plants(first: $first, after: $after, filter: $filter, order: $order) {
+    items {
+      ...PlantFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+query PlantDetail($id: ID!) {
+  plant(id: $id) {
+    ...PlantFields
+  }
+}
+
+mutation CreatePlant($input: CreatePlantInput!, $clientMutationId: String) {
+  createPlant(input: $input, clientMutationId: $clientMutationId) {
+    plant {
+      ...PlantFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdatePlant($input: UpdatePlantInput!, $clientMutationId: String) {
+  updatePlant(input: $input, clientMutationId: $clientMutationId) {
+    plant {
+      ...PlantFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation ArchivePlant($input: ArchivePlantInput!, $clientMutationId: String) {
+  archivePlant(input: $input, clientMutationId: $clientMutationId) {
+    plant {
+      id
+      status
+      revision
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation RestorePlant($input: RestorePlantInput!, $clientMutationId: String) {
+  restorePlant(input: $input, clientMutationId: $clientMutationId) {
+    plant {
+      id
+      status
+      revision
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation PurgePlant($input: PurgePlantInput!, $clientMutationId: String) {
+  purgePlant(input: $input, clientMutationId: $clientMutationId) {
+    purgedPlantId
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation CreateLocation($input: CreateLocationInput!, $clientMutationId: String) {
+  createLocation(input: $input, clientMutationId: $clientMutationId) {
+    location {
+      ...LocationFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdateLocation($input: UpdateLocationInput!, $clientMutationId: String) {
+  updateLocation(input: $input, clientMutationId: $clientMutationId) {
+    location {
+      ...LocationFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation CreateTag($input: CreateTagInput!, $clientMutationId: String) {
+  createTag(input: $input, clientMutationId: $clientMutationId) {
+    tag {
+      id
+      label
+      archivedAt
+      revision
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdateTag($input: UpdateTagInput!, $clientMutationId: String) {
+  updateTag(input: $input, clientMutationId: $clientMutationId) {
+    tag {
+      id
+      label
+      archivedAt
+      revision
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation ArchiveTag($input: ArchiveTagInput!, $clientMutationId: String) {
+  archiveTag(input: $input, clientMutationId: $clientMutationId) {
+    tag {
+      id
+      label
+      archivedAt
+      revision
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation SetPlantTags($input: SetPlantTagsInput!, $clientMutationId: String) {
+  setPlantTags(input: $input, clientMutationId: $clientMutationId) {
+    plant {
+      id
+      revision
+      tags {
+        id
+        label
+      }
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation SetPlantContext($input: SetPlantContextInput!, $clientMutationId: String) {
+  setPlantContext(input: $input, clientMutationId: $clientMutationId) {
+    plant {
+      id
+      revision
+    }
+    context {
+      id
+      effectiveFrom
+      location {
+        ...LocationFields
+      }
+      placement
+      potVolumeLiters
+      mediumNote
+      lightNote
+      createdAt
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}

@@ -1,0 +1,940 @@
+{
+  "schemaVersion": 1,
+  "groups": {
+    "T01": [
+      "T01.r1",
+      "T01.care",
+      "T01.ai"
+    ],
+    "T02": [
+      "T02.r1",
+      "T02.care",
+      "T02.ai"
+    ],
+    "T32": [
+      "T32.a",
+      "T32.b"
+    ],
+    "T38": [
+      "T38.a",
+      "T38.final"
+    ]
+  },
+  "nodes": {
+    "T00": {
+      "title": "Toolchain and local-model compatibility spike [M, deep]",
+      "dependsOn": [],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T01.ai": {
+      "title": "R3 analysis and insight API contracts",
+      "dependsOn": [
+        "T28"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T01.care": {
+      "title": "R2 care/source/profile API contracts",
+      "dependsOn": [
+        "T20"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T01.r1": {
+      "title": "R1 shared values and API contracts",
+      "dependsOn": [
+        "T00"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T02.ai": {
+      "title": "R3 additive analysis data contracts",
+      "dependsOn": [
+        "T01.ai"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T02.care": {
+      "title": "R2 additive care data contracts",
+      "dependsOn": [
+        "T01.care"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T02.r1": {
+      "title": "R1 data constraints and queries",
+      "dependsOn": [
+        "T01.r1"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T03": {
+      "title": "Repository, builds, codegen, CI and agent rules [L, deep]",
+      "dependsOn": [
+        "T00",
+        "T01.r1",
+        "T02.r1"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T04": {
+      "title": "Backend composition, configuration and transaction seams [M, deep]",
+      "dependsOn": [
+        "T03"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T05": {
+      "title": "Design tokens, accessible primitives and visual reference [L, deep]",
+      "dependsOn": [
+        "T03"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T06": {
+      "title": "Owner lifecycle, sessions, authorization and CSRF [L, deep]",
+      "dependsOn": [
+        "T04"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T07": {
+      "title": "Angular shell, auth UX, routes and settings basics [M, deep]",
+      "dependsOn": [
+        "T05",
+        "T06"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T08": {
+      "title": "Typed GraphQL transport and contract harness [M, deep]",
+      "dependsOn": [
+        "T01.r1",
+        "T04",
+        "T06",
+        "T07"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T09": {
+      "title": "Collection domain and backend [M, deep]",
+      "dependsOn": [
+        "T02.r1",
+        "T06",
+        "T08"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T10": {
+      "title": "Collection UI and plant overview [M, deep]",
+      "dependsOn": [
+        "T05",
+        "T08",
+        "T09"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T11": {
+      "title": "Purchases and exact allocation backend [L, deep]",
+      "dependsOn": [
+        "T09"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T12": {
+      "title": "Purchase and expense UI [M, deep]",
+      "dependsOn": [
+        "T05",
+        "T08",
+        "T11"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T13": {
+      "title": "Upload reservation, private ObjectStore and streamed ingest [M, deep]",
+      "dependsOn": [
+        "T04",
+        "T06",
+        "T08"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T14": {
+      "title": "Phone photo normalization worker [L, deep]",
+      "dependsOn": [
+        "T00",
+        "T13"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T15": {
+      "title": "Authorized media delivery and attachment operations [M, deep]",
+      "dependsOn": [
+        "T09",
+        "T11",
+        "T14"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T16": {
+      "title": "Photo metadata, chronology and compare query backend [M, deep]",
+      "dependsOn": [
+        "T15"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T17": {
+      "title": "Activities and measurements backend [M, deep]",
+      "dependsOn": [
+        "T09"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T18": {
+      "title": "Unified timeline, filters and search backend [M, deep]",
+      "dependsOn": [
+        "T11",
+        "T16",
+        "T17"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T19": {
+      "title": "Journey UI, quick log and measurement view [M, deep]",
+      "dependsOn": [
+        "T08",
+        "T10",
+        "T17",
+        "T18"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T20": {
+      "title": "Growth comparison UI [M, deep]",
+      "dependsOn": [
+        "T05",
+        "T16",
+        "T19",
+        "T32.a"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T21": {
+      "title": "Reviewed knowledge profiles and source provenance [L, deep]",
+      "dependsOn": [
+        "T09",
+        "T17",
+        "T01.care",
+        "T02.care"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T22": {
+      "title": "Pure care engine and recurrence math [L, deep]",
+      "dependsOn": [
+        "T21"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T23": {
+      "title": "Durable occurrence generation and activity completion [L, deep]",
+      "dependsOn": [
+        "T04",
+        "T17",
+        "T22"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T24": {
+      "title": "Care GraphQL application surface and lifecycle integration [M, deep]",
+      "dependsOn": [
+        "T08",
+        "T09",
+        "T21",
+        "T23"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T25": {
+      "title": "Care agenda, plan editor and task interactions [M, deep]",
+      "dependsOn": [
+        "T05",
+        "T24"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T26": {
+      "title": "Weather provider, freshness and context evaluation [M, deep]",
+      "dependsOn": [
+        "T04",
+        "T22",
+        "T24"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T27": {
+      "title": "Notification inbox and email delivery [M, deep]",
+      "dependsOn": [
+        "T06",
+        "T23",
+        "T24"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T28": {
+      "title": "Today overview and contextual dashboard [M, deep]",
+      "dependsOn": [
+        "T10",
+        "T19",
+        "T25",
+        "T26",
+        "T27"
+      ],
+      "status": "ACCEPTED",
+      "release": "R2"
+    },
+    "T29": {
+      "title": "Analysis ports, jobs, capability and budget foundation [L, deep]",
+      "dependsOn": [
+        "T04",
+        "T08",
+        "T18",
+        "T24",
+        "T01.ai",
+        "T02.ai"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T30": {
+      "title": "Identification and receipt extraction drafts [L, deep]",
+      "dependsOn": [
+        "T11",
+        "T15",
+        "T29"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T31": {
+      "title": "Vision observations and longitudinal insight engine [L, deep]",
+      "dependsOn": [
+        "T16",
+        "T18",
+        "T21",
+        "T26",
+        "T29"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T32.a": {
+      "title": "R1 capture queue and upload recovery",
+      "dependsOn": [
+        "T12",
+        "T15",
+        "T16"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T32.b": {
+      "title": "R3 OCR/analysis request UI",
+      "dependsOn": [
+        "T32.a",
+        "T29",
+        "T30"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T33": {
+      "title": "Cost/care/history synthesis and suggestion acceptance backend [M, deep]",
+      "dependsOn": [
+        "T11",
+        "T17",
+        "T24",
+        "T29",
+        "T31"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T34": {
+      "title": "Insight evidence UX and health review [M, deep]",
+      "dependsOn": [
+        "T20",
+        "T25",
+        "T31",
+        "T32.b",
+        "T33"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T35": {
+      "title": "Real model evaluation and privacy/budget pilot [L, deep + independent reviewer]",
+      "dependsOn": [
+        "T30",
+        "T31",
+        "T33",
+        "T34"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "T36": {
+      "title": "Security/concurrency/performance hardening [L, deep]",
+      "dependsOn": [
+        "T28",
+        "T34"
+      ],
+      "status": "PLANNED",
+      "release": "R4"
+    },
+    "T37": {
+      "title": "Accessibility, visual polish and browser compatibility [L, deep + visual reviewer]",
+      "dependsOn": [
+        "T28",
+        "T34",
+        "UI01",
+        "UI02"
+      ],
+      "status": "PLANNED",
+      "release": "R4"
+    },
+    "T38.a": {
+      "title": "R1 export purge backup restore",
+      "dependsOn": [
+        "T04",
+        "T06",
+        "T11",
+        "T15",
+        "T17"
+      ],
+      "status": "ACCEPTED",
+      "release": "R1"
+    },
+    "T38.final": {
+      "title": "Full schema restore and purge coverage",
+      "dependsOn": [
+        "T38.a",
+        "T23",
+        "T33"
+      ],
+      "status": "PLANNED",
+      "release": "R4"
+    },
+    "T39": {
+      "title": "Production-shaped deployment and observability [M, deep]",
+      "dependsOn": [
+        "T04",
+        "T06",
+        "T14",
+        "T27",
+        "T38.final"
+      ],
+      "status": "PLANNED",
+      "release": "R4"
+    },
+    "T40": {
+      "title": "Full release acceptance rehearsal [M, deep]",
+      "dependsOn": [
+        "T35",
+        "T36",
+        "T37",
+        "T38.final",
+        "T39"
+      ],
+      "status": "PLANNED",
+      "release": "R4"
+    },
+    "T41": {
+      "title": "Fresh independent implementation review and A gate [M]",
+      "dependsOn": [
+        "T40",
+        "UI03",
+        "DATA01",
+        "UI04",
+        "UI05",
+        "UI06",
+        "UI07",
+        "UI08",
+        "UI09",
+        "UI10",
+        "UI11",
+        "UI12",
+        "UI13",
+        "UI14",
+        "UI15",
+        "UI16",
+        "UI17",
+        "UI21",
+        "UI22",
+        "UI23",
+        "UI24",
+        "UI25",
+        "UI26",
+        "UI27",
+        "MCP00",
+        "M12",
+        "UI28",
+        "UI29",
+        "PUB01"
+      ],
+      "status": "PLANNED",
+      "release": "R4"
+    },
+    "UI01": {
+      "title": "Adopt the owner-approved Canopy design as the official Angular UI",
+      "dependsOn": [
+        "T07",
+        "T12",
+        "T20",
+        "T25",
+        "T27",
+        "T28",
+        "T32.a"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI02": {
+      "title": "Consistent modal data entry with native choice fields across shipped UI",
+      "dependsOn": [
+        "UI01",
+        "T35"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI03": {
+      "title": "Repair live Today failure and Journal layout spacing",
+      "dependsOn": [
+        "UI02"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "DATA01": {
+      "title": "Import owner plant archive and purchase provenance",
+      "dependsOn": [
+        "UI03"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI05": {
+      "title": "Uniform collection filters and trailing Add Plant card",
+      "dependsOn": [
+        "UI04"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI04": {
+      "title": "Plant-aware photo framing and complete archive views",
+      "dependsOn": [
+        "UI03"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI06": {
+      "title": "Canopy brand favicon",
+      "dependsOn": [
+        "UI05"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI07": {
+      "title": "Modern native choices, garden destination and rotating Today hero",
+      "dependsOn": [
+        "UI05"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI08": {
+      "title": "Compact purchase entry with amount cascades; purchase-edit repairs",
+      "dependsOn": [
+        "UI07"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI09": {
+      "title": "Receipt-first purchase entry and quiet initial validation",
+      "dependsOn": [
+        "UI08"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI10": {
+      "title": "Receipt extraction retry and background worker recovery",
+      "dependsOn": [
+        "UI09"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI11": {
+      "title": "Floating account dropdown without header reflow",
+      "dependsOn": [
+        "UI10"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI12": {
+      "title": "Configured vision model for receipt image extraction",
+      "dependsOn": [
+        "UI10"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI13": {
+      "title": "Receipt reading accuracy and truthful review status",
+      "dependsOn": [
+        "UI12"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI14": {
+      "title": "Compact purchase line-item editor",
+      "dependsOn": [
+        "UI13"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI15": {
+      "title": "Mobile garden rounds: photo today and one-tap watering",
+      "dependsOn": [
+        "UI14"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI16": {
+      "title": "Direct photo navigation for garden rounds",
+      "dependsOn": [
+        "UI15"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI17": {
+      "title": "Separate rounds grid and full-screen plant actions",
+      "dependsOn": [
+        "UI16"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI18": {
+      "title": "Reactive rounds photo save status",
+      "dependsOn": [
+        "UI17"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI19": {
+      "title": "Garden calendar and manual area rain",
+      "dependsOn": [
+        "UI18"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI20": {
+      "title": "Calendar photo capture dates",
+      "dependsOn": [
+        "UI19"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI21": {
+      "title": "Regional plant knowledge and seasonal year tracks",
+      "dependsOn": [
+        "UI20"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI22": {
+      "title": "Whole-garden seasonal overview",
+      "dependsOn": [
+        "UI21"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI23": {
+      "title": "Complete source-backed timing ingestion",
+      "dependsOn": [
+        "UI22"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI24": {
+      "title": "Android LAN photo upload compatibility",
+      "dependsOn": [
+        "UI23"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI25": {
+      "title": "Purposeful navigation, year, care and AI surfaces",
+      "dependsOn": [
+        "UI24"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI26": {
+      "title": "Bring-your-own AI connections",
+      "dependsOn": [
+        "UI25"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI27": {
+      "title": "Capture dates from original photo metadata",
+      "dependsOn": [
+        "UI26"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "MCP00": {
+      "title": "MCP integration implementation plan",
+      "dependsOn": [
+        "UI27"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M01": {
+      "title": "Contracts and SDK compatibility",
+      "dependsOn": [
+        "MCP00"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M02": {
+      "title": "Agent grants and credentials",
+      "dependsOn": [
+        "M01"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M03": {
+      "title": "Shared operations and audit attribution",
+      "dependsOn": [
+        "M02"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M04": {
+      "title": "MCP HTTP transport",
+      "dependsOn": [
+        "M03"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M05": {
+      "title": "Garden read tools",
+      "dependsOn": [
+        "M04"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M06": {
+      "title": "Agent settings UI",
+      "dependsOn": [
+        "M05"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M07": {
+      "title": "Trusted logging and operation replay",
+      "dependsOn": [
+        "M06"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M08": {
+      "title": "Reviewed agent actions",
+      "dependsOn": [
+        "M07"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M09": {
+      "title": "Agent photo and receipt transfer",
+      "dependsOn": [
+        "M08"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M10": {
+      "title": "Complete domain workflows",
+      "dependsOn": [
+        "M09"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M11": {
+      "title": "Client packages and onboarding",
+      "dependsOn": [
+        "M10"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "M12": {
+      "title": "Local deployment and interoperability",
+      "dependsOn": [
+        "M11"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI28": {
+      "title": "Fullscreen photos and compact plant gallery",
+      "dependsOn": [
+        "M12"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI29": {
+      "title": "Quiet plant controls, filters and section navigation",
+      "dependsOn": [
+        "UI28"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI30": {
+      "title": "Quiet journey headings and automatic quality-based covers",
+      "dependsOn": [
+        "UI29"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI31": {
+      "title": "Plant header quick actions and reliable history evidence",
+      "dependsOn": [
+        "UI30"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "UI32": {
+      "title": "Readable plant suggestions and evidence disclosure",
+      "dependsOn": [
+        "UI31"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "DEP01": {
+      "title": "Container publishing and release promotion",
+      "dependsOn": [
+        "UI32"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PUB01": {
+      "title": "First GitHub repository and v1 release",
+      "dependsOn": [
+        "DEP01"
+      ],
+      "status": "IN_PROGRESS",
+      "release": "R3"
+    }
+  },
+  "gates": {
+    "R1": [
+      "T20",
+      "T32.a",
+      "T38.a"
+    ],
+    "R2": [
+      "T20",
+      "T32.a",
+      "T38.a",
+      "T28"
+    ],
+    "R3": [
+      "T20",
+      "T32.a",
+      "T38.a",
+      "T28",
+      "T35"
+    ],
+    "R4": [
+      "T20",
+      "T32.a",
+      "T38.a",
+      "T28",
+      "T35",
+      "T41"
+    ]
+  }
+}

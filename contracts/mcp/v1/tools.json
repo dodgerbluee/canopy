@@ -1,0 +1,590 @@
+[
+  {
+    "name": "garden_overview",
+    "root": "@overview",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Garden overview. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "plants_list",
+    "root": "plants",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Plants list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "plant_get",
+    "root": "plant",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Plant get. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "journal_list",
+    "root": "journal",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Journal list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "calendar_events",
+    "root": "calendarEvents",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Calendar events. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "garden_year",
+    "root": "gardenKnowledge",
+    "scope": "knowledge:read",
+    "mode": "read",
+    "description": "Source-backed seasonal guidance and actual recorded counts; estimates are not ripening deadlines or scheduled care tasks."
+  },
+  {
+    "name": "knowledge_get",
+    "root": "gardenKnowledge",
+    "scope": "knowledge:read",
+    "mode": "read",
+    "description": "Knowledge get. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "care_agenda",
+    "root": "careAgenda",
+    "scope": "care:read",
+    "mode": "read",
+    "description": "Care agenda. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "photos_list",
+    "root": "@photos",
+    "scope": "photos:read",
+    "mode": "read",
+    "description": "Photos list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "photo_get",
+    "root": "@photo",
+    "scope": "photos:read",
+    "mode": "read",
+    "description": "Photo get. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "purchases_list",
+    "root": "purchases",
+    "scope": "purchases:read",
+    "mode": "read",
+    "description": "Purchases list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "purchase_get",
+    "root": "purchase",
+    "scope": "purchases:read",
+    "mode": "read",
+    "description": "Purchase get. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "spending_summary",
+    "root": "spending",
+    "scope": "purchases:read",
+    "mode": "read",
+    "description": "Spending summary. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "locations_list",
+    "root": "locations",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Locations list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "tags_list",
+    "root": "tags",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Tags list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "care_profiles",
+    "root": "careProfiles",
+    "scope": "care:read",
+    "mode": "read",
+    "description": "Care profiles. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "care_profile_get",
+    "root": "careProfile",
+    "scope": "care:read",
+    "mode": "read",
+    "description": "Care profile get. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "care_sources",
+    "root": "sources",
+    "scope": "knowledge:read",
+    "mode": "read",
+    "description": "Care sources. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "care_plan_preview",
+    "root": "previewCarePlan",
+    "scope": "care:read",
+    "mode": "read",
+    "description": "Care plan preview. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "analysis_status",
+    "root": "analysisRun",
+    "scope": "analysis:run",
+    "mode": "read",
+    "description": "Analysis status. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "analysis_capabilities",
+    "root": "providerCapabilities",
+    "scope": "analysis:run",
+    "mode": "read",
+    "description": "Analysis capabilities. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "suggestions_list",
+    "root": "suggestions",
+    "scope": "suggestions:review",
+    "mode": "read",
+    "description": "Suggestions list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "notifications_list",
+    "root": "notifications",
+    "scope": "inbox:read",
+    "mode": "read",
+    "description": "Notifications list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "export_status",
+    "root": "exportJob",
+    "scope": "exports:request",
+    "mode": "read",
+    "description": "Export status. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "upload_status",
+    "root": "@upload",
+    "scope": "media:write",
+    "mode": "read",
+    "description": "Upload status. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "receipt_get",
+    "root": "@receipt",
+    "scope": "receipts:read",
+    "mode": "read",
+    "description": "Receipt get. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "operation_get",
+    "root": "@operation",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Operation get. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "proposed_actions_list",
+    "root": "@proposals",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Proposed actions list. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "proposed_action_get",
+    "root": "@proposal",
+    "scope": "garden:read",
+    "mode": "read",
+    "description": "Proposed action get. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "log_watered",
+    "root": "recordActivity",
+    "scope": "logs:write",
+    "mode": "direct",
+    "description": "Log an explicitly observed watering. Never infer watering from rain or forecasts. Retry with the same operation_id."
+  },
+  {
+    "name": "record_activity",
+    "root": "recordActivity",
+    "scope": "logs:write",
+    "mode": "direct",
+    "description": "Record activity. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "record_measurement",
+    "root": "recordMeasurement",
+    "scope": "logs:write",
+    "mode": "direct",
+    "description": "Record measurement. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "record_rain",
+    "root": "recordRain",
+    "scope": "rain:write",
+    "mode": "direct",
+    "description": "Record rain. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "upload_prepare",
+    "root": "reserveUpload",
+    "scope": "media:write",
+    "mode": "direct",
+    "description": "Upload prepare. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "upload_finalize",
+    "root": "finalizeUpload",
+    "scope": "media:write",
+    "mode": "direct",
+    "description": "Upload finalize. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "photo_attach",
+    "root": "attachPhoto",
+    "scope": "media:write",
+    "mode": "direct",
+    "description": "Attach a processed original photo. Reads original capture date automatically unless a manual date is supplied. Missing capture time remains upload fallback."
+  },
+  {
+    "name": "receipt_attach",
+    "root": "attachReceipt",
+    "scope": "media:write",
+    "mode": "direct",
+    "description": "Receipt attach. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "analysis_request",
+    "root": "requestAnalysis",
+    "scope": "analysis:run",
+    "mode": "direct",
+    "description": "Analysis request. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "receipt_extract_request",
+    "root": "requestAnalysis",
+    "scope": "analysis:run",
+    "mode": "direct",
+    "description": "Receipt extract request. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "analysis_cancel",
+    "root": "cancelAnalysis",
+    "scope": "analysis:run",
+    "mode": "direct",
+    "description": "Analysis cancel. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "knowledge_refresh",
+    "root": "refreshGardenKnowledge",
+    "scope": "analysis:run",
+    "mode": "direct",
+    "description": "Knowledge refresh. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "notification_mark_read",
+    "root": "markNotificationRead",
+    "scope": "inbox:write",
+    "mode": "direct",
+    "description": "Notification mark read. Uses Canopy records and domain validation."
+  },
+  {
+    "name": "plant_create",
+    "root": "createPlant",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Plant create. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "plant_update",
+    "root": "updatePlant",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Plant update. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "plant_archive",
+    "root": "archivePlant",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Plant archive. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "plant_restore",
+    "root": "restorePlant",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Plant restore. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "location_create",
+    "root": "createLocation",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Location create. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "location_update",
+    "root": "updateLocation",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Location update. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "tag_create",
+    "root": "createTag",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Tag create. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "tag_update",
+    "root": "updateTag",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Tag update. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "tag_archive",
+    "root": "archiveTag",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Tag archive. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "plant_set_tags",
+    "root": "setPlantTags",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Plant set tags. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "plant_set_context",
+    "root": "setPlantContext",
+    "scope": "plants:write",
+    "mode": "review",
+    "description": "Plant set context. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "activity_correct",
+    "root": "updateActivity",
+    "scope": "logs:write",
+    "mode": "review",
+    "description": "Activity correct. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "activity_void",
+    "root": "voidActivity",
+    "scope": "logs:write",
+    "mode": "review",
+    "description": "Activity void. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "measurement_correct",
+    "root": "updateMeasurement",
+    "scope": "logs:write",
+    "mode": "review",
+    "description": "Measurement correct. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "measurement_delete",
+    "root": "deleteMeasurement",
+    "scope": "logs:write",
+    "mode": "review",
+    "description": "Measurement delete. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "void_rain",
+    "root": "voidRain",
+    "scope": "rain:write",
+    "mode": "review",
+    "description": "Void rain. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "photo_update",
+    "root": "updatePhoto",
+    "scope": "media:write",
+    "mode": "review",
+    "description": "Photo update. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "photo_delete",
+    "root": "deletePhoto",
+    "scope": "media:write",
+    "mode": "review",
+    "description": "Photo delete. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "receipt_detach",
+    "root": "detachReceipt",
+    "scope": "media:write",
+    "mode": "review",
+    "description": "Receipt detach. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "acquisition_record",
+    "root": "recordAcquisition",
+    "scope": "purchases:write",
+    "mode": "review",
+    "description": "Acquisition record. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "acquisition_update",
+    "root": "updateAcquisition",
+    "scope": "purchases:write",
+    "mode": "review",
+    "description": "Acquisition update. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "acquisition_price",
+    "root": "priceAcquisition",
+    "scope": "purchases:write",
+    "mode": "review",
+    "description": "Acquisition price. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "purchase_propose",
+    "root": "createPurchase",
+    "scope": "purchases:write",
+    "mode": "review",
+    "description": "Purchase propose. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "purchase_update_propose",
+    "root": "updatePurchase",
+    "scope": "purchases:write",
+    "mode": "review",
+    "description": "Purchase update propose. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "purchase_void_propose",
+    "root": "voidPurchase",
+    "scope": "purchases:write",
+    "mode": "review",
+    "description": "Purchase void propose. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_plan_propose",
+    "root": "createCarePlan",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care plan propose. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_plan_update",
+    "root": "updateCarePlan",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care plan update. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_complete",
+    "root": "completeOccurrence",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care complete. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_skip",
+    "root": "skipOccurrence",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care skip. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_snooze",
+    "root": "snoozeOccurrence",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care snooze. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_completion_correct",
+    "root": "correctOccurrenceCompletion",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care completion correct. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_profile_draft",
+    "root": "createCareProfileDraft",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care profile draft. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_profile_update",
+    "root": "updateCareProfileDraft",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care profile update. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_profile_delete",
+    "root": "deleteCareProfileDraft",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care profile delete. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_profile_publish",
+    "root": "publishCareProfile",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care profile publish. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_profile_retire",
+    "root": "retireCareProfileVersion",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care profile retire. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_source_create",
+    "root": "createSource",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care source create. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_source_update",
+    "root": "updateSource",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care source update. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "care_source_retire",
+    "root": "retireSource",
+    "scope": "care:write",
+    "mode": "review",
+    "description": "Care source retire. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "suggestion_accept",
+    "root": "acceptSuggestion",
+    "scope": "suggestions:review",
+    "mode": "review",
+    "description": "Suggestion accept. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "suggestion_dismiss",
+    "root": "dismissSuggestion",
+    "scope": "suggestions:review",
+    "mode": "review",
+    "description": "Suggestion dismiss. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "export_propose",
+    "root": "requestExport",
+    "scope": "exports:request",
+    "mode": "review",
+    "description": "Export propose. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  }
+]

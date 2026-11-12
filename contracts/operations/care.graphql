@@ -1,0 +1,536 @@
+# Care lane operations. Frozen by T01.care. Server surface lands in T24;
+# union selections on RecurrenceSpec are exhaustive over all four members.
+
+fragment SourceVersionFields on SourceVersion {
+  id
+  sourceId
+  citation
+  summary
+  retrievedOn
+  contentSha256
+  createdAt
+}
+
+fragment ReasonEvidenceFields on ReasonEvidence {
+  sourceVersion {
+    ...SourceVersionFields
+  }
+  weatherSnapshot {
+    id
+    locationId
+    provider
+    fetchedAt
+    validFrom
+    validUntil
+    highTempC
+    lowTempC
+    rainfallMm
+    et0Mm
+    freshness
+    license
+  }
+  note
+}
+
+fragment OccurrenceReasonFields on OccurrenceReason {
+  text
+  evidence {
+    ...ReasonEvidenceFields
+  }
+  missingFacts
+}
+
+fragment CareOccurrenceFields on CareOccurrence {
+  id
+  planId
+  plantId
+  ruleKey
+  kind
+  activityKind
+  occurrenceKey
+  originalDueDate
+  currentDueDate
+  snoozedUntil
+  status
+  completedActivityId
+  resolvedAt
+  planTimezone
+  reason {
+    ...OccurrenceReasonFields
+  }
+}
+
+fragment RecurrenceSpecFields on RecurrenceSpec {
+  __typename
+  ... on EveryNDaysRecurrence {
+    days
+    anchor
+  }
+  ... on WeeklyDaysRecurrence {
+    weekdays
+  }
+  ... on AnnualWindowRecurrence {
+    month
+    day
+    windowDays
+    everyYears
+  }
+  ... on OneTimeRecurrence {
+    date
+  }
+}
+
+fragment CareRuleFields on CareRule {
+  ruleKey
+  kind
+  activityKind
+  recurrence {
+    ...RecurrenceSpecFields
+  }
+  requiredFacts
+  weatherSensitivity
+  guidanceText
+  sourceVersions {
+    ...SourceVersionFields
+  }
+}
+
+fragment CareProfileVersionFields on CareProfileVersion {
+  id
+  profileId
+  version
+  status
+  environment {
+    situations
+    hemispheres
+  }
+  rules {
+    ...CareRuleFields
+  }
+  reviewerLabel
+  reviewedOn
+  publishedAt
+  retiredAt
+  createdAt
+}
+
+fragment CareProfileFields on CareProfile {
+  id
+  category
+  species
+  cultivar
+  status
+  revision
+  createdAt
+  updatedAt
+  versions {
+    ...CareProfileVersionFields
+  }
+  currentVersion {
+    ...CareProfileVersionFields
+  }
+}
+
+fragment CarePlanFields on CarePlan {
+  id
+  plantId
+  profileVersion {
+    ...CareProfileVersionFields
+  }
+  timezone
+  enabled
+  notificationTime
+  overrides {
+    ruleKey
+    enabled
+    recurrenceOverride {
+      ...RecurrenceSpecFields
+    }
+  }
+  revision
+  createdAt
+  updatedAt
+}
+
+fragment NotificationFields on Notification {
+  id
+  channel
+  dedupKey
+  refKind
+  refId
+  title
+  body
+  digestDate
+  createdAt
+  readAt
+}
+
+fragment ProblemFields on MutationProblem {
+  code
+  field
+  message
+  currentRevision
+}
+
+# ---------- queries ----------
+
+query CareAgenda($from: LocalDate, $to: LocalDate, $plantId: ID, $first: Int, $after: String) {
+  careAgenda(from: $from, to: $to, plantId: $plantId, first: $first, after: $after) {
+    items {
+      ...CareOccurrenceFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+query CareProfiles($filter: CareProfileFilter, $first: Int, $after: String) {
+  careProfiles(filter: $filter, first: $first, after: $after) {
+    items {
+      ...CareProfileFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+query CareProfileDetail($id: ID!) {
+  careProfile(id: $id) {
+    ...CareProfileFields
+  }
+}
+
+# The plant's plan as one self-contained read (T25): the Care tab and the
+# plan editor need the plan without the collection's PlantDetail operation
+# spreading fragments across files (the server validates each operations
+# file standalone).
+query PlantCarePlan($id: ID!) {
+  plant(id: $id) {
+    id
+    carePlan {
+      ...CarePlanFields
+    }
+  }
+}
+
+# Picker-sized profile list (T25): the full CareProfileFields fragment
+# (versions → rules → citations, each plain list charged at the page-size
+# fan-out) exceeds the complexity budget at any page size, so the plan
+# editor's pin picker selects only the fields it displays.
+query CareProfilePicker($filter: CareProfileFilter, $first: Int, $after: String) {
+  careProfiles(filter: $filter, first: $first, after: $after) {
+    items {
+      id
+      category
+      species
+      cultivar
+      currentVersion {
+        id
+        version
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+query Sources($filter: SourceFilter, $first: Int, $after: String) {
+  sources(filter: $filter, first: $first, after: $after) {
+    items {
+      id
+      kind
+      title
+      publisher
+      url
+      region
+      license
+      retiredAt
+      revision
+      createdAt
+      updatedAt
+      versions {
+        ...SourceVersionFields
+      }
+      currentVersion {
+        ...SourceVersionFields
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+query PreviewCarePlan($input: PreviewCarePlanInput!) {
+  previewCarePlan(input: $input) {
+    preview {
+      occurrences {
+        ruleKey
+        kind
+        activityKind
+        dueDate
+        reason {
+          ...OccurrenceReasonFields
+        }
+      }
+      wouldCancel {
+        ...CareOccurrenceFields
+      }
+      missingFacts
+    }
+    problems {
+      ...ProblemFields
+    }
+  }
+}
+
+query Notifications($unreadOnly: Boolean, $first: Int, $after: String) {
+  notifications(unreadOnly: $unreadOnly, first: $first, after: $after) {
+    items {
+      ...NotificationFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+# ---------- sources ----------
+
+mutation CreateSource($input: CreateSourceInput!, $clientMutationId: String) {
+  createSource(input: $input, clientMutationId: $clientMutationId) {
+    source {
+      id
+      kind
+      title
+      publisher
+      url
+      region
+      license
+      retiredAt
+      revision
+      createdAt
+      updatedAt
+      versions {
+        ...SourceVersionFields
+      }
+      currentVersion {
+        ...SourceVersionFields
+      }
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdateSource($input: UpdateSourceInput!, $clientMutationId: String) {
+  updateSource(input: $input, clientMutationId: $clientMutationId) {
+    source {
+      id
+      revision
+      versions {
+        ...SourceVersionFields
+      }
+      currentVersion {
+        ...SourceVersionFields
+      }
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation RetireSource($input: RetireSourceInput!, $clientMutationId: String) {
+  retireSource(input: $input, clientMutationId: $clientMutationId) {
+    source {
+      id
+      retiredAt
+      revision
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+# ---------- profile lifecycle ----------
+
+mutation CreateCareProfileDraft($input: CreateCareProfileDraftInput!, $clientMutationId: String) {
+  createCareProfileDraft(input: $input, clientMutationId: $clientMutationId) {
+    profile {
+      ...CareProfileFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdateCareProfileDraft($input: UpdateCareProfileDraftInput!, $clientMutationId: String) {
+  updateCareProfileDraft(input: $input, clientMutationId: $clientMutationId) {
+    profile {
+      ...CareProfileFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation DeleteCareProfileDraft($input: DeleteCareProfileDraftInput!, $clientMutationId: String) {
+  deleteCareProfileDraft(input: $input, clientMutationId: $clientMutationId) {
+    deletedProfileId
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation PublishCareProfile($input: PublishCareProfileInput!, $clientMutationId: String) {
+  publishCareProfile(input: $input, clientMutationId: $clientMutationId) {
+    profile {
+      ...CareProfileFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation RetireCareProfileVersion($input: RetireCareProfileVersionInput!, $clientMutationId: String) {
+  retireCareProfileVersion(input: $input, clientMutationId: $clientMutationId) {
+    profile {
+      ...CareProfileFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+# ---------- plans ----------
+
+mutation CreateCarePlan($input: CreateCarePlanInput!, $clientMutationId: String) {
+  createCarePlan(input: $input, clientMutationId: $clientMutationId) {
+    plan {
+      ...CarePlanFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdateCarePlan($input: UpdateCarePlanInput!, $clientMutationId: String) {
+  updateCarePlan(input: $input, clientMutationId: $clientMutationId) {
+    plan {
+      ...CarePlanFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+# ---------- task actions ----------
+
+mutation CompleteOccurrence($input: CompleteOccurrenceInput!, $clientMutationId: String) {
+  completeOccurrence(input: $input, clientMutationId: $clientMutationId) {
+    occurrence {
+      ...CareOccurrenceFields
+    }
+    activity {
+      ...ActivityFields
+    }
+    nextOccurrence {
+      ...CareOccurrenceFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation SkipOccurrence($input: SkipOccurrenceInput!, $clientMutationId: String) {
+  skipOccurrence(input: $input, clientMutationId: $clientMutationId) {
+    occurrence {
+      ...CareOccurrenceFields
+    }
+    nextOccurrence {
+      ...CareOccurrenceFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation SnoozeOccurrence($input: SnoozeOccurrenceInput!, $clientMutationId: String) {
+  snoozeOccurrence(input: $input, clientMutationId: $clientMutationId) {
+    occurrence {
+      ...CareOccurrenceFields
+    }
+    nextOccurrence {
+      ...CareOccurrenceFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+mutation CorrectOccurrenceCompletion($input: CorrectOccurrenceCompletionInput!, $clientMutationId: String) {
+  correctOccurrenceCompletion(input: $input, clientMutationId: $clientMutationId) {
+    occurrence {
+      ...CareOccurrenceFields
+    }
+    activity {
+      ...ActivityFields
+    }
+    nextOccurrence {
+      ...CareOccurrenceFields
+    }
+    retracted
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}
+
+# ---------- notifications ----------
+
+mutation MarkNotificationRead($input: MarkNotificationReadInput!, $clientMutationId: String) {
+  markNotificationRead(input: $input, clientMutationId: $clientMutationId) {
+    notification {
+      ...NotificationFields
+    }
+    problems {
+      ...ProblemFields
+    }
+    clientMutationId
+  }
+}

@@ -1,0 +1,3 @@
+/* Global styles: design tokens + base system (T05). Components consume
+   tokens only; raw hex outside src/styles/tokens.css is a design-system change. */
+@import "./styles/base.css";

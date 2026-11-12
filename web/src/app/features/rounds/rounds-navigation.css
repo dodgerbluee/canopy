@@ -1,0 +1,79 @@
+/* The grid and the full-screen action route are mutually exclusive views. */
+.round-page.round-list {
+  max-width: none;
+}
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.plant-option {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border-decorative);
+  border-radius: var(--radius-card);
+  color: var(--text-primary);
+  background: var(--surface-base);
+  text-decoration: none;
+}
+.plant-option:hover {
+  border-color: var(--accent);
+  background: var(--surface-raised);
+}
+.plant-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  border-radius: var(--radius-field);
+  overflow: hidden;
+  color: var(--accent);
+  background: var(--surface-raised);
+}
+.plant-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.plant-label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+}
+.round-page.round-detail {
+  max-width: 780px;
+  min-height: 100dvh;
+  padding: max(16px, env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom));
+}
+.round-detail .round-header {
+  position: sticky;
+  top: env(safe-area-inset-top);
+  z-index: 30;
+  align-items: center;
+  margin: 0;
+  padding: 8px 0 16px;
+  background: var(--surface-canvas);
+}
+.round-back {
+  gap: 8px;
+  min-height: 44px;
+}
+@media (min-width: 600px) {
+  .plant-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (min-width: 1000px) {
+  .plant-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+@media (max-width: 767px) {
+  .round-list {
+    padding-bottom: calc(48px + env(safe-area-inset-bottom));
+  }
+}

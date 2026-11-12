@@ -1,0 +1,5 @@
+# Install canopy-mcp ON THE AGENT HOST and set CANOPY_AGENT_TOKEN there.
+mcp_servers:
+  canopy:
+    command: "/absolute/path/on/agent/host/canopy-mcp"
+    args: ["--url", "http://127.0.0.1:8080/mcp"]

@@ -1,0 +1,121 @@
+{
+  "caseId": "v-ambispot",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:6e2e00fc1a6462afbc7eed7aa59b92d473fe277a241f81188f5c411b6a0a8956",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "3b1cb854-00e8-4341-af76-5c02c156b463",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "920d5875-bd74-4772-bf1c-4b775919c09d",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "d7396dd4-bfdc-4c44-b153-0f0f0548e5b9",
+        "takenAt": "2026-10-04T08:17:56Z"
+      },
+      {
+        "id": "d963f3af-d34e-438d-a780-4c4d1993d1f6",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "6abb09aa-bce4-45f1-ad12-7448c69f5305",
+        "takenAt": "2026-11-03T08:17:56Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "e7edcb20-5f1c-4fe8-ac3b-a47279258ab3",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The plant may have produced additional visible leaves between the two captures.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "920d5875-bd74-4772-bf1c-4b775919c09d",
+          "d963f3af-d34e-438d-a780-4c4d1993d1f6"
+        ]
+      },
+      {
+        "text": "The pale circular spot on one leaf may indicate localized leaf damage, discoloration, or an image artifact.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "d963f3af-d34e-438d-a780-4c4d1993d1f6"
+        ]
+      },
+      {
+        "text": "The plant may be experiencing a change in light, watering, or other care conditions, but the available records do not support a specific cause.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "920d5875-bd74-4772-bf1c-4b775919c09d",
+          "d963f3af-d34e-438d-a780-4c4d1993d1f6"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Inspect the pale spot closely for texture, spread, pests, or physical damage.",
+      "Check soil moisture and drainage to assess watering conditions.",
+      "Review light exposure and recent placement changes.",
+      "Look for pests, webbing, sticky residue, or leaf edge damage.",
+      "Take consistent photos from the same angle and distance with a scale reference.",
+      "Record measurements and care activities for future comparison."
+    ],
+    "missingInformation": [
+      "No measurements are recorded for this plant.",
+      "No care activities are recorded for this plant.",
+      "No approved care guidance is published for this workspace.",
+      "No fresh weather snapshot exists for this location.",
+      "The workspace has no location coordinates.",
+      "The images do not include a scale reference.",
+      "There is no information about soil moisture, light exposure, fertilizer use, pests, or recent repotting.",
+      "It is not possible to determine whether the pale spot is physical damage, disease, pest injury, nutrient issue, or an image artifact."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The earlier image shows a potted plant with a single upright stem and three dark green rounded leaves arranged near the top.",
+        "evidenceIds": [
+          "920d5875-bd74-4772-bf1c-4b775919c09d"
+        ]
+      },
+      {
+        "text": "The later image shows the same pot and stem with three dark green rounded leaves, two lighter green rounded leaves lower near the pot rim, and a pale circular spot on one dark green leaf.",
+        "evidenceIds": [
+          "d963f3af-d34e-438d-a780-4c4d1993d1f6"
+        ]
+      },
+      {
+        "text": "The later image appears to show more visible foliage than the earlier image, but no scale reference is present.",
+        "evidenceIds": [
+          "920d5875-bd74-4772-bf1c-4b775919c09d",
+          "d963f3af-d34e-438d-a780-4c4d1993d1f6"
+        ]
+      }
+    ]
+  }
+}

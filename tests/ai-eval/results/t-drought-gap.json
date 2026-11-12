@@ -1,0 +1,145 @@
+{
+  "caseId": "t-drought-gap",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:3e9bdc68da64d2fb46ca7f3fa3877ed6fd6f45d741b056f6f77b2102c4289827",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "084004cf-bc97-45b5-96b7-34bb66064d9f",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "97e57342-f39d-4f59-aafa-1a9c57770984",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "96ea324e-0228-4f06-b8e4-86705500dd5e",
+        "kind": "WATER",
+        "note": "watered deeply, leaves perked up the next day",
+        "occurredAt": "2026-10-14T08:29:23Z"
+      },
+      {
+        "id": "d2c49f96-74b5-45c3-a2eb-b28d93cb24d5",
+        "kind": "OBSERVE",
+        "note": "leaves drooping, soil bone dry",
+        "occurredAt": "2026-10-09T08:29:23Z"
+      },
+      {
+        "id": "ec2b42bd-8b9a-4c6a-b739-536f233c7d46",
+        "kind": "WATER",
+        "note": "watered",
+        "occurredAt": "2026-09-24T08:29:23Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The drooping and dry soil note is consistent with a period of low soil moisture.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "d2c49f96-74b5-45c3-a2eb-b28d93cb24d5"
+        ]
+      },
+      {
+        "text": "The note that leaves perked up the next day may be associated with improved plant turgor following deep watering.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "96ea324e-0228-4f06-b8e4-86705500dd5e"
+        ]
+      },
+      {
+        "text": "The interval between recorded waterings may be longer than the plant's moisture needs under current conditions.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "ec2b42bd-8b9a-4c6a-b739-536f233c7d46",
+          "d2c49f96-74b5-45c3-a2eb-b28d93cb24d5",
+          "96ea324e-0228-4f06-b8e4-86705500dd5e"
+        ]
+      },
+      {
+        "text": "Environmental factors such as light, temperature, humidity, pot size, or drainage may be associated with faster soil drying.",
+        "confidence": "LOW",
+        "evidenceIds": []
+      },
+      {
+        "text": "The plant may be responding to watering practices rather than a structural issue, but the record is too limited to distinguish.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "d2c49f96-74b5-45c3-a2eb-b28d93cb24d5",
+          "96ea324e-0228-4f06-b8e4-86705500dd5e"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Check soil moisture with a finger or meter before watering; water when the top few centimeters feel dry, then record the date and amount.",
+      "Inspect leaves and stems for pests, discoloration, or damage, and photograph the plant weekly.",
+      "Monitor drooping for 24-48 hours after watering to see whether it improves.",
+      "Confirm the pot has drainage and that excess water can escape; avoid letting the plant sit in standing water.",
+      "Record light exposure, temperature, and humidity if possible, and note any recent changes.",
+      "If drooping persists despite moist soil, review pot size, drainage, and light, and consider a professional assessment."
+    ],
+    "missingInformation": [
+      "No photos or measurements are available to assess leaf condition, soil moisture, pot size, or drainage.",
+      "No guidance entries are present to compare care actions to approved recommendations.",
+      "No weather snapshot or location coordinates are available to estimate environmental drying conditions.",
+      "No watering amounts, potting mix, pot material, drainage status, light level, humidity, or fertilizer history are recorded.",
+      "No pest, disease, root, or repotting inspection notes are recorded.",
+      "No timeline of drooping onset, duration, or whether drooping recurs between waterings is recorded."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The plant is recorded as Monstera with status ACTIVE.",
+        "evidenceIds": []
+      },
+      {
+        "text": "On 2026-09-24, a WATER activity note states: watered.",
+        "evidenceIds": [
+          "ec2b42bd-8b9a-4c6a-b739-536f233c7d46"
+        ]
+      },
+      {
+        "text": "On 2026-10-09, an OBSERVE activity note states: leaves drooping, soil bone dry.",
+        "evidenceIds": [
+          "d2c49f96-74b5-45c3-a2eb-b28d93cb24d5"
+        ]
+      },
+      {
+        "text": "On 2026-10-14, a WATER activity note states: watered deeply, leaves perked up the next day.",
+        "evidenceIds": [
+          "96ea324e-0228-4f06-b8e4-86705500dd5e"
+        ]
+      },
+      {
+        "text": "The snapshot contains no photos, measurements, weather entries, or guidance entries.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

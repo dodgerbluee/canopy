@@ -1,0 +1,144 @@
+{
+  "caseId": "t-missing-humidity",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:f32d7279e02cc7a758846ea8ea12c9bd40af906703efc753c4da66249aacf662",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "9909ccc9-bc6e-4f63-a69f-8c7e7524f78d",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "d4029fb9-9c76-4c00-9f44-fa49103fb675",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "41a0c181-69aa-4136-afc7-96454e3c8923",
+        "kind": "WATER",
+        "note": "watered",
+        "occurredAt": "2026-11-01T08:22:17Z"
+      },
+      {
+        "id": "289cbe32-0895-45b2-802b-b54c66bc5b7f",
+        "kind": "WATER",
+        "note": "watered",
+        "occurredAt": "2026-10-25T08:22:17Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The two recorded waterings may be associated with a roughly weekly watering routine.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "41a0c181-69aa-4136-afc7-96454e3c8923",
+          "289cbe32-0895-45b2-802b-b54c66bc5b7f"
+        ]
+      },
+      {
+        "text": "The plant may be maintained in a setting where environmental data are not being captured, consistent with the absence of weather and coordinates.",
+        "confidence": "LOW",
+        "evidenceIds": []
+      },
+      {
+        "text": "The recent recorded care history may be limited to watering events rather than broader maintenance.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "41a0c181-69aa-4136-afc7-96454e3c8923",
+          "289cbe32-0895-45b2-802b-b54c66bc5b7f"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Inspect the Monstera for leaf color, spots, wilting, pests, and new growth; take a clear photo of the whole plant and close-ups of any unusual areas.",
+      "Check the top few centimeters of soil before watering; water only if it feels dry to the touch, and ensure excess water drains freely.",
+      "Record any available measurements such as leaf count, plant height, or soil moisture.",
+      "Review the watering interval and adjust if the soil remains wet or dries out much faster than the recorded 7-day pattern.",
+      "Add location or environmental details to the workspace if possible, so future care can be compared with local conditions."
+    ],
+    "missingInformation": [
+      "No photos or measurements are available, so the plant's current visual condition and health cannot be assessed.",
+      "No approved care guidance is published for this workspace.",
+      "No fresh weather snapshot exists for this location.",
+      "Workspace has no location coordinates.",
+      "No purchases with costs allocated to this plant are recorded.",
+      "No soil moisture, light, temperature, or humidity measurements are recorded."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The plant is named Monstera and is recorded as ACTIVE.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The record lists a WATER activity on 2026-11-01T08:22:17Z.",
+        "evidenceIds": [
+          "41a0c181-69aa-4136-afc7-96454e3c8923"
+        ]
+      },
+      {
+        "text": "The record lists a WATER activity on 2026-10-25T08:22:17Z.",
+        "evidenceIds": [
+          "289cbe32-0895-45b2-802b-b54c66bc5b7f"
+        ]
+      },
+      {
+        "text": "The two recorded waterings occurred 7 days apart.",
+        "evidenceIds": [
+          "41a0c181-69aa-4136-afc7-96454e3c8923",
+          "289cbe32-0895-45b2-802b-b54c66bc5b7f"
+        ]
+      },
+      {
+        "text": "No photos are present in the snapshot.",
+        "evidenceIds": []
+      },
+      {
+        "text": "No measurements are present in the snapshot.",
+        "evidenceIds": []
+      },
+      {
+        "text": "No guidance entries are present in the snapshot.",
+        "evidenceIds": []
+      },
+      {
+        "text": "No weather entries are present in the snapshot.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The workspace has no location coordinates.",
+        "evidenceIds": []
+      },
+      {
+        "text": "No purchases with costs allocated to this plant are recorded.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

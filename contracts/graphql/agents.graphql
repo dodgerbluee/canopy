@@ -1,0 +1,16 @@
+# Owner-only agent access management. Tokens are returned once on issuance.
+type AgentGrant { id:ID!,name:String!,scopes:[String!]!,plantIds:[ID!]!,expiresAt:DateTime!,revokedAt:DateTime,revision:Int!,lastUsedAt:DateTime,lastTool:String,createdAt:DateTime! }
+type AgentAction { id:ID!,grantId:ID!,grantName:String!,operationId:String!,tool:String!,input:String!,before:String!,state:String!,createdAt:DateTime!,expiresAt:DateTime! }
+type AgentSettings { enabled:Boolean!,endpoint:String!,scopeOptions:[String!]!,grants:[AgentGrant!]!,actions:[AgentAction!]! }
+input SaveAgentGrantInput { id:ID!,name:String!,scopes:[String!]!,plantIds:[ID!]!,expiresAt:DateTime!,expectedRevision:Int! }
+input ChangeAgentCredentialInput { id:ID!,expectedRevision:Int! }
+input DecideAgentActionInput { id:ID!,approve:Boolean! }
+type AgentGrantPayload { grant:AgentGrant,token:String,problems:[MutationProblem!]! }
+type AgentActionPayload { applied:Boolean!,problems:[MutationProblem!]! }
+extend type Query { agentSettings:AgentSettings! }
+extend type Mutation {
+ saveAgentGrant(input:SaveAgentGrantInput!):AgentGrantPayload!
+ rotateAgentCredential(input:ChangeAgentCredentialInput!):AgentGrantPayload!
+ revokeAgentGrant(input:ChangeAgentCredentialInput!):AgentGrantPayload!
+ decideAgentAction(input:DecideAgentActionInput!):AgentActionPayload!
+}

@@ -1,0 +1,135 @@
+{
+  "caseId": "v-growth",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:a8718a2311ab66319b8d90fc34e26254ed6253315562120a3048752f5fb2c0a2",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "476387a7-6d32-4ee5-ab1a-d9ab5ce9186a",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "9fb65696-71a0-4133-96bf-099c5a9af1f4",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "9cb20261-07b0-47cc-a899-51b5fbd08b21",
+        "takenAt": "2026-10-04T08:15:19Z"
+      },
+      {
+        "id": "c1e4bc86-285f-44ce-b792-cc828ef64d31",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "c098c270-722e-46c6-9402-d11e2133a0fd",
+        "takenAt": "2026-11-03T08:15:19Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "9a17e4d4-c2f6-43c9-aab1-da10a29dc50b",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The later image may show additional leaf-like structures compared with the earlier image.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "9fb65696-71a0-4133-96bf-099c5a9af1f4",
+          "c1e4bc86-285f-44ce-b792-cc828ef64d31"
+        ]
+      },
+      {
+        "text": "The apparent change could be due to a different viewing angle, occlusion, or a change in the illustration rather than actual plant growth.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "9fb65696-71a0-4133-96bf-099c5a9af1f4",
+          "c1e4bc86-285f-44ce-b792-cc828ef64d31"
+        ]
+      },
+      {
+        "text": "The plant may be in a stable potting setup with no visible signs of distress in the provided images.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "9fb65696-71a0-4133-96bf-099c5a9af1f4",
+          "c1e4bc86-285f-44ce-b792-cc828ef64d31"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Capture photos from the same angle and distance with a scale reference.",
+      "Inspect the leaf-like structures for texture, firmness, color, and whether they are true leaves or artifacts.",
+      "Check soil moisture, drainage, and pot condition.",
+      "Review light conditions and recent watering or fertilizing activity.",
+      "Record measurements and care activities for the plant.",
+      "Look for pests, discoloration, wilting, or damage on the leaves and stem."
+    ],
+    "missingInformation": [
+      "The images are stylized and do not provide enough identifying detail to confirm with certainty that they show the same physical plant.",
+      "No scale reference is present, so size, leaf area, or growth rate cannot be assessed.",
+      "No measurements are recorded for this plant.",
+      "No care activities are recorded for this plant.",
+      "No weather snapshot or location coordinates are available.",
+      "No approved care guidance is published for this workspace.",
+      "Close-up views of leaves, stem, soil, roots, drainage, pests, or leaf texture are not available."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The earlier image shows a potted plant with a single upright stem and three dark green rounded leaf shapes.",
+        "evidenceIds": [
+          "9fb65696-71a0-4133-96bf-099c5a9af1f4"
+        ]
+      },
+      {
+        "text": "The later image shows a similar pot and stem with three dark green rounded leaf shapes and two additional lighter green rounded leaf shapes near the pot rim.",
+        "evidenceIds": [
+          "c1e4bc86-285f-44ce-b792-cc828ef64d31"
+        ]
+      },
+      {
+        "text": "Both images show a terracotta-colored pot against a plain light background.",
+        "evidenceIds": [
+          "9fb65696-71a0-4133-96bf-099c5a9af1f4",
+          "c1e4bc86-285f-44ce-b792-cc828ef64d31"
+        ]
+      },
+      {
+        "text": "No flowers, fruit, pests, soil surface detail, or obvious leaf damage are clearly visible in either image.",
+        "evidenceIds": [
+          "9fb65696-71a0-4133-96bf-099c5a9af1f4",
+          "c1e4bc86-285f-44ce-b792-cc828ef64d31"
+        ]
+      },
+      {
+        "text": "No fenestrations or split-leaf patterns are visible on the leaf shapes shown.",
+        "evidenceIds": [
+          "9fb65696-71a0-4133-96bf-099c5a9af1f4",
+          "c1e4bc86-285f-44ce-b792-cc828ef64d31"
+        ]
+      }
+    ]
+  }
+}

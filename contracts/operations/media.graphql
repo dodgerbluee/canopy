@@ -1,0 +1,116 @@
+query PendingUploads($first: Int, $after: String) {
+  pendingUploads(first: $first, after: $after) {
+    items {
+      ...AssetFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+mutation ReserveUpload($input: ReserveUploadInput!, $clientMutationId: String) {
+  reserveUpload(input: $input, clientMutationId: $clientMutationId) {
+    asset {
+      ...AssetFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation FinalizeUpload($input: FinalizeUploadInput!, $clientMutationId: String) {
+  finalizeUpload(input: $input, clientMutationId: $clientMutationId) {
+    asset {
+      ...AssetFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation AttachPhoto($input: AttachPhotoInput!, $clientMutationId: String) {
+  attachPhoto(input: $input, clientMutationId: $clientMutationId) {
+    photo {
+      ...PhotoFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdatePhoto($input: UpdatePhotoInput!, $clientMutationId: String) {
+  updatePhoto(input: $input, clientMutationId: $clientMutationId) {
+    photo {
+      ...PhotoFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation DeletePhoto($input: DeletePhotoInput!, $clientMutationId: String) {
+  deletePhoto(input: $input, clientMutationId: $clientMutationId) {
+    deletedPhotoId
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation AttachReceipt($input: AttachReceiptInput!, $clientMutationId: String) {
+  attachReceipt(input: $input, clientMutationId: $clientMutationId) {
+    receipt {
+      id
+      purchaseId
+      asset {
+        ...AssetFields
+      }
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation DetachReceipt($input: DetachReceiptInput!, $clientMutationId: String) {
+  detachReceipt(input: $input, clientMutationId: $clientMutationId) {
+    detachedReceiptId
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}

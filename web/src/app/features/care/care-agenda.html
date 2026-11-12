@@ -1,0 +1,188 @@
+<header class="page-head">
+  <div>
+    <p class="eyebrow">Checks and actions, in the plan's own words</p>
+    <h1 class="editorial">Care agenda</h1>
+    <p class="caption">
+      Grouped against today in your timezone. Every row states its date and reason as recorded — the
+      agenda never invents a schedule.
+    </p>
+  </div>
+  <div class="row wrap head-actions">
+    <a class="btn btn-primary" routerLink="/plants">Plan a plant</a>
+  </div>
+</header>
+
+<!-- Complete / Snooze / Skip all render in the shared entry dialog instead of
+     expanding the row. One form per mode, native fields unchanged, and the
+     dialog stays mounted while the mutation is in flight. -->
+<ui-entry-dialog
+  #entry
+  [open]="!!activeId()"
+  [title]="entryTitle()"
+  [description]="entryDescription()"
+  [size]="mode() === 'skip' ? 'compact' : 'regular'"
+  [busy]="busy()"
+  (dismissed)="onEntryDismissed()"
+>
+  @if (entryItem(); as o) {
+    @if (mode() === 'complete') {
+      <form #cForm (submit)="$event.preventDefault(); confirmComplete(o, cForm)">
+        <div class="form-section">
+          @if (unitsFor(o.activityKind).length) {
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label" for="cq-{{ o.id }}">Quantity (optional)</label>
+                <input
+                  id="cq-{{ o.id }}"
+                  class="input"
+                  name="quantity"
+                  inputmode="decimal"
+                  placeholder="e.g. 500"
+                />
+              </div>
+              <div class="field">
+                <label class="field-label" for="cu-{{ o.id }}">Unit</label>
+                <select id="cu-{{ o.id }}" class="input" name="unit">
+                  @for (u of unitsFor(o.activityKind); track u.value) {
+                    <option [value]="u.value">{{ u.label }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+          }
+          <div class="field">
+            <label class="field-label" for="cn-{{ o.id }}">Note (optional)</label>
+            <input id="cn-{{ o.id }}" class="input" name="note" />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" (click)="requestCancel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">Confirm</button>
+        </div>
+      </form>
+    } @else if (mode() === 'snooze') {
+      <form #sForm (submit)="$event.preventDefault(); confirmSnooze(o, sForm)">
+        <div class="form-section">
+          <div class="field">
+            <label class="field-label" for="sd-{{ o.id }}">Snooze until</label>
+            <input
+              id="sd-{{ o.id }}"
+              class="input"
+              type="date"
+              name="until"
+              [min]="o.currentDueDate"
+              [value]="offsetDate(o.currentDueDate, 1)"
+            />
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" (click)="requestCancel()">Cancel</button>
+          <button type="submit" class="btn btn-primary" [disabled]="busy()">Confirm snooze</button>
+        </div>
+      </form>
+    } @else {
+      <!-- confirmation-only step: no automatic mutation, the row's own words
+           stay in the description above -->
+      <div class="form-section">
+        <p class="caption">
+          Only this one date is passed over — the plan continues from the next one.
+        </p>
+        <div class="form-actions">
+          <button type="button" class="btn" (click)="requestCancel()">Cancel</button>
+          <button type="button" class="btn btn-danger" [disabled]="busy()" (click)="confirmSkip(o)">
+            {{ busy() ? 'Skipping…' : 'Confirm skip' }}
+          </button>
+        </div>
+      </div>
+    }
+  }
+</ui-entry-dialog>
+
+@if (store.error()) {
+  <section class="card narrow" role="alert" aria-labelledby="ca-err">
+    <h2 id="ca-err">Agenda failed to load</h2>
+    <p class="caption">{{ store.error() }} This is not an empty agenda — nothing was changed.</p>
+    <div>
+      <button type="button" class="btn btn-primary" (click)="retry()">Retry</button>
+    </div>
+  </section>
+} @else if (store.loading() && store.items().length === 0) {
+  <div class="stack" aria-busy="true">
+    @for (i of [1, 2, 3]; track i) {
+      <ui-skeleton ar="auto" maxW="100%" />
+    }
+  </div>
+} @else if (store.items().length === 0) {
+  <section class="card narrow">
+    <h2>No scheduled care yet</h2>
+    <p class="caption">
+      No scheduled checks or actions in the next 60 days. Sourced seasonal guidance does not
+      automatically create a care plan. Review the guidance below; scheduled reminders need a plan
+      with care rules.
+    </p>
+  </section>
+} @else {
+  @for (g of groups(); track g.key) {
+    <section class="agenda-group" [attr.aria-label]="g.label">
+      <div class="section-heading">
+        <h2>{{ g.label }}</h2>
+        <span class="badge num">{{ g.items.length }}</span>
+      </div>
+      <ul class="agenda-list">
+        @for (o of g.items; track o.id) {
+          <li class="card agenda-row" [class.is-check]="isCheck(o)">
+            <div class="row spread wrap">
+              <div class="agenda-title">
+                <strong class="small">{{ o.ruleKey }}</strong>
+                <span class="caption"> · {{ plantName(o.plantId) }}</span>
+              </div>
+              <span class="row wrap agenda-facts">
+                <span class="badge" [class.badge-check]="isCheck(o)">{{ kindLabel(o) }}</span>
+                <span class="badge num">{{ dueNote(o) }}</span>
+              </span>
+            </div>
+            @if (o.reason?.text) {
+              <p class="caption agenda-note">{{ o.reason.text }}</p>
+            }
+            @if (missingFactsOf(o).length) {
+              <p class="caption agenda-note">
+                <strong>Needs context:</strong> {{ missingFactsOf(o).map(factLabel).join(', ') }} —
+                the plan will not guess a schedule without it.
+              </p>
+            }
+            <div class="row wrap agenda-actions">
+              <button
+                type="button"
+                class="btn btn-primary"
+                [disabled]="busy()"
+                (click)="startComplete(o)"
+              >
+                {{ isCheck(o) ? 'Mark checked' : 'Complete' }}
+              </button>
+              <button type="button" class="btn" [disabled]="busy()" (click)="startSnooze(o)">
+                Snooze
+              </button>
+              <button type="button" class="btn" [disabled]="busy()" (click)="startSkip(o)">
+                Skip
+              </button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+  <div class="row pag">
+    @if (hasNext()) {
+      <button type="button" class="btn" [disabled]="store.loading()" (click)="store.loadMore()">
+        {{ store.loading() ? 'Loading…' : 'Load more' }}
+      </button>
+    }
+    <span class="caption num">{{ store.items().length }} shown</span>
+  </div>
+}
+
+<care-seasonal-guidance />
+
+<!-- The care plan editor modal renders here; when it goes away the agenda
+     re-reads so saved plans appear. -->
+<router-outlet (deactivate)="onOutletDeactivate()" />

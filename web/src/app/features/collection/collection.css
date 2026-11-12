@@ -1,0 +1,178 @@
+/* Photo-led collection, one quiet filter trigger, and a trailing add tile. */
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-6);
+}
+.page-head h1 {
+  margin: var(--sp-1) 0;
+}
+.page-head p {
+  margin: 0;
+  max-width: 46ch;
+}
+
+.filter-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.3em;
+  height: 1.3em;
+  padding: 0 0.4em;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--accent-fg);
+  font-size: var(--fs-small);
+  font-weight: 700;
+}
+
+/* ---------- grid ---------- */
+.plant-grid,
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+.rows {
+  display: grid;
+  gap: var(--sp-3);
+}
+/* the explanatory card sits above the list, so the tile below it lines up
+   with the card column rather than the page width */
+.empty-note {
+  max-width: 560px;
+  margin-bottom: var(--sp-4);
+}
+.empty-note h2 {
+  margin-bottom: var(--sp-2);
+}
+.empty-note p {
+  margin: 0;
+}
+
+/* ---------- Add Plant tile: same cell as a plant card, quieter surface ---------- */
+.add-plant-card {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  height: 100%;
+  min-height: 280px;
+  padding: var(--sp-4);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-card);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  transition:
+    border-color var(--dur-control) var(--ease-out),
+    background var(--dur-control) var(--ease-out),
+    color var(--dur-control) var(--ease-out);
+}
+.add-plant-card:hover,
+.add-plant-card:focus-visible {
+  border-color: var(--accent);
+  background: var(--surface-raised);
+  color: var(--text-primary);
+}
+/* list layout: a coherent row height instead of a card-sized tile */
+.add-plant-card.list {
+  min-height: 112px;
+  grid-auto-flow: column;
+  gap: var(--sp-2);
+}
+
+.tags {
+  margin-top: var(--sp-2);
+}
+.summary {
+  margin-top: var(--sp-4);
+}
+
+@media (max-width: 1199px) {
+  .plant-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 639px) {
+  .plant-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.collection-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0 0 24px;
+}
+.collection-tools p {
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.collection-filter-form {
+  display: grid;
+  gap: 24px;
+}
+.collection-filter-form label {
+  display: grid;
+  gap: 8px;
+  font-size: 13px;
+}
+.filter-section {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.filter-section legend {
+  margin-bottom: 12px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.choice-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.choice {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-decorative);
+  border-radius: 10px;
+  background: var(--surface-base);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.choice[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+.view-options summary {
+  font-size: 13px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 8px 0;
+}
+.view-options .form-grid {
+  margin-top: 16px;
+}

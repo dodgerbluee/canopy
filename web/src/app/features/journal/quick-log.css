@@ -1,0 +1,23 @@
+/* Quick log (UI02): the form lives inside UiEntryDialog, so section/field/
+ * action spacing comes from the shared .entry-form/.form-section/.form-grid/
+ * .form-actions classes in styles/base.css. Only the field-local bits and the
+ * native two-column pairing stay here. Design tokens only. */
+.ql-form {
+  display: grid;
+  gap: var(--sp-6);
+}
+.ql-field {
+  display: grid;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+.ql-pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+@media (max-width: 767px) {
+  .ql-pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

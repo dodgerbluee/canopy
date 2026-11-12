@@ -1,0 +1,23 @@
+# Portability: export jobs. Frozen by T01.r1.
+# Download is authenticated HTTP; no signed public links.
+
+enum ExportState {
+  QUEUED
+  RUNNING
+  READY
+  FAILED
+  EXPIRED
+}
+
+type ExportJob {
+  id: ID!
+  state: ExportState!
+  "Snapshot cutoff instant; export reflects a consistent snapshot, not live reads."
+  snapshotAt: DateTime!
+  createdAt: DateTime!
+  finishedAt: DateTime
+  "Operator-policy expiry."
+  expiresAt: DateTime
+  manifestSha256: String
+  errorCode: String
+}

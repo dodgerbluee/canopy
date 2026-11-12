@@ -1,0 +1,46 @@
+# gqlgen config — schema is the frozen contract SDL (T01.r1). Generated code
+# lives under gql/ and is committed; regenerate with `make gen-gqlgen`.
+# The generated stub file (resolvers_gen.go) is never hand-edited; the real
+# ResolverRoot implementation is hand-written in root.go (same package,
+# because ResolverRoot carries unexported introspection methods).
+# Explicit file list (integrator gate, T01.care): care.graphql joined the server
+# schema at T24, when the care resolvers landed; analysis.graphql joined at T29
+# with the run-lifecycle resolvers (suggestion surfaces stay CAPABILITY_UNAVAILABLE
+# until T33). Contract validation and TS codegen consume the full
+# contracts/graphql/ directory.
+schema:
+  - ../contracts/graphql/agents.graphql
+  - ../contracts/graphql/ai-connections.graphql
+  - ../contracts/graphql/analysis.graphql
+  - ../contracts/graphql/calendar.graphql
+  - ../contracts/graphql/care.graphql
+  - ../contracts/graphql/collection.graphql
+  - ../contracts/graphql/knowledge.graphql
+  - ../contracts/graphql/journal.graphql
+  - ../contracts/graphql/media.graphql
+  - ../contracts/graphql/overview.graphql
+  - ../contracts/graphql/portability.graphql
+  - ../contracts/graphql/purchases.graphql
+  - ../contracts/graphql/schema.graphql
+  - ../contracts/graphql/shared.graphql
+exec:
+  filename: internal/transport/graphql/gql/generated.go
+  package: gql
+model:
+  filename: internal/transport/graphql/gql/models_gen.go
+  package: gql
+resolver:
+  layout: single-file
+  dir: ./internal/transport/graphql/gql
+  package: gql
+  filename: ./internal/transport/graphql/gql/resolvers_gen.go
+autobind: []
+models:
+  DateTime:
+    model: [canopy/server/internal/transport/graphql/scalars.DateTime]
+  LocalDate:
+    model: [canopy/server/internal/transport/graphql/scalars.Date]
+  Decimal:
+    model: [canopy/server/internal/transport/graphql/scalars.Decimal]
+  MinorUnits:
+    model: [canopy/server/internal/transport/graphql/scalars.MinorUnits]

@@ -1,0 +1,60 @@
+{
+  "caseId": "r-bare-dollar",
+  "kind": "RECEIPT",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:6119d121a9d4cbcd7a8444d3e9f551b795644512a3f39f7c7bea08c2393a3b2a",
+  "snapshot": {
+    "kind": "RECEIPT_EXTRACTION",
+    "costs": [],
+    "plant": {
+      "id": "",
+      "name": "",
+      "status": "",
+      "revision": 0
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "050b71b0-0e1e-49eb-b2d6-ae3ca001ca0e",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "lines": [
+      {
+        "amountMinor": "650",
+        "description": "Basil plant"
+      },
+      {
+        "amountMinor": "425",
+        "description": "Ceramic saucer"
+      }
+    ],
+    "seller": "CORNER MARKET",
+    "currency": "",
+    "taxMinor": "",
+    "totalMinor": "1075",
+    "purchasedOn": "",
+    "shippingMinor": "",
+    "needsReconciliation": false
+  }
+}

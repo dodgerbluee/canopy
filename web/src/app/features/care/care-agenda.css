@@ -1,0 +1,90 @@
+/* Care agenda (UI01.d): editorial head, calm group headings, scannable rows.
+ * Design tokens only. */
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-6);
+}
+.page-head h1 {
+  margin: var(--sp-2) 0;
+}
+.page-head p {
+  margin: 0;
+  max-width: 46ch;
+}
+.head-actions {
+  align-items: center;
+}
+
+.narrow {
+  max-width: 640px;
+}
+
+.agenda-group {
+  display: grid;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-8);
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.section-heading h2 {
+  margin: 0;
+  font-size: var(--fs-small);
+  line-height: var(--lh-small);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+
+.agenda-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-3);
+}
+.agenda-row {
+  display: grid;
+  gap: var(--sp-2);
+}
+.agenda-title {
+  min-width: 0;
+}
+.agenda-facts {
+  justify-content: flex-end;
+}
+.agenda-note {
+  margin: 0;
+}
+.agenda-actions {
+  margin-top: var(--sp-1);
+}
+
+/* checks read as checks — a quiet rule, never a health colour */
+.is-check {
+  border-left: 3px solid var(--accent);
+}
+.badge-check {
+  font-style: italic;
+}
+
+/* the complete/snooze/skip forms live in the shared UiEntryDialog, so their
+   field/section/action spacing comes from the shared .entry-form/.form-section/
+   .form-grid/.form-actions classes in styles/base.css — nothing to add here. */
+
+.pag {
+  margin-top: var(--sp-6);
+}
+
+@media (max-width: 767px) {
+  .agenda-row {
+    padding: var(--sp-3);
+  }
+}

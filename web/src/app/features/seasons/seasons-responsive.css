@@ -1,0 +1,125 @@
+@media (max-width: 1000px) {
+  .seasons-heading {
+    align-items: flex-start;
+  }
+  .seasons-heading h1 {
+    font-size: 36px;
+  }
+  .heading-actions {
+    max-width: 180px;
+    justify-content: flex-end;
+  }
+  .year-overview {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .year-overview p {
+    min-width: 180px;
+  }
+  .knowledge-setup {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .knowledge-setup .btn {
+    margin-left: 40px;
+  }
+}
+@media (max-width: 600px) {
+  .seasons-heading {
+    display: block;
+    margin-bottom: 20px;
+  }
+  .heading-actions {
+    max-width: none;
+    justify-content: flex-start;
+    margin-top: 20px;
+  }
+  .seasons-heading h1 {
+    font-size: 35px;
+  }
+  .intro {
+    font-size: 12px;
+  }
+  .year-overview {
+    gap: 12px;
+  }
+  .year-overview p {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .year-selector h2 {
+    font-size: 27px;
+  }
+  .research-button {
+    margin-left: auto;
+    padding: 8px 10px;
+  }
+  .knowledge-setup {
+    padding: 18px;
+    gap: 12px;
+  }
+  .knowledge-setup .btn {
+    margin-left: 0;
+  }
+  .legend-item {
+    min-height: 40px;
+    font-size: 11px;
+  }
+  .season-search {
+    width: 100%;
+  }
+  .season-search input {
+    flex: 1;
+  }
+  .season-explanation {
+    font-size: 11px;
+  }
+}
+
+.season-plant {
+  position: sticky;
+  left: 0;
+  background: var(--surface-base);
+  z-index: 1;
+  height: 100%;
+  display: grid;
+  align-content: center;
+}
+.season-axis > span {
+  position: sticky;
+  left: 0;
+  background: var(--surface-canvas);
+  z-index: 3;
+}
+@media (max-width: 767px) {
+  .season-axis,
+  .season-row {
+    grid-template-columns: 155px minmax(0, 1fr);
+  }
+  .season-plant {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+  .plant-identity {
+    gap: 8px;
+  }
+  .season-avatar {
+    width: 30px;
+    height: 36px;
+  }
+  .plant-identity strong {
+    font-size: 12px;
+  }
+  .plant-records {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 767px) {
+  .season-scroll {
+    scroll-padding-inline-start: 165px;
+  }
+  .season-band {
+    scroll-margin-inline-start: 165px;
+  }
+}

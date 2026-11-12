@@ -1,0 +1,177 @@
+<div
+  [attr.role]="detailId() ? 'main' : null"
+  class="round-page"
+  [class.round-detail]="!!detailId()"
+  [class.round-list]="!detailId()"
+>
+  <div class="round-header">
+    @if (detailId()) {
+      <button type="button" class="btn round-back" (click)="backToRounds()">
+        <ui-icon name="back" [size]="18" />Back to rounds
+      </button>
+    } @else {
+      <div>
+        <p class="kicker">A LITTLE CARE, EVERY DAY</p>
+        <h1>Garden rounds</h1>
+      </div>
+    }
+    <span class="round-date"><ui-icon name="sun" [size]="16" />{{ dateLabel() }}</span>
+  </div>
+  @if (loading()) {
+    <div class="round-empty" role="status">Loading your plants…</div>
+  } @else if (loadError()) {
+    <section class="round-empty">
+      <h2>Your garden couldn’t be loaded</h2>
+      <p role="alert">{{ loadError() }}</p>
+      <button type="button" class="btn" (click)="loadPlants()">Retry loading plants</button>
+    </section>
+  } @else if (!detailId()) {
+    @if (!plants().length) {
+      <section class="round-empty">
+        <ui-icon name="sprout" [size]="40" />
+        <h2>Your first round starts with a plant</h2>
+        <p>Active plants will appear here, ready for a photo and a little care.</p>
+        <a class="btn btn-primary" routerLink="/plants/new">Add a plant</a>
+      </section>
+    } @else {
+      <p class="caption">{{ plants().length }} plants · Choose one to begin</p>
+      <nav #plantGrid class="plant-grid" aria-label="Choose a plant">
+        @for (choice of plantChoices(); track choice.id) {
+          <a
+            class="plant-option"
+            [routerLink]="['/rounds', choice.id]"
+            [state]="{ fromRounds: true }"
+            [attr.data-plant-id]="choice.id"
+            [attr.aria-label]="'Open ' + choice.name"
+            (click)="rememberGrid(choice.id)"
+          >
+            <span class="plant-thumb">
+              @if (choice.photo; as photo) {
+                <img [src]="photo" alt="" (error)="imageFailed(photo)" />
+              } @else {
+                <ui-icon name="leaf" [size]="40" />
+              }
+            </span>
+            <span class="plant-label">{{ choice.name }}</span>
+          </a>
+        }
+      </nav>
+    }
+  } @else if (plant(); as p) {
+    <article class="round-card" aria-labelledby="round-plant-name">
+      <div class="round-image">
+        @if (hero(); as image) {
+          <img [src]="image" [alt]="p.name" (error)="imageFailed(image)" />
+        } @else {
+          <div class="image-empty">
+            <ui-icon name="leaf" [size]="64" /><span>Your next chapter starts here</span>
+          </div>
+        }
+      </div>
+      <div class="round-identity">
+        <div>
+          <h1 id="round-plant-name">{{ p.name }}</h1>
+          @if (p.cultivar || p.scientificName) {
+            <p>{{ p.cultivar || p.scientificName }}</p>
+          }
+          @if (p.currentContext?.location?.name) {
+            <p class="row">
+              <ui-icon name="location" [size]="14" />{{ p.currentContext?.location?.name }}
+            </p>
+          }
+        </div>
+        <a class="view-plant" [routerLink]="['/plants', p.id]"
+          >View plant <ui-icon name="arrow-up-right" [size]="16"
+        /></a>
+      </div>
+      <div class="today-status" aria-live="polite">
+        @if (watered()) {
+          <span class="confirmed"><ui-icon name="check" [size]="14" />Watering logged today</span>
+        } @else if (historyKnown()) {
+          <span><ui-icon name="drop" [size]="14" />No watering logged today</span>
+        }
+        @if (historyKnown()) {
+          <span
+            ><ui-icon name="image" [size]="14" />{{ photoCount() }}
+            {{ photoCount() === 1 ? 'photo' : 'photos' }} today</span
+          >
+        } @else {
+          <span>{{
+            historyLoading() ? 'Checking today’s entries…' : 'Today’s history unavailable'
+          }}</span>
+        }
+      </div>
+      <div class="round-actions">
+        <button
+          type="button"
+          class="round-action photo-action"
+          [disabled]="photoJob()?.state === 'saving'"
+          (click)="openCamera(camera)"
+        >
+          <ui-icon name="camera" [size]="26" /><strong>{{ photoLabel() }}</strong>
+        </button>
+        <button
+          type="button"
+          class="round-action water-action"
+          [disabled]="waterDisabled()"
+          (click)="water()"
+        >
+          <ui-icon [name]="watered() ? 'check' : 'drop'" [size]="26" /><strong>{{
+            waterLabel()
+          }}</strong>
+        </button>
+        <input
+          #camera
+          type="file"
+          accept="image/*"
+          capture="environment"
+          hidden
+          (change)="photoChosen(camera)"
+        />
+      </div>
+      <p class="camera-note">
+        Take a new photo or choose one. Its original capture date is preserved when available;
+        otherwise it is labelled with the upload date.
+      </p>
+    </article>
+    @if (historyError()) {
+      <div class="round-notice">
+        <p role="alert">
+          {{ historyError() }} Watering is paused until today’s entries can be checked.
+        </p>
+        <button type="button" class="btn" (click)="refreshHistory()">Retry history</button>
+      </div>
+    }
+  } @else {
+    <section class="round-empty">
+      <h1>Plant unavailable</h1>
+      <p role="alert">This plant isn’t in your active garden.</p>
+      <button type="button" class="btn" (click)="backToRounds()">Choose another plant</button>
+    </section>
+  }
+  @if (savingPhotos()) {
+    <p class="saving-note" role="status">
+      <ui-icon name="upload" [size]="16" />Saving {{ savingPhotos() === 1 ? 'photo' : 'photos' }} —
+      keep this tab open until saved. You can move to the next plant.
+    </p>
+  }
+  @if (failures().length) {
+    <section class="round-retries" aria-label="Unfinished actions">
+      <h2>Needs a retry</h2>
+      @for (job of failures(); track job.id) {
+        <div class="round-retry">
+          <div>
+            <strong
+              >{{ plantName(job.plantId) }} · {{ isPhoto(job) ? 'Photo' : 'Watering' }}</strong
+            >
+            <div class="caption">{{ job.dayKey }}</div>
+            <p role="alert">{{ job.error }}</p>
+          </div>
+          <button type="button" class="btn" (click)="retry(job)">
+            {{ isPhoto(job) ? 'Retry photo' : 'Retry watering' }}
+          </button>
+        </div>
+      }
+    </section>
+  }
+</div>

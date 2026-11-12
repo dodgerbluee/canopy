@@ -1,0 +1,124 @@
+:host {
+  display: block;
+  max-width: 1100px;
+}
+.assistant-heading {
+  position: relative;
+  margin-bottom: 32px;
+  padding-right: 180px;
+}
+.assistant-heading h1 {
+  margin: 10px 0;
+}
+.assistant-heading .btn {
+  position: absolute;
+  right: 0;
+  top: 22px;
+}
+.assistant-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.assistant-feature {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 14px;
+  padding: 28px;
+}
+.assistant-feature > ui-icon {
+  color: var(--accent);
+}
+.assistant-feature h2,
+.assistant-feature p {
+  margin: 0;
+}
+.assistant-feature h2 {
+  font-size: 22px;
+  font-weight: 500;
+}
+.assistant-feature p {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--text-muted);
+}
+.assistant-feature .btn {
+  margin-top: auto;
+}
+.assistant-section {
+  margin-top: 34px;
+}
+.section-heading {
+  margin-bottom: 16px;
+}
+.section-heading h2 {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 500;
+}
+.section-heading p {
+  margin: 0;
+}
+.assistant-plants {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.assistant-plant {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  text-decoration: none;
+  color: var(--text-primary);
+  padding: 18px;
+  min-width: 0;
+}
+.assistant-plant > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.assistant-plant strong {
+  font-size: 13px;
+  display: block;
+  overflow-wrap: anywhere;
+}
+.assistant-plant small {
+  display: block;
+  color: var(--text-muted);
+  font-size: 11px;
+  margin-top: 5px;
+  line-height: 1.6;
+}
+.plant-glyph {
+  color: var(--accent);
+  padding: 10px;
+  background: var(--surface-raised);
+  border-radius: 12px;
+}
+.suggestion-list {
+  display: grid;
+  gap: 14px;
+}
+.assistant-plant:hover {
+  border-color: var(--accent);
+}
+@media (max-width: 600px) {
+  .assistant-heading {
+    padding-right: 0;
+  }
+  .assistant-heading .btn {
+    position: static;
+    margin-top: 12px;
+  }
+  .assistant-actions,
+  .assistant-plants {
+    grid-template-columns: 1fr;
+  }
+  .assistant-feature {
+    padding: 22px;
+  }
+  .assistant-heading h1 {
+    font-size: 34px;
+  }
+}

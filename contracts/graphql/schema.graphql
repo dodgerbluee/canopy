@@ -1,0 +1,623 @@
+# Root operation surface for R1. Frozen by T01.r1.
+# Rules (03): every modifying mutation carries clientMutationId; changes to existing
+# records carry expectedRevision; stale writes return CONFLICT + currentRevision with
+# no partial changes. Payloads carry typed result + problems, never generic JSON.
+
+type Query {
+  session: Session!
+  workspace: Workspace!
+  locations: [Location!]!
+  tags(first: Int = 25, after: String, filter: TagFilter): TagConnection!
+  plants(first: Int = 25, after: String, filter: PlantFilter, order: PlantOrder = NAME_ASC): PlantConnection!
+  "Null when absent or cross-workspace (behaves as NOT_FOUND for mutations)."
+  plant(id: ID!): Plant
+  "plantId null = workspace-wide timeline. Default order (occurredAt DESC, id DESC); opaque keyset cursors bound to filter signature."
+  journal(plantId: ID, first: Int = 25, after: String, filter: JournalFilter): JournalConnection!
+  purchases(first: Int = 25, after: String, filter: PurchaseFilter): PurchaseConnection!
+  purchase(id: ID!): Purchase
+  spending(filter: SpendingFilter): Spending!
+  "Assets in RESERVED/UPLOADED/PROCESSING/FAILED for resume and sweeper visibility."
+  pendingUploads(first: Int = 25, after: String): AssetConnection!
+  exportJob(id: ID!): ExportJob
+}
+
+input SpendingFilter {
+  plantId: ID
+  from: LocalDate
+  to: LocalDate
+}
+
+type Mutation {
+  updateWorkspace(input: UpdateWorkspaceInput!, clientMutationId: String): UpdateWorkspacePayload!
+
+  createPlant(input: CreatePlantInput!, clientMutationId: String): CreatePlantPayload!
+  updatePlant(input: UpdatePlantInput!, clientMutationId: String): UpdatePlantPayload!
+  archivePlant(input: ArchivePlantInput!, clientMutationId: String): ArchivePlantPayload!
+  restorePlant(input: RestorePlantInput!, clientMutationId: String): RestorePlantPayload!
+  purgePlant(input: PurgePlantInput!, clientMutationId: String): PurgePlantPayload!
+
+  createLocation(input: CreateLocationInput!, clientMutationId: String): CreateLocationPayload!
+  updateLocation(input: UpdateLocationInput!, clientMutationId: String): UpdateLocationPayload!
+
+  createTag(input: CreateTagInput!, clientMutationId: String): CreateTagPayload!
+  "Rename changes display only; tag IDs never change."
+  updateTag(input: UpdateTagInput!, clientMutationId: String): UpdateTagPayload!
+  archiveTag(input: ArchiveTagInput!, clientMutationId: String): ArchiveTagPayload!
+  "Atomically replaces the plant's tag set; increments plant revision. Archived tags rejected as newly assigned."
+  setPlantTags(input: SetPlantTagsInput!, clientMutationId: String): SetPlantTagsPayload!
+  "Appends an immutable context transition; backdated entries re-evaluate affected future care (T23 hook)."
+  setPlantContext(input: SetPlantContextInput!, clientMutationId: String): SetPlantContextPayload!
+
+  recordActivity(input: RecordActivityInput!, clientMutationId: String): RecordActivityPayload!
+  updateActivity(input: UpdateActivityInput!, clientMutationId: String): UpdateActivityPayload!
+  voidActivity(input: VoidActivityInput!, clientMutationId: String): VoidActivityPayload!
+
+  recordMeasurement(input: RecordMeasurementInput!, clientMutationId: String): RecordMeasurementPayload!
+  updateMeasurement(input: UpdateMeasurementInput!, clientMutationId: String): UpdateMeasurementPayload!
+  deleteMeasurement(input: DeleteMeasurementInput!, clientMutationId: String): DeleteMeasurementPayload!
+
+  recordAcquisition(input: RecordAcquisitionInput!, clientMutationId: String): RecordAcquisitionPayload!
+  updateAcquisition(input: UpdateAcquisitionInput!, clientMutationId: String): UpdateAcquisitionPayload!
+  priceAcquisition(input: PriceAcquisitionInput!, clientMutationId: String): PriceAcquisitionPayload!
+
+  createPurchase(input: CreatePurchaseInput!, clientMutationId: String): CreatePurchasePayload!
+  updatePurchase(input: UpdatePurchaseInput!, clientMutationId: String): UpdatePurchasePayload!
+  voidPurchase(input: VoidPurchaseInput!, clientMutationId: String): VoidPurchasePayload!
+
+  reserveUpload(input: ReserveUploadInput!, clientMutationId: String): ReserveUploadPayload!
+  finalizeUpload(input: FinalizeUploadInput!, clientMutationId: String): FinalizeUploadPayload!
+
+  attachPhoto(input: AttachPhotoInput!, clientMutationId: String): AttachPhotoPayload!
+  updatePhoto(input: UpdatePhotoInput!, clientMutationId: String): UpdatePhotoPayload!
+  deletePhoto(input: DeletePhotoInput!, clientMutationId: String): DeletePhotoPayload!
+
+  attachReceipt(input: AttachReceiptInput!, clientMutationId: String): AttachReceiptPayload!
+  detachReceipt(input: DetachReceiptInput!, clientMutationId: String): DetachReceiptPayload!
+
+  requestExport(input: RequestExportInput! = {}, clientMutationId: String): RequestExportPayload!
+}
+
+# ---------- workspace ----------
+
+input UpdateWorkspaceInput {
+  expectedRevision: Int!
+  displayName: String
+  timezone: String
+  defaultCurrency: String
+  location: WorkspaceLocationInput
+}
+
+input WorkspaceLocationInput {
+  latitude: Decimal!
+  longitude: Decimal!
+  label: String
+}
+
+type UpdateWorkspacePayload {
+  workspace: Workspace
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- plants ----------
+
+input PlantContextInput {
+  "Default now."
+  effectiveFrom: DateTime
+  locationId: ID
+  placement: ContextPlacement!
+  potVolumeLiters: Decimal
+  mediumNote: String
+  lightNote: String
+}
+
+input CreatePlantInput {
+  name: String!
+  scientificName: String
+  cultivar: String
+  rootstock: String
+  type: PlantType!
+  count: Int
+  category: PlantCategory!
+  plantedOn: LocalDate
+  estimatedAgeYears: Decimal
+  tagIds: [ID!]
+  initialContext: PlantContextInput
+  "Optional provenance recorded with creation; acquiredOn here also writes the projection."
+  acquisition: AcquisitionInput
+  "Optional pricing for the acquisition at creation; atomic purchase+line+allocation when set."
+  initialPurchase: InitialPurchaseInput
+}
+
+input AcquisitionInput {
+  seller: String
+  acquiredOn: LocalDate
+  pricingState: PricingState!
+}
+
+input InitialPurchaseInput {
+  currency: String!
+  totalMinor: MinorUnits!
+  shippingMinor: MinorUnits! = "0"
+  taxMinor: MinorUnits! = "0"
+  purchasedOn: LocalDate
+  seller: String
+}
+
+input UpdatePlantInput {
+  id: ID!
+  expectedRevision: Int!
+  name: String
+  scientificName: String
+  cultivar: String
+  rootstock: String
+  type: PlantType
+  count: Int
+  category: PlantCategory
+  "acquiredOn is NOT editable here: it is the acquisition projection."
+  plantedOn: LocalDate
+  estimatedAgeYears: Decimal
+}
+
+input ArchivePlantInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+input RestorePlantInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+enum PurgeConfirmation {
+  "Echoed in UI copy; the only accepted value. Removes plant-owned data per 03 retained-copy matrix."
+  PERMANENTLY_DELETE_PLANT
+}
+
+input PurgePlantInput {
+  id: ID!
+  expectedRevision: Int!
+  confirm: PurgeConfirmation!
+}
+
+input SetPlantTagsInput {
+  plantId: ID!
+  expectedRevision: Int!
+  tagIds: [ID!]!
+}
+
+input SetPlantContextInput {
+  plantId: ID!
+  expectedRevision: Int!
+  context: PlantContextInput!
+}
+
+type CreatePlantPayload {
+  plant: Plant
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type UpdatePlantPayload {
+  plant: Plant
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type ArchivePlantPayload {
+  plant: Plant
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type RestorePlantPayload {
+  plant: Plant
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type PurgePlantPayload {
+  "Id of the purged plant; entity itself is gone (tombstone internal)."
+  purgedPlantId: ID
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type SetPlantTagsPayload {
+  plant: Plant
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type SetPlantContextPayload {
+  plant: Plant
+  context: PlantContext
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- locations ----------
+
+input CreateLocationInput {
+  name: String!
+  parentLocationId: ID
+  situation: LocationSituation!
+  latitude: Decimal
+  longitude: Decimal
+  label: String
+}
+
+input UpdateLocationInput {
+  id: ID!
+  expectedRevision: Int!
+  name: String
+  "Null clears; setting to self/descendant rejected with VALIDATION (cycle/depth <= 5)."
+  parentLocationId: ID
+  situation: LocationSituation
+  latitude: Decimal
+  longitude: Decimal
+  label: String
+}
+
+type CreateLocationPayload {
+  location: Location
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type UpdateLocationPayload {
+  location: Location
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- tags ----------
+
+input CreateTagInput {
+  "Trimmed; workspace-normalized unique, max 40 chars."
+  label: String!
+}
+
+input UpdateTagInput {
+  id: ID!
+  expectedRevision: Int!
+  label: String!
+}
+
+input ArchiveTagInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+type CreateTagPayload {
+  tag: Tag
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type UpdateTagPayload {
+  tag: Tag
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type ArchiveTagPayload {
+  tag: Tag
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- activities ----------
+
+input RecordActivityInput {
+  plantId: ID!
+  kind: ActivityKind!
+  occurredAt: DateTime!
+  "IANA timezone of entry; default workspace timezone."
+  timezone: String
+  note: String
+  "WATER amount may be unknown (both null); measured WATER requires quantity with a VOLUME unit. FERTILIZE requires quantity/unit (MASS or VOLUME) with product. Other kinds carry neither."
+  quantity: Decimal
+  unit: Unit
+  product: String
+}
+
+input UpdateActivityInput {
+  id: ID!
+  expectedRevision: Int!
+  occurredAt: DateTime
+  timezone: String
+  note: String
+  quantity: Decimal
+  unit: Unit
+  product: String
+}
+
+input VoidActivityInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+type RecordActivityPayload {
+  activity: Activity
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type UpdateActivityPayload {
+  activity: Activity
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type VoidActivityPayload {
+  activity: Activity
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- measurements ----------
+
+input RecordMeasurementInput {
+  plantId: ID!
+  quantityKind: QuantityKind!
+  value: Decimal!
+  "Must be compatible with quantityKind."
+  unit: Unit!
+  observedAt: DateTime!
+  method: MeasurementMethod! = MANUAL
+  uncertainty: Decimal
+  activityId: ID
+}
+
+"Original quantityKind/unit/value inputs are retained in audit revisions."
+input UpdateMeasurementInput {
+  id: ID!
+  expectedRevision: Int!
+  value: Decimal
+  uncertainty: Decimal
+  observedAt: DateTime
+}
+
+input DeleteMeasurementInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+type RecordMeasurementPayload {
+  measurement: Measurement
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type UpdateMeasurementPayload {
+  measurement: Measurement
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type DeleteMeasurementPayload {
+  deletedMeasurementId: ID
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- acquisitions ----------
+
+input RecordAcquisitionInput {
+  plantId: ID!
+  seller: String
+  acquiredOn: LocalDate
+  "UNKNOWN requires no allocation; KNOWN requires purchaseAllocationId or newPurchase."
+  pricingState: PricingState!
+  "Link an existing allocation to this plant."
+  purchaseAllocationId: ID
+  "Atomically create a priced purchase (single line) allocated to this plant."
+  newPurchase: NewPricedPurchaseInput
+}
+
+input NewPricedPurchaseInput {
+  currency: String!
+  totalMinor: MinorUnits!
+  shippingMinor: MinorUnits! = "0"
+  taxMinor: MinorUnits! = "0"
+  purchasedOn: LocalDate
+  seller: String
+  lineDescription: String!
+}
+
+input UpdateAcquisitionInput {
+  id: ID!
+  expectedRevision: Int!
+  "Field presence changes provenance only; pricing changes go through priceAcquisition."
+  seller: String
+  acquiredOn: LocalDate
+}
+
+input PriceAcquisitionInput {
+  acquisitionId: ID!
+  expectedRevision: Int!
+  "Exactly one of link/unlink/create."
+  purchaseAllocationId: ID
+  newPurchase: NewPricedPurchaseInput
+  "KNOWN -> UNKNOWN: detaches the acquisition link without voiding the financial purchase."
+  revertToUnknown: Boolean
+}
+
+type RecordAcquisitionPayload {
+  acquisition: Acquisition
+  "Present when a purchase was atomically created."
+  purchase: Purchase
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type UpdateAcquisitionPayload {
+  acquisition: Acquisition
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type PriceAcquisitionPayload {
+  acquisition: Acquisition
+  purchase: Purchase
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- purchases ----------
+
+input CreatePurchaseInput {
+  seller: String
+  purchasedOn: LocalDate
+  currency: String!
+  totalMinor: MinorUnits!
+  shippingMinor: MinorUnits! = "0"
+  taxMinor: MinorUnits! = "0"
+  lines: [PurchaseLineInput!]!
+}
+
+input UpdatePurchaseInput {
+  id: ID!
+  expectedRevision: Int!
+  seller: String
+  purchasedOn: LocalDate
+  currency: String
+  totalMinor: MinorUnits
+  shippingMinor: MinorUnits
+  taxMinor: MinorUnits
+  "Full replacement set; retained lines/allocations keep their ids. Removing or reassigning an acquisition-linked allocation requires listing its acquisitionId here after UI confirmation; the transaction marks that acquisition UNKNOWN first."
+  unlinkAcquisitionIds: [ID!]
+  lines: [PurchaseLineInput!]
+}
+
+input VoidPurchaseInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+type CreatePurchasePayload {
+  purchase: Purchase
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type UpdatePurchasePayload {
+  purchase: Purchase
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type VoidPurchasePayload {
+  purchase: Purchase
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- media ----------
+
+input FinalizeUploadInput {
+  assetId: ID!
+  "Server-computed checksum must match; repeat finalize is safe and returns the same state."
+  sha256: String!
+}
+
+input AttachPhotoInput {
+  plantId: ID!
+  assetId: ID!
+  "Asset must be READY, purpose PHOTO, same workspace."
+  takenAt: DateTime
+  "When no explicit takenAt is supplied, prefer original capture metadata; missing metadata stays upload fallback."
+  preferCaptureDate: Boolean = false
+  dateSource: PhotoDateSource!
+  timezone: String
+  caption: String
+  viewpoint: PhotoViewpoint!
+  "True explicitly chooses this cover. Otherwise the server may choose a better, current whole-plant photo using locally derived thumbnail quality."
+  isCover: Boolean! = false
+}
+
+input UpdatePhotoInput {
+  id: ID!
+  expectedRevision: Int!
+  takenAt: DateTime
+  dateSource: PhotoDateSource
+  timezone: String
+  caption: String
+  viewpoint: PhotoViewpoint
+  isCover: Boolean
+}
+
+input DeletePhotoInput {
+  id: ID!
+  expectedRevision: Int!
+}
+
+input AttachReceiptInput {
+  purchaseId: ID!
+  "READY receipt asset, same workspace; one receipt may document many lines."
+  assetId: ID!
+}
+
+input DetachReceiptInput {
+  purchaseId: ID!
+  receiptId: ID!
+  expectedRevision: Int!
+}
+
+type ReserveUploadPayload {
+  "state RESERVED; stream body to PUT /api/uploads/{assetId} with X-CSRF-Token."
+  asset: Asset
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type FinalizeUploadPayload {
+  "state PROCESSING on success; derivatives arrive asynchronously."
+  asset: Asset
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type AttachPhotoPayload {
+  photo: PlantPhoto
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type UpdatePhotoPayload {
+  photo: PlantPhoto
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type DeletePhotoPayload {
+  deletedPhotoId: ID
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type AttachReceiptPayload {
+  receipt: PurchaseReceipt
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+type DetachReceiptPayload {
+  detachedReceiptId: ID
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# ---------- portability ----------
+
+input RequestExportInput {
+  "Ignored placeholder to keep the input extensible without breaking callers."
+  includeMedia: Boolean
+}
+
+type RequestExportPayload {
+  exportJob: ExportJob
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}

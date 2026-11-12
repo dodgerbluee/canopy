@@ -1,0 +1,29 @@
+"""Calendar days use workspace timezone; photos appear on their recorded capture date. Unknown/upload-fallback capture dates are excluded."""
+type CalendarEvent {
+  id: ID!
+  entityId: ID!
+  plantId: ID
+  day: LocalDate!
+  kind: CalendarEventKind!
+  activityKind: ActivityKind
+  title: String!
+  amountMm: Decimal
+  note: String
+  revision: Int
+}
+enum CalendarEventKind { ACTIVITY PHOTO PURCHASE MEASUREMENT CARE INSIGHT RAIN }
+type CalendarEventConnection { items: [CalendarEvent!]!, pageInfo: PageInfo! }
+type RainEvent { id: ID!, day: LocalDate!, amountMm: Decimal, note: String, revision: Int! }
+input RecordRainInput { day: LocalDate!, amountMm: Decimal, note: String }
+input VoidRainInput { id: ID!, expectedRevision: Int! }
+type RecordRainPayload { rain: RainEvent, problems: [MutationProblem!]!, clientMutationId: String }
+type VoidRainPayload { removedId: ID, problems: [MutationProblem!]!, clientMutationId: String }
+extend type Query {
+  """Inclusive dates; maximum 62 days. Complete pagination before displaying a month."""
+  calendarEvents(from: LocalDate!, to: LocalDate!, first: Int = 100, after: String): CalendarEventConnection!
+}
+extend type Mutation {
+  """Area rain only. Never creates WATER activities or completes care tasks."""
+  recordRain(input: RecordRainInput!, clientMutationId: String): RecordRainPayload!
+  voidRain(input: VoidRainInput!, clientMutationId: String): VoidRainPayload!
+}

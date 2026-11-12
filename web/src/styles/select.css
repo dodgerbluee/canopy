@@ -1,0 +1,163 @@
+/* Shared treatment for every single native select.input (Add Plant choices,
+   collection filters, quick-log and unit selects). The controls stay native:
+   same values, same keyboard and type-ahead behaviour, no JS listbox.
+   `select.input:not([multiple])` outranks the later base input rules, so this
+   file wins regardless of import order. Tokens only — no literal colors. */
+
+select.input:not([multiple]) {
+  min-height: var(--touch-min);
+  width: 100%;
+  padding: var(--sp-2) var(--sp-8) var(--sp-2) var(--sp-3);
+  font-size: inherit;
+  line-height: inherit;
+  color: var(--text-primary);
+  background-color: var(--surface-base);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-field);
+  /* fallback arrow: two short strokes meeting at a point, drawn in the muted
+     token inside 6px boxes at right 18px and right 12px. No image requests. */
+  appearance: none;
+  background-image:
+    linear-gradient(
+      to bottom-left,
+      transparent calc(50% - 1px),
+      var(--text-muted) calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    ),
+    linear-gradient(
+      to bottom-right,
+      transparent calc(50% - 1px),
+      var(--text-muted) calc(50% - 1px) calc(50% + 1px),
+      transparent calc(50% + 1px)
+    );
+  background-repeat: no-repeat;
+  background-position:
+    right 18px center,
+    right 12px center;
+  background-size:
+    6px 6px,
+    6px 6px;
+  transition: border-color var(--dur-control) var(--ease-out);
+}
+select.input:not([multiple]):hover {
+  border-color: var(--text-muted);
+}
+select.input:not([multiple]):focus-visible {
+  outline: var(--focus-width) solid var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+select.input:not([multiple])[aria-invalid='true'] {
+  border-color: var(--danger);
+}
+select.input:not([multiple])[disabled],
+select.input:not([multiple])[disabled]:hover {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-color: var(--border);
+}
+select[multiple].input {
+  /* multiple keeps the platform control: no painted arrow, no custom padding */
+  appearance: auto;
+  background-image: none;
+  padding-right: var(--sp-3);
+}
+
+/* Progressive enhancement: browsers that can style the real picker get the
+   native popup, themed to the card surface. Others keep the gradient arrow. */
+@supports (appearance: base-select) and (selector(::picker(select))) {
+  select.input:not([multiple]),
+  select.input:not([multiple])::picker(select) {
+    appearance: base-select;
+  }
+  select.input:not([multiple]) {
+    background-image: none;
+    padding-right: var(--sp-6);
+  }
+  select.input:not([multiple])::picker-icon {
+    color: var(--text-muted);
+    font-size: 10px;
+    transition: transform var(--dur-control) var(--ease-out);
+    /* the default glyph is an opaque text triangle: replace it with a themed
+       chevron drawn from two borders. No image requests. */
+    content: '';
+    inline-size: 6px;
+    block-size: 6px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    margin-inline-start: auto;
+    margin-inline-end: 4px;
+  }
+  select.input:not([multiple]):open::picker-icon {
+    transform: rotate(225deg);
+  }
+  select.input:not([multiple])::picker(select) {
+    background: var(--surface-base);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow);
+    padding: var(--sp-2);
+    margin-block-start: var(--sp-1);
+    max-height: min(320px, 50dvh);
+    overflow: auto;
+  }
+  /* options are ordinary native option elements, not shadow children: they do
+     not inherit the field's background-image. The reset is only belt-and-braces
+     for engines that paint the select's box into its option row. */
+  select.input:not([multiple]) option {
+    min-height: var(--touch-min);
+    padding: var(--sp-2) var(--sp-3);
+    border-radius: calc(var(--radius-field) - 2px);
+    font-size: inherit;
+    line-height: inherit;
+    background-image: none;
+    transition: background var(--dur-control) var(--ease-out);
+  }
+  select.input:not([multiple]) option:hover {
+    background: color-mix(in srgb, var(--accent) 12%, var(--surface-base));
+  }
+  select.input:not([multiple]) option:focus-visible {
+    background: color-mix(in srgb, var(--accent) 18%, var(--surface-base));
+    outline: var(--focus-width) solid var(--focus-ring);
+    outline-offset: calc(var(--focus-offset) * -1);
+  }
+  select.input:not([multiple]) option:checked {
+    background: color-mix(in srgb, var(--accent) 22%, var(--surface-base));
+    color: var(--text-primary);
+    /* the UA checkmark stays: it is the only non-color marker of the choice */
+    font-weight: 600;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  select.input:not([multiple]),
+  select.input:not([multiple])::picker-icon,
+  select.input:not([multiple]) option {
+    transition: none;
+  }
+}
+
+/* Forced colors: the platform draws its own control and arrow, so the painted
+   chevron and the custom popup chrome step aside. */
+@media (forced-colors: active) {
+  select.input:not([multiple]) {
+    appearance: auto;
+    background-image: none;
+    padding-right: var(--sp-6);
+  }
+  select.input:not([multiple])::picker-icon {
+    color: CanvasText;
+  }
+  select.input:not([multiple])::picker(select) {
+    background: Canvas;
+    color: CanvasText;
+    border-color: CanvasText;
+    box-shadow: none;
+  }
+  select.input:not([multiple]) option:hover,
+  select.input:not([multiple]) option:checked {
+    background: Highlight;
+    color: HighlightText;
+  }
+}

@@ -1,0 +1,18 @@
+query CalendarEvents($from: LocalDate!, $to: LocalDate!, $first: Int!, $after: String) {
+  calendarEvents(from: $from, to: $to, first: $first, after: $after) {
+    items { id entityId plantId day kind activityKind title amountMm note revision }
+    pageInfo { hasNextPage endCursor }
+  }
+}
+mutation RecordRain($input: RecordRainInput!, $clientMutationId: String) {
+  recordRain(input: $input, clientMutationId: $clientMutationId) {
+    rain { id day amountMm note revision }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation VoidRain($input: VoidRainInput!, $clientMutationId: String) {
+  voidRain(input: $input, clientMutationId: $clientMutationId) {
+    removedId problems { code field message currentRevision } clientMutationId
+  }
+}

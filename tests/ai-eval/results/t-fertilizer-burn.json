@@ -1,0 +1,133 @@
+{
+  "caseId": "t-fertilizer-burn",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:aa2db34c3c00fa5d3e664f6f77938c33f9dda9f36e65ab533e797818b68b5d12",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "d1d2bc7d-9324-4e57-ac48-e5afa06956d1",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "0fe31887-c15a-4e29-8008-58f042a3c8fb",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "a4c34dda-bd7b-463c-ae6c-789500603f05",
+        "kind": "FERTILIZE",
+        "note": "applied three times the recommended dose of fertilizer by mistake",
+        "occurredAt": "2026-10-27T08:26:07Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The recorded triple-dose fertilizer application may be associated with an elevated risk of fertilizer salt buildup or root-zone stress.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "a4c34dda-bd7b-463c-ae6c-789500603f05"
+        ]
+      },
+      {
+        "text": "If leaf browning, yellowing, tip burn, or wilting are observed, those signs may be associated with fertilizer concentration stress, though other factors cannot be ruled out.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "a4c34dda-bd7b-463c-ae6c-789500603f05"
+        ]
+      },
+      {
+        "text": "The plant may recover without intervention if the fertilizer dose was not excessive for its pot size, soil mix, and watering pattern.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "a4c34dda-bd7b-463c-ae6c-789500603f05"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Inspect the plant now and over the next 7-14 days for leaf yellowing, brown tips, crispy edges, wilting, or new growth.",
+      "Check the soil surface and pot drainage for salt crust, soggy soil, or poor drainage.",
+      "If the pot drains well, consider gently flushing the soil with water to reduce fertilizer salts, then allow it to drain fully.",
+      "Pause additional fertilizer until new healthy growth is observed, then resume at a lower dose if needed.",
+      "Record photos of the whole plant and close-ups of affected leaves, along with pot size and watering notes.",
+      "Compare the plant with reliable Monstera care guidance before making further fertilizer changes.",
+      "Monitor for improvement or worsening over 2-4 weeks and adjust watering and light based on observed condition."
+    ],
+    "missingInformation": [
+      "No photos or visual condition details are available, so current leaf color, texture, and symptoms cannot be assessed.",
+      "No measurements such as leaf count, pot size, soil moisture, or EC/salinity are recorded.",
+      "The fertilizer product, concentration, and exact amount applied are not specified.",
+      "Watering practices after the fertilizer application are not recorded.",
+      "Soil mix, drainage, pot size, and root condition are not recorded.",
+      "No approved care guidance is available for this workspace.",
+      "No weather or location data are available to contextualize environmental stress.",
+      "No prior activities or baseline condition are recorded for comparison.",
+      "No purchases or cost records are available to identify fertilizer product details.",
+      "No follow-up observations after 2026-02-27 are recorded."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The snapshot lists one activity for this Monstera: a FERTILIZE activity recorded at 2026-02-27T08:26:07Z.",
+        "evidenceIds": [
+          "a4c34dda-bd7b-463c-ae6c-789500603f05"
+        ]
+      },
+      {
+        "text": "The activity note says three times the recommended dose of fertilizer was applied by mistake.",
+        "evidenceIds": [
+          "a4c34dda-bd7b-463c-ae6c-789500603f05"
+        ]
+      },
+      {
+        "text": "No photos are included in the snapshot.",
+        "evidenceIds": []
+      },
+      {
+        "text": "No measurements are included in the snapshot.",
+        "evidenceIds": []
+      },
+      {
+        "text": "No guidance entries are included in the snapshot.",
+        "evidenceIds": []
+      },
+      {
+        "text": "No weather entries are included in the snapshot.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The workspace has no location coordinates.",
+        "evidenceIds": []
+      },
+      {
+        "text": "No purchases with costs allocated to this plant are recorded.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

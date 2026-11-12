@@ -1,0 +1,404 @@
+<div class="calendar-page">
+  <div class="calendar-heading">
+    <div>
+      <p class="kicker">YOUR GARDEN, OVER TIME</p>
+      <h1>Calendar<span class="heading-dot">.</span></h1>
+      <p class="intro">Little moments. A growing story.</p>
+    </div>
+    <button class="btn btn-primary" type="button" (click)="addRain()" [disabled]="!selectedDay()">
+      <ui-icon name="rain" [size]="18" />Add rain
+    </button>
+  </div>
+
+  <div class="calendar-layout">
+    <aside class="plant-sidebar" aria-label="Calendar filters">
+      <div class="filter-title">
+        <h2>Your plants</h2>
+        <span class="count">{{ selectedPlants().size }}/{{ plants().length }}</span>
+      </div>
+      <p class="filter-hint">Choose what shows up.</p>
+      <label class="search-box"
+        ><ui-icon name="search" [size]="16" /><input
+          type="search"
+          aria-label="Find a plant"
+          placeholder="Find a plant…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+      /></label>
+      <div class="filter-links">
+        <button type="button" (click)="chooseAll(true)">Select all</button
+        ><span aria-hidden="true">·</span
+        ><button type="button" (click)="chooseAll(false)">Clear</button>
+      </div>
+      <div class="plant-checks">
+        @for (plant of filteredPlants(); track plant.id) {
+          <label class="plant-check"
+            ><input
+              type="checkbox"
+              [checked]="selectedPlants().has(plant.id)"
+              (change)="togglePlant(plant.id)"
+            /><span class="plant-avatar">
+              @if (thumbnail(plant); as src) {
+                <img [src]="src" alt="" (error)="imageFailed(plant.id)" />
+              } @else {
+                <ui-icon name="leaf" [size]="19" />
+              }</span
+            ><span
+              >{{ plant.name }}
+              @if (plant.status !== 'ACTIVE') {
+                <small>{{ plant.status }}</small>
+              }
+            </span></label
+          >
+        } @empty {
+          <p class="filter-hint">No plants found.</p>
+        }
+      </div>
+      <div class="filter-section">
+        <h3>Show on calendar</h3>
+        <label class="type-check"
+          ><input
+            type="checkbox"
+            [ngModel]="showWater()"
+            (ngModelChange)="showWater.set($event)"
+          /><ui-icon name="drop" [size]="17" />Watering</label
+        >
+        <label class="type-check"
+          ><input
+            type="checkbox"
+            [ngModel]="showPhotos()"
+            (ngModelChange)="showPhotos.set($event)"
+          /><ui-icon name="camera" [size]="17" />Photos taken</label
+        >
+        <label class="type-check"
+          ><input
+            type="checkbox"
+            [ngModel]="showOther()"
+            (ngModelChange)="showOther.set($event)"
+          /><ui-icon name="leaf" [size]="17" />Other entries</label
+        >
+        <label class="type-check"
+          ><input
+            type="checkbox"
+            [ngModel]="showRain()"
+            (ngModelChange)="showRain.set($event)"
+          /><ui-icon name="rain" [size]="17" />Area rain</label
+        >
+      </div>
+      <p class="area-caption"><ui-icon name="location" [size]="15" />{{ area() }}</p>
+      <p class="filter-hint">Rain is area context, separate from manual watering.</p>
+    </aside>
+    <div class="calendar-content">
+      <section class="month-panel" aria-labelledby="calendar-month" [attr.aria-busy]="loading()">
+        <div class="month-toolbar">
+          <div>
+            <h2 id="calendar-month">{{ monthLabel() }}</h2>
+            <p class="month-meta">
+              @if (loading()) {
+                Loading your history…
+              } @else if (error()) {
+                History unavailable
+              } @else {
+                {{ monthCount() }} entries this month
+              }
+              @if (timezone()) {
+                <span>· {{ timezone() }}</span>
+              }
+            </p>
+          </div>
+          <div class="month-controls">
+            <button
+              type="button"
+              class="btn today-btn"
+              (click)="goToday()"
+              [disabled]="!timezone()"
+            >
+              Today</button
+            ><button
+              class="icon-button"
+              type="button"
+              aria-label="Previous month"
+              (click)="moveMonth(-1)"
+              [disabled]="!month()"
+            >
+              <ui-icon name="back" [size]="18" /></button
+            ><button
+              class="icon-button"
+              type="button"
+              aria-label="Next month"
+              (click)="moveMonth(1)"
+              [disabled]="!month()"
+            >
+              <ui-icon name="arrow" [size]="18" />
+            </button>
+          </div>
+        </div>
+        <div class="mobile-filter-bar">
+          <button class="btn" type="button" (click)="filtersOpen.set(true)">
+            <ui-icon name="leaf" [size]="16" />Plants & filters<span class="count">{{
+              selectedPlants().size
+            }}</span>
+          </button>
+        </div>
+        @if (error()) {
+          <div class="calendar-error" role="alert">
+            <strong>Your calendar couldn’t be loaded</strong>
+            <p>{{ error() }}</p>
+            <button class="btn" type="button" (click)="loadMonth()">Retry loading calendar</button>
+          </div>
+        }
+        <div class="weekdays" aria-hidden="true">
+          @for (day of weekdays; track day) {
+            <span>{{ day }}</span>
+          }
+        </div>
+        <div class="month-grid" aria-label="Calendar days">
+          @for (day of days(); track day) {
+            <button
+              type="button"
+              class="day-cell"
+              [class.outside-month]="!day.startsWith(month())"
+              [class.is-today]="day === today()"
+              [class.is-selected]="day === selectedDay()"
+              [attr.aria-pressed]="day === selectedDay()"
+              [attr.aria-current]="day === today() ? 'date' : null"
+              (click)="selectedDay.set(day)"
+            >
+              <span class="day-number">{{ dayNumber(day) }}</span
+              ><span class="visually-hidden"
+                >{{ dateLabel(day) }};
+                {{ loading() ? 'loading' : error() ? 'history unavailable' : '' }}</span
+              >
+              @if (!loading() && !error()) {
+                <span class="day-markers">
+                  @for (group of groups(day); track group.icon) {
+                    <span
+                      class="event-marker"
+                      [class.rain-marker]="group.icon === 'rain'"
+                      [attr.title]="group.label + ': ' + group.count"
+                      ><span class="visually-hidden">{{ group.label }}: </span
+                      ><ui-icon [name]="group.icon" [size]="15" /><span>{{
+                        group.count
+                      }}</span></span
+                    >
+                  }
+                </span>
+              }
+            </button>
+          }
+        </div>
+        <div class="calendar-legend">
+          <span><ui-icon name="drop" [size]="15" />Watering</span
+          ><span><ui-icon name="rain" [size]="15" />Rain</span
+          ><span><ui-icon name="camera" [size]="15" />Photos taken</span
+          ><span><ui-icon name="leaf" [size]="15" />Other</span>
+        </div>
+      </section>
+      <section class="day-panel" aria-labelledby="selected-day-title">
+        <div class="day-heading">
+          <div>
+            <p class="kicker">THE DAY’S DETAILS</p>
+            <h2 id="selected-day-title">{{ selectedLabel() }}</h2>
+          </div>
+          <span class="count">{{ dayEvents().length }}</span>
+        </div>
+        @if (loading()) {
+          <p class="day-empty" role="status">Loading entries…</p>
+        } @else if (error()) {
+          <p class="day-empty">History is unavailable. Retry loading the calendar above.</p>
+        } @else {
+          @for (entry of dayEvents(); track entry.id) {
+            <article class="calendar-entry">
+              <span class="entry-icon" [class.is-rain]="entry.kind === 'RAIN'"
+                ><ui-icon [name]="icon(entry)" [size]="20"
+              /></span>
+              <div class="entry-copy">
+                <p class="entry-title">
+                  {{ entry.kind === 'PHOTO' ? 'Photo taken' : entry.title }}
+                </p>
+                @if (entry.kind === 'RAIN') {
+                  <p class="entry-meta">
+                    {{ area() }} ·
+                    {{ entry.amountMm === null ? 'Amount not recorded' : entry.amountMm + ' mm' }}
+                  </p>
+                  @if (entry.note) {
+                    <p class="entry-note">{{ entry.note }}</p>
+                  }
+                } @else {
+                  <a class="entry-plant" [routerLink]="['/plants', entry.plantId]">{{
+                    plantName(entry.plantId)
+                  }}</a>
+                }
+              </div>
+              @if (entry.kind === 'RAIN') {
+                <button
+                  class="btn remove-rain"
+                  type="button"
+                  (click)="confirmRemove(entry)"
+                  aria-label="Remove rain record"
+                >
+                  Remove
+                </button>
+              }
+            </article>
+          } @empty {
+            <div class="day-empty">
+              <ui-icon name="sprout" [size]="28" />
+              <p>No entries with these filters.</p>
+              <span>Choose another day, show more plants, or add rain.</span>
+            </div>
+          }
+        }
+      </section>
+    </div>
+  </div>
+</div>
+<ui-entry-dialog
+  #rainDialog
+  [open]="rainOpen()"
+  title="Add rain"
+  description="Record rain in your garden area. Watering stays separate."
+  size="compact"
+  [busy]="saving()"
+  (dismissed)="rainOpen.set(false)"
+>
+  <form class="rain-form" (ngSubmit)="saveRain()">
+    <label for="rain-day"
+      >Date<input
+        id="rain-day"
+        name="day"
+        class="input"
+        type="date"
+        required
+        [ngModel]="rainDay()"
+        (ngModelChange)="rainDay.set($event)"
+        [disabled]="saving()"
+    /></label>
+    <div class="rain-depth">
+      <label for="rain-amount"
+        >Amount <span class="optional">optional</span
+        ><input
+          id="rain-amount"
+          name="amount"
+          class="input"
+          type="text"
+          inputmode="decimal"
+          placeholder="Unknown"
+          [ngModel]="rainAmount()"
+          (ngModelChange)="rainAmount.set($event)"
+          [disabled]="saving()" /></label
+      ><label for="rain-unit"
+        >Unit<select
+          id="rain-unit"
+          name="unit"
+          class="input"
+          [ngModel]="rainUnit()"
+          (ngModelChange)="rainUnit.set($event)"
+          [disabled]="saving()"
+        >
+          <option value="in">inches</option>
+          <option value="mm">mm</option>
+        </select></label
+      >
+    </div>
+    <p class="field-hint">A rough estimate is fine. Leave blank if you don’t know.</p>
+    <label for="rain-note"
+      >Note <span class="optional">optional</span
+      ><textarea
+        id="rain-note"
+        name="note"
+        class="input"
+        rows="2"
+        maxlength="2000"
+        placeholder="A steady afternoon shower…"
+        [ngModel]="rainNote()"
+        (ngModelChange)="rainNote.set($event)"
+        [disabled]="saving()"
+      ></textarea>
+    </label>
+    @if (saveError()) {
+      <p class="form-error" role="alert">{{ saveError() }}</p>
+    }
+    <div class="form-actions">
+      <button type="button" class="btn" [disabled]="saving()" (click)="rainDialog.requestClose()">
+        Cancel</button
+      ><button type="submit" class="btn btn-primary" [disabled]="saving()">
+        {{ saving() ? 'Saving rain…' : 'Save rain' }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>
+<ui-entry-dialog
+  #filterDialog
+  [open]="filtersOpen()"
+  title="Plants & filters"
+  description="Choose what appears on your calendar."
+  size="compact"
+  [dirty]="false"
+  (dismissed)="filtersOpen.set(false)"
+>
+  <div class="mobile-filters">
+    <div class="filter-links">
+      <button type="button" (click)="chooseAll(true)">Select all</button
+      ><button type="button" (click)="chooseAll(false)">Clear</button>
+    </div>
+    @for (plant of plants(); track plant.id) {
+      <label class="plant-check"
+        ><input
+          type="checkbox"
+          [checked]="selectedPlants().has(plant.id)"
+          (change)="togglePlant(plant.id)"
+        /><ui-icon name="leaf" [size]="19" /><span>{{ plant.name }}</span></label
+      >
+    }
+    <div class="filter-section">
+      <h3>Show on calendar</h3>
+      <label class="type-check"
+        ><input
+          type="checkbox"
+          [ngModel]="showWater()"
+          (ngModelChange)="showWater.set($event)"
+        />Watering</label
+      ><label class="type-check"
+        ><input
+          type="checkbox"
+          [ngModel]="showPhotos()"
+          (ngModelChange)="showPhotos.set($event)"
+        />Photos taken</label
+      ><label class="type-check"
+        ><input
+          type="checkbox"
+          [ngModel]="showOther()"
+          (ngModelChange)="showOther.set($event)"
+        />Other entries</label
+      ><label class="type-check"
+        ><input type="checkbox" [ngModel]="showRain()" (ngModelChange)="showRain.set($event)" />Area
+        rain</label
+      >
+    </div>
+    <button type="button" class="btn btn-primary" (click)="filterDialog.requestClose()">
+      Done
+    </button>
+  </div>
+</ui-entry-dialog>
+<ui-entry-dialog
+  #removeDialog
+  [open]="!!removeTarget()"
+  title="Remove rain record?"
+  description="This removes the rain entry from your calendar."
+  size="compact"
+  [busy]="saving()"
+  [dirty]="false"
+  (dismissed)="removeTarget.set(null)"
+>
+  @if (removeError()) {
+    <p class="form-error" role="alert">{{ removeError() }}</p>
+  }
+  <div class="form-actions">
+    <button type="button" class="btn" [disabled]="saving()" (click)="removeDialog.requestClose()">
+      Keep record</button
+    ><button type="button" class="btn btn-primary" [disabled]="saving()" (click)="removeRain()">
+      {{ saving() ? 'Removing…' : 'Remove rain' }}
+    </button>
+  </div>
+</ui-entry-dialog>

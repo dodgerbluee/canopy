@@ -1,0 +1,3 @@
+# DATA01
+
+Import ~/dev/trees (57 JPEGs in 10 folders) and owner purchase notes through the existing local app API. Evidence and resumable import tooling only under .artifacts/agents/DATA01. Preserve original files. Use exact EXIF instants with offsets, make visual observations explicit, do not invent purchases/measurements/care actions. Seller correction: Owari mandarin and pomegranate were a separate Facebook purchase from Piao Zhao in Carrolton; pom1 $20, pom2 Covingtons actual price awaiting receipt. Auth credential-source access rejected by automatic review; prepare concrete import before requesting approval or use normal sign-in.

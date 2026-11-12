@@ -1,0 +1,11 @@
+# Prepared configuration only. Replace hostname and configure DNS/TLS before
+# deploying. This file does not start a tunnel or publish the app.
+garden.example.com {
+    @canopy_agents path /mcp /agent/uploads/* /agent/exports/*/download
+    reverse_proxy @canopy_agents 127.0.0.1:8080
+    respond 404
+}
+# Matching API environment:
+# CANOPY_MCP_ENABLED=true
+# CANOPY_MCP_PUBLIC_URL=https://garden.example.com/mcp
+# CANOPY_MCP_ALLOWED_HOSTS=garden.example.com

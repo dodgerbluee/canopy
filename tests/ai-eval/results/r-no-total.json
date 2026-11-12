@@ -1,0 +1,60 @@
+{
+  "caseId": "r-no-total",
+  "kind": "RECEIPT",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:acf28241876fefbc9d34d4ecee0412ff7245fdaa774457f2d422a6516eb27d07",
+  "snapshot": {
+    "kind": "RECEIPT_EXTRACTION",
+    "costs": [],
+    "plant": {
+      "id": "",
+      "name": "",
+      "status": "",
+      "revision": 0
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "7d1bba53-4bf8-4c83-be69-e67c368e16c7",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "lines": [
+      {
+        "amountMinor": "900",
+        "description": "Fig cuttings x3"
+      },
+      {
+        "amountMinor": "750",
+        "description": "Gloves"
+      }
+    ],
+    "seller": "FARMERS STAND",
+    "currency": "",
+    "taxMinor": "",
+    "totalMinor": "",
+    "purchasedOn": "2026-08-08",
+    "shippingMinor": "",
+    "needsReconciliation": true
+  }
+}

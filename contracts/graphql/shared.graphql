@@ -1,0 +1,70 @@
+# Shared scalars, envelope, session and workspace. Frozen by T01.r1.
+# Semantics authoritative from docs/plan/03-contracts.md "Shared value rules".
+
+"RFC3339 UTC instant."
+scalar DateTime
+
+"Strict Gregorian calendar date YYYY-MM-DD. Never silently becomes an instant."
+scalar LocalDate
+
+"Canonical decimal string, no exponent, max 6 fractional digits. Exact DB numeric. Never used for money."
+scalar Decimal
+
+"Nonnegative minor-unit digit string (no sign, no separators). Validated against ISO currency exponent."
+scalar MinorUnits
+
+type Money {
+  minorUnits: MinorUnits!
+  "ISO 4217 currency code."
+  currency: String!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type MutationProblem {
+  code: ProblemCode!
+  "Failing input field path when applicable, e.g. 'input.name'."
+  field: String
+  message: String!
+  "Present on CONFLICT: current server revision of the aggregate."
+  currentRevision: Int
+}
+
+enum ProblemCode {
+  VALIDATION
+  CONFLICT
+  NOT_FOUND
+  FORBIDDEN
+  IDEMPOTENCY_CONFLICT
+  CAPABILITY_UNAVAILABLE
+  RATE_LIMITED
+  RESOURCE_GONE
+  LINKED_COMPLETION_USE_CORRECTION
+}
+
+type Session {
+  "Always true for an authenticated GraphQL request; unauthenticated transport errors are HTTP-level."
+  authenticated: Boolean!
+  workspace: Workspace!
+}
+
+type Workspace {
+  id: ID!
+  displayName: String!
+  "Validated IANA timezone identifier."
+  timezone: String!
+  "ISO 4217 default currency."
+  defaultCurrency: String!
+  settingsRevision: Int!
+  "Approximate, private, user-entered location. Never geolocated."
+  location: WorkspaceLocation
+}
+
+type WorkspaceLocation {
+  latitude: Decimal!
+  longitude: Decimal!
+  label: String
+}

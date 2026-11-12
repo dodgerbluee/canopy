@@ -1,0 +1,14 @@
+{
+  "name": "canopy-contracts",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "devDependencies": {
+    "@graphql-codegen/cli": "7.4.6",
+    "@graphql-codegen/typed-document-node": "7.2.0",
+    "@graphql-codegen/typescript": "6.1.2",
+    "@graphql-codegen/typescript-operations": "6.2.0",
+    "graphql": "17.0.2",
+    "typescript": "~6.0.3"
+  }
+}

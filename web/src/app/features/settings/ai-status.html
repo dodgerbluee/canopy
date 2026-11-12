@@ -1,0 +1,343 @@
+<section class="card ai-status" id="ai">
+  <header>
+    <p class="eyebrow">BRING YOUR OWN AI</p>
+    <h2>Your garden. Your intelligence.</h2>
+    <p class="caption">Connect a model you trust, on your network or with a hosted provider.</p>
+  </header>
+  @if (error()) {
+    <p role="alert">
+      {{ error() }}
+      <button class="btn" (click)="load()" [disabled]="busy()">Reload connections</button>
+    </p>
+  }
+  @if (notice()) {
+    <p class="caption" role="status">{{ notice() }}</p>
+  }
+  @if (data(); as settings) {
+    <div class="section-heading">
+      <h3>Feature connections</h3>
+      <button class="btn" (click)="assignments()" [disabled]="busy()">Choose connections</button>
+    </div>
+    <div class="feature-list">
+      @for (feature of features; track feature) {
+        <div class="feature-row">
+          <strong>{{ labels[feature] }}</strong
+          ><span>{{ bindingLabel(feature) }}</span>
+        </div>
+      }
+    </div>
+    <div class="section-heading">
+      <h3>Saved connections</h3>
+      <button class="btn btn-primary" (click)="edit()" [disabled]="busy()">Add connection</button>
+    </div>
+    @for (c of settings.connections; track c.id) {
+      <article class="connection">
+        <div>
+          <h4>{{ c.name }}</h4>
+          <p class="model">{{ c.model }}</p>
+          <p class="caption">{{ c.endpoint }}</p>
+          <div class="connection-meta">
+            <span class="badge">{{ c.deploymentLocal ? 'Deployment local' : 'Hosted' }}</span
+            ><span class="badge">{{ c.supportsVision ? 'Text & images' : 'Text' }}</span
+            ><span class="badge">{{
+              c.lastTestSucceeded === true
+                ? 'Connection test passed'
+                : c.lastTestSucceeded === false
+                  ? 'Last test failed'
+                  : 'Not tested'
+            }}</span>
+          </div>
+          @if (c.lastTestMessage) {
+            <p class="caption">{{ c.lastTestMessage }}</p>
+          }
+        </div>
+        <div class="actions">
+          <button class="btn" (click)="edit(c)" [disabled]="busy()">Edit</button
+          ><button class="btn" (click)="test(c)" [disabled]="busy()">Test</button
+          ><button
+            class="btn"
+            (click)="formError.set(''); deleting.set(c)"
+            [disabled]="busy()"
+            [attr.aria-label]="'Remove ' + c.name"
+          >
+            Remove
+          </button>
+        </div>
+      </article>
+    } @empty {
+      <p class="caption">
+        Add your own connection, or make an editable copy of a deployment default below.
+      </p>
+    }
+    @if (settings.deploymentDefaults.length) {
+      <h3>Deployment defaults</h3>
+      @for (d of settings.deploymentDefaults; track d.feature) {
+        <div class="default-row">
+          <div>
+            <strong>{{ labels[d.feature] }}</strong>
+            <p class="caption">{{ d.model }} · {{ d.deploymentLocal ? 'local' : 'hosted' }}</p>
+          </div>
+          <button
+            class="btn"
+            [attr.aria-label]="'Make editable copy for ' + labels[d.feature]"
+            (click)="copy(d)"
+            [disabled]="busy()"
+          >
+            Make editable copy
+          </button>
+        </div>
+      }
+    }
+  } @else {
+    <p role="status" class="caption">Loading connections…</p>
+  }
+  @if (result(); as r) {
+    <p role="status" class="test-result">
+      {{ r.succeeded ? 'Test passed.' : 'Test failed.' }} {{ r.message }}
+    </p>
+  }
+  <p class="caption">
+    Connection tests use a synthetic message and optional sample image. They do not send garden
+    records. A successful test confirms the request was accepted; it does not assess advice quality.
+  </p>
+  <a class="btn" routerLink="/insights">Open AI assistant</a>
+</section>
+<ui-entry-dialog
+  #editor
+  [open]="open()"
+  [title]="draft.expectedRevision ? 'Edit AI connection' : 'Add AI connection'"
+  description="Choose your provider and model. Keys are write-only and encrypted on the server."
+  [busy]="busy()"
+  (dismissed)="close()"
+>
+  <form class="ai-form" (ngSubmit)="save()" (input)="result.set(null)" (change)="result.set(null)">
+    <fieldset [disabled]="busy()">
+      <label for="ai-name"
+        >Connection name<input
+          id="ai-name"
+          class="input"
+          name="name"
+          [(ngModel)]="draft.name"
+          maxlength="120"
+          required
+          placeholder="My garden AI"
+      /></label>
+      <label for="ai-protocol"
+        >Provider protocol<select
+          id="ai-protocol"
+          class="input"
+          name="protocol"
+          [ngModel]="draft.protocol"
+          (ngModelChange)="protocolChanged($event)"
+        >
+          @for (p of protocols; track p.value) {
+            <option [value]="p.value">{{ p.label }}</option>
+          }
+        </select></label
+      >
+      <label for="ai-endpoint"
+        >API base URL<input
+          id="ai-endpoint"
+          class="input"
+          name="endpoint"
+          [(ngModel)]="draft.endpoint"
+          type="url"
+          required
+          placeholder="https://api.openai.com/v1"
+          autocapitalize="off"
+          spellcheck="false"
+      /></label>
+      <p class="field-hint">
+        OpenAI: https://api.openai.com/v1 · Anthropic: https://api.anthropic.com/v1 · Gemini:
+        https://generativelanguage.googleapis.com/v1beta. Local services use their own API base URL.
+      </p>
+      <label for="ai-model"
+        >Model identifier<input
+          id="ai-model"
+          class="input"
+          name="model"
+          [(ngModel)]="draft.model"
+          required
+          maxlength="200"
+          autocapitalize="off"
+          spellcheck="false"
+      /></label>
+      <label class="check"
+        ><input type="checkbox" name="local" [(ngModel)]="draft.deploymentLocal" /><span
+          >This service runs inside my deployment or private network<small
+            >Allows local HTTP and requires a private or loopback address.</small
+          ></span
+        ></label
+      >
+      <label class="check"
+        ><input type="checkbox" name="vision" [(ngModel)]="draft.supportsVision" /><span
+          >This model accepts images<small
+            >Required for plant photos and receipt image extraction.</small
+          ></span
+        ></label
+      >
+      @if (!draft.deploymentLocal) {
+        <label class="check"
+          ><input type="checkbox" name="consent" [(ngModel)]="draft.externalConsent" /><span
+            >Allow assigned features to send garden data to this provider<small
+              >Garden questions send records and sourced guidance. Photo and receipt features send
+              the selected images when requested.</small
+            ></span
+          ></label
+        >
+      }
+      <label for="ai-key"
+        >API key
+        {{ hasKey ? '· saved key retained when blank' : '· optional for keyless local services'
+        }}<input
+          id="ai-key"
+          class="input"
+          name="key"
+          type="password"
+          [(ngModel)]="apiKey"
+          autocomplete="new-password"
+          autocapitalize="off"
+          spellcheck="false"
+          [disabled]="clearKey"
+      /></label>
+      @if (hasKey) {
+        <label class="check"
+          ><input
+            type="checkbox"
+            name="clearKey"
+            [ngModel]="clearKey"
+            (ngModelChange)="clearKey = $event; apiKey = ''"
+          /><span>Remove the saved API key</span></label
+        >
+        <p class="field-hint">
+          Changing the provider or base URL requires a replacement key or explicit key removal.
+        </p>
+      }
+      @if (draft.protocol === 'OPENAI_COMPATIBLE') {
+        <details>
+          <summary>Advanced compatibility</summary>
+          <div class="advanced">
+            <label for="ai-reasoning"
+              >Reasoning effort<select
+                id="ai-reasoning"
+                class="input"
+                name="reasoning"
+                [(ngModel)]="draft.reasoningEffort"
+              >
+                <option value="">Provider default</option>
+                @for (e of ['none', 'minimal', 'low', 'medium', 'high', 'xhigh']; track e) {
+                  <option [value]="e">{{ e }}</option>
+                }
+              </select></label
+            ><label for="ai-token-field"
+              >Token limit parameter<select
+                id="ai-token-field"
+                class="input"
+                name="tokenField"
+                [(ngModel)]="draft.tokenLimitField"
+              >
+                <option value="MAX_TOKENS">max_tokens · most compatible services</option>
+                <option value="MAX_COMPLETION_TOKENS">
+                  max_completion_tokens · newer OpenAI models
+                </option>
+              </select></label
+            >
+          </div>
+        </details>
+      }
+      <div class="test-controls">
+        <label class="check"
+          ><input
+            type="checkbox"
+            name="testVision"
+            [(ngModel)]="testVision"
+            [disabled]="!draft.supportsVision"
+          /><span>Include a sample image in the test</span></label
+        ><button class="btn" type="button" (click)="test()">
+          {{ busy() ? 'Working…' : 'Test draft connection' }}
+        </button>
+      </div>
+    </fieldset>
+    @if (result(); as r) {
+      <p role="status" class="test-result">
+        {{ r.succeeded ? 'Test passed.' : 'Test failed.' }} {{ r.message }}
+      </p>
+    }
+    @if (formError()) {
+      <p role="alert" class="form-error">{{ formError() }}</p>
+    }
+    <div class="form-actions">
+      <button class="btn" type="button" [disabled]="busy()" (click)="editor.requestClose()">
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Working…' : 'Save connection' }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>
+<ui-entry-dialog
+  #assignmentDialog
+  [open]="assignmentsOpen()"
+  title="Choose AI connections"
+  description="Choose a connection for each feature. Changes apply to new requests."
+  [busy]="busy()"
+  (dismissed)="assignmentsOpen.set(false)"
+>
+  <form class="ai-form" (ngSubmit)="saveAssignments()">
+    <fieldset [disabled]="busy()">
+      @for (feature of features; track feature) {
+        <label [for]="'ai-feature-' + feature"
+          >{{ labels[feature]
+          }}<select
+            class="input"
+            [id]="'ai-feature-' + feature"
+            [attr.aria-label]="labels[feature]"
+            [name]="feature"
+            [(ngModel)]="choices[feature]"
+          >
+            <option value="DEFAULT">Deployment default</option>
+            <option value="DISABLED">Off</option>
+            @for (c of data()?.connections ?? []; track c.id) {
+              <option [value]="c.id" [disabled]="feature !== 'GARDEN' && !c.supportsVision">
+                {{ c.name }}{{ feature !== 'GARDEN' && !c.supportsVision ? ' · text only' : '' }}
+              </option>
+            }
+          </select></label
+        >
+      }
+    </fieldset>
+    @if (formError()) {
+      <p role="alert" class="form-error">{{ formError() }}</p>
+    }
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn"
+        (click)="assignmentDialog.requestClose()"
+        [disabled]="busy()"
+      >
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="busy()">
+        Save feature choices
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>
+<ui-entry-dialog
+  [open]="!!deleting()"
+  title="Remove AI connection?"
+  description="Features assigned to this connection will be turned off. Choose another connection in Feature connections to enable them again."
+  [busy]="busy()"
+  [dirty]="false"
+  (dismissed)="deleting.set(null)"
+  ><p>Remove {{ deleting()?.name }}?</p>
+  @if (formError()) {
+    <p role="alert">{{ formError() }}</p>
+  }
+  <div class="form-actions">
+    <button class="btn" [disabled]="busy()" (click)="deleting.set(null)">Cancel</button
+    ><button class="btn btn-primary" [disabled]="busy()" (click)="remove()">
+      Remove connection
+    </button>
+  </div></ui-entry-dialog
+>

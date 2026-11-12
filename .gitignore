@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.angular/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+# local dev credentials/cookies — never commit (AGENTS.md secrets rule)
+.artifacts/dev/
+
+# Source releases retain text-only acceptance summaries, never local runtime data.
+.artifacts/*
+!.artifacts/agents/
+.artifacts/agents/*/*
+!.artifacts/agents/*/EVIDENCE.md
+__pycache__/
+release/
+digests/
+candidate/

@@ -1,0 +1,21 @@
+fragment AIConnectionFields on AIConnection {
+ id name protocol endpoint model deploymentLocal supportsVision externalConsent hasAPIKey reasoningEffort tokenLimitField revision lastTestedAt lastTestSucceeded lastTestMessage
+}
+fragment AIConnectionSettingsFields on AIConnectionSettings {
+ connections { ...AIConnectionFields }
+ bindings { feature mode connectionId revision }
+ deploymentDefaults { feature protocol endpoint model deploymentLocal supportsVision hasAPIKey reasoningEffort tokenLimitField }
+}
+query AIConnections { aiConnections { ...AIConnectionSettingsFields } }
+mutation SaveAIConnection($input:SaveAIConnectionInput!,$clientMutationId:String) {
+ saveAIConnection(input:$input,clientMutationId:$clientMutationId) { connection { ...AIConnectionFields } problems { code field message currentRevision } clientMutationId }
+}
+mutation SaveAIFeatureBindings($input:[AIFeatureBindingInput!]!,$clientMutationId:String) {
+ saveAIFeatureBindings(input:$input,clientMutationId:$clientMutationId) { settings { ...AIConnectionSettingsFields } problems { code field message currentRevision } clientMutationId }
+}
+mutation DeleteAIConnection($input:DeleteAIConnectionInput!,$clientMutationId:String) {
+ deleteAIConnection(input:$input,clientMutationId:$clientMutationId) { settings { ...AIConnectionSettingsFields } problems { code field message currentRevision } clientMutationId }
+}
+mutation TestAIConnection($input:TestAIConnectionInput!) {
+ testAIConnection(input:$input) { result { succeeded message testedAt visionRequest } problems { code field message currentRevision } }
+}

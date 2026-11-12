@@ -1,0 +1,130 @@
+{
+  "caseId": "t-multi-kind",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:86ab9ec64ae6f56639f0e1780c4f8439f9af47f1206657c00f7fa0fb1bc54ff4",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "874b47f3-eac7-4e2f-a434-0e571c1bcb1c",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "6f7042c2-7cea-4043-a2e5-3ada45414061",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "5a873187-3049-4aca-8336-755cb7260c0c",
+        "kind": "WATER",
+        "note": "watered",
+        "occurredAt": "2026-10-29T08:31:16Z"
+      },
+      {
+        "id": "18e93785-965f-4765-916f-3a290a5fa1ad",
+        "kind": "PRUNE",
+        "note": "removed one yellowing lower leaf",
+        "occurredAt": "2026-10-19T08:31:16Z"
+      },
+      {
+        "id": "75e5dfbb-b1db-4848-9780-1190ef9c17ba",
+        "kind": "REPOT",
+        "note": "moved up one pot size, fresh all-purpose mix",
+        "occurredAt": "2026-10-04T08:31:16Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The removed yellowing lower leaf may be associated with normal lower-leaf aging or with recent care changes such as repotting and watering.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "18e93785-965f-4765-916f-3a290a5fa1ad",
+          "75e5dfbb-b1db-4848-9780-1190ef9c17ba",
+          "5a873187-3049-4aca-8336-755cb7260c0c"
+        ]
+      },
+      {
+        "text": "The plant may be in an adjustment phase associated with recent repotting.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "75e5dfbb-b1db-4848-9780-1190ef9c17ba"
+        ]
+      },
+      {
+        "text": "The plant's recent care pattern may be associated with variable soil moisture, but the record does not show enough detail to determine the plant's current moisture status.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "5a873187-3049-4aca-8336-755cb7260c0c"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Inspect remaining leaves over the next 7 days for new yellowing, browning, wilting, or spotting.",
+      "Check the top 2-3 cm of soil before watering and water only if it feels dry.",
+      "Confirm the pot has drainage holes and that no saucer water remains after watering.",
+      "Observe whether new leaves unfurl or existing leaves remain stable over the next 2-4 weeks.",
+      "Take weekly photos of the whole plant and close-ups of affected leaves to track changes."
+    ],
+    "missingInformation": [
+      "No photos are available to assess current leaf color, spotting, wilting, or overall growth.",
+      "No measurements are recorded for soil moisture, light, humidity, temperature, or plant size.",
+      "No watering frequency or soil moisture readings are recorded.",
+      "No details are recorded about light exposure, drainage, fertilizer, or recent environmental changes.",
+      "No location coordinates or fresh weather snapshot are available."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The record lists a WATER activity for the Monstera on 2026-10-29 with the note \"watered\".",
+        "evidenceIds": [
+          "5a873187-3049-4aca-8336-755cb7260c0c"
+        ]
+      },
+      {
+        "text": "The record lists a PRUNE activity on 2026-10-19 with the note \"removed one yellowing lower leaf\".",
+        "evidenceIds": [
+          "18e93785-965f-4765-916f-3a290a5fa1ad"
+        ]
+      },
+      {
+        "text": "The record lists a REPOT activity on 2026-10-04 with the note \"moved up one pot size, fresh all-purpose mix\".",
+        "evidenceIds": [
+          "75e5dfbb-b1db-4848-9780-1190ef9c17ba"
+        ]
+      },
+      {
+        "text": "The snapshot contains no photos, measurements, weather entries, or guidance entries for this plant.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The plant is listed as ACTIVE.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

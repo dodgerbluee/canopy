@@ -1,0 +1,240 @@
+{
+  "note": "Analysis negative fixtures required by T01.ai acceptance: CAPABILITY_UNAVAILABLE request, duplicate active run (IDEMPOTENCY_CONFLICT carrying the existing run), daily-budget RATE_LIMITED, cancel of a terminal run (CONFLICT + currentRevision), accept with moved revision (CONFLICT), accept of an EXPIRED suggestion (VALIDATION), accept on a planless plant (VALIDATION = the 'asks for confirmation' path).",
+  "cases": [
+    {
+      "case": "CAPABILITY_UNAVAILABLE_NO_VISION",
+      "operation": "RequestAnalysis",
+      "variables": {
+        "input": {
+          "kind": "VISION",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "photoIds": ["as-0010", "as-0011"]
+        },
+        "clientMutationId": "cmid-vision-1"
+      },
+      "data": {
+        "requestAnalysis": {
+          "run": null,
+          "problems": [
+            {
+              "code": "CAPABILITY_UNAVAILABLE",
+              "field": "input.kind",
+              "message": "No vision provider is configured; ask the operator to enable one in settings."
+            }
+          ],
+          "clientMutationId": "cmid-vision-1"
+        }
+      }
+    },
+    {
+      "case": "DUPLICATE_ACTIVE_RUN",
+      "operation": "RequestAnalysis",
+      "variables": {
+        "input": {
+          "kind": "TEXT",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001"
+        },
+        "clientMutationId": "cmid-text-dup"
+      },
+      "data": {
+        "requestAnalysis": {
+          "run": {
+            "id": "5f0c1b6e-3333-4aaa-8bbb-000000000001",
+            "revision": 2,
+            "kind": "TEXT",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+            "receiptAssetId": null,
+            "state": "RUNNING",
+            "attempts": 1,
+            "requestedAt": "2026-10-29T14:00:00Z",
+            "startedAt": "2026-10-29T14:00:02Z",
+            "finishedAt": null,
+            "failureCode": null,
+            "failureMessage": null,
+            "provider": "configured-text-provider",
+            "model": "example-text-model-2026",
+            "promptVersion": "p7",
+            "resultSchemaVersion": "r2",
+            "costReservedMicroUsd": "4000",
+            "costActualMicroUsd": null,
+            "evidence": {
+              "activityIds": ["a-0001", "a-0002", "a-0003"],
+              "measurementIds": ["m-0001"],
+              "photoIds": [],
+              "sourceVersionIds": ["sv-0001"],
+              "weatherSnapshotIds": ["ws-0001"],
+              "missingFacts": ["location situation for the current context"],
+              "inputHash": "sha256:6d3f0c9b8a5e4c1f9a7b2d0e8c5f3a1b6d9e2c4f7a0b8d1e3c5f7a9b1d3e5f7c"
+            },
+            "result": null,
+            "suggestions": []
+          },
+          "problems": [
+            {
+              "code": "IDEMPOTENCY_CONFLICT",
+              "field": "input.plantId",
+              "message": "An analysis for this plant with unchanged input is already running; follow the existing run or force a rerun."
+            }
+          ],
+          "clientMutationId": "cmid-text-dup"
+        }
+      }
+    },
+    {
+      "case": "DAILY_BUDGET_RATE_LIMITED",
+      "operation": "RequestAnalysis",
+      "variables": {
+        "input": {
+          "kind": "SYNTHESIS",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001"
+        },
+        "clientMutationId": "cmid-synth-11"
+      },
+      "data": {
+        "requestAnalysis": {
+          "run": null,
+          "problems": [
+            {
+              "code": "RATE_LIMITED",
+              "field": "input.kind",
+              "message": "Daily analysis limit reached (10 of 10 runs used today); try again tomorrow."
+            }
+          ],
+          "clientMutationId": "cmid-synth-11"
+        }
+      }
+    },
+    {
+      "case": "CANCEL_TERMINAL_CONFLICT",
+      "operation": "CancelAnalysis",
+      "variables": {
+        "input": {
+          "runId": "5f0c1b6e-3333-4aaa-8bbb-000000000001",
+          "expectedRevision": 2
+        },
+        "clientMutationId": "cmid-cancel-1"
+      },
+      "data": {
+        "cancelAnalysis": {
+          "run": {
+            "id": "5f0c1b6e-3333-4aaa-8bbb-000000000001",
+            "revision": 3,
+            "kind": "TEXT",
+            "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+            "receiptAssetId": null,
+            "state": "SUCCEEDED",
+            "attempts": 1,
+            "requestedAt": "2026-10-29T14:00:00Z",
+            "startedAt": "2026-10-29T14:00:02Z",
+            "finishedAt": "2026-10-29T14:00:31Z",
+            "failureCode": null,
+            "failureMessage": null,
+            "provider": "configured-text-provider",
+            "model": "example-text-model-2026",
+            "promptVersion": "p7",
+            "resultSchemaVersion": "r2",
+            "costReservedMicroUsd": "4000",
+            "costActualMicroUsd": "2310",
+            "evidence": {
+              "activityIds": ["a-0001", "a-0002", "a-0003"],
+              "measurementIds": ["m-0001"],
+              "photoIds": [],
+              "sourceVersionIds": ["sv-0001"],
+              "weatherSnapshotIds": ["ws-0001"],
+              "missingFacts": ["location situation for the current context"],
+              "inputHash": "sha256:6d3f0c9b8a5e4c1f9a7b2d0e8c5f3a1b6d9e2c4f7a0b8d1e3c5f7a9b1d3e5f7c"
+            },
+            "result": null,
+            "suggestions": []
+          },
+          "problems": [
+            {
+              "code": "CONFLICT",
+              "field": "input.expectedRevision",
+              "message": "This run already finished; it cannot be cancelled.",
+              "currentRevision": 3
+            }
+          ],
+          "clientMutationId": "cmid-cancel-1"
+        }
+      }
+    },
+    {
+      "case": "ACCEPT_STALE_REVISION",
+      "operation": "AcceptSuggestion",
+      "variables": {
+        "input": {
+          "suggestionId": "sg-0001",
+          "expectedRevision": 1,
+          "dueOn": "2026-11-03"
+        },
+        "clientMutationId": "cmid-accept-1"
+      },
+      "data": {
+        "acceptSuggestion": {
+          "suggestion": null,
+          "occurrence": null,
+          "problems": [
+            {
+              "code": "CONFLICT",
+              "field": "input.expectedRevision",
+              "message": "The plant's context changed since this suggestion was made; review the updated suggestion before accepting.",
+              "currentRevision": 2
+            }
+          ],
+          "clientMutationId": "cmid-accept-1"
+        }
+      }
+    },
+    {
+      "case": "ACCEPT_EXPIRED_VALIDATION",
+      "operation": "AcceptSuggestion",
+      "variables": {
+        "input": {
+          "suggestionId": "sg-0002",
+          "expectedRevision": 1
+        },
+        "clientMutationId": "cmid-accept-2"
+      },
+      "data": {
+        "acceptSuggestion": {
+          "suggestion": null,
+          "occurrence": null,
+          "problems": [
+            {
+              "code": "VALIDATION",
+              "field": "input.suggestionId",
+              "message": "This suggestion has expired and can no longer be accepted."
+            }
+          ],
+          "clientMutationId": "cmid-accept-2"
+        }
+      }
+    },
+    {
+      "case": "ACCEPT_NO_PLAN_ASKS_CONFIRMATION",
+      "operation": "AcceptSuggestion",
+      "variables": {
+        "input": {
+          "suggestionId": "sg-0003",
+          "expectedRevision": 1
+        },
+        "clientMutationId": "cmid-accept-3"
+      },
+      "data": {
+        "acceptSuggestion": {
+          "suggestion": null,
+          "occurrence": null,
+          "problems": [
+            {
+              "code": "VALIDATION",
+              "field": "input.suggestionId",
+              "message": "This plant has no care plan to host the task; create a plan for the plant, then accept again."
+            }
+          ],
+          "clientMutationId": "cmid-accept-3"
+        }
+      }
+    }
+  ]
+}

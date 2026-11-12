@@ -1,0 +1,299 @@
+<div class="seasons-page">
+  <div class="seasons-heading">
+    <div>
+      <p class="kicker">THE RHYTHM OF YOUR GARDEN</p>
+      <h1>A year of growing<span>.</span></h1>
+      <p class="intro">Every plant. Every season. A little perspective.</p>
+    </div>
+    <div class="heading-actions">
+      <garden-knowledge-settings
+        #settingsPanel
+        [settings]="garden()?.settings ?? null"
+        (saved)="settingsSaved()"
+      /><button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="!garden()?.settings?.enabled"
+        (click)="chatOpen.set(true)"
+      >
+        <ui-icon name="sparkles" [size]="17" />Ask your garden
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="seasons-error" role="alert">
+      <p>{{ error() }}</p>
+      <button type="button" class="btn" (click)="load()">Retry loading garden</button>
+    </div>
+  }
+  @if (loading() && !garden()) {
+    <p class="seasons-empty" role="status">Gathering your garden…</p>
+  } @else if (garden(); as g) {
+    <div class="year-overview">
+      <div class="year-selector">
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Previous year"
+          [disabled]="year() <= 1900"
+          (click)="moveYear(-1)"
+        >
+          <ui-icon name="back" [size]="18" />
+        </button>
+        <h2>{{ year() }}</h2>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Next year"
+          [disabled]="year() >= 2200"
+          (click)="moveYear(1)"
+        >
+          <ui-icon name="arrow" [size]="18" />
+        </button>
+      </div>
+      <p>
+        <strong>{{ g.plants.length }}</strong> plants<span>·</span
+        ><strong>{{ ready() }}</strong> with guidance<span>·</span>{{ activityCount() }} recorded
+        moments
+      </p>
+      <button
+        type="button"
+        class="btn research-button"
+        [disabled]="refreshing() || !g.settings.enabled"
+        (click)="refresh()"
+      >
+        <ui-icon name="book" [size]="16" />{{ refreshing() ? 'Queuing…' : 'Refresh guidance' }}
+      </button>
+    </div>
+    @if (!g.settings.enabled) {
+      <div class="knowledge-setup">
+        <ui-icon name="location" [size]="25" />
+        <div>
+          <h3>Give your garden a sense of place.</h3>
+          <p>
+            Choose its country and region, then enable regional guidance. New plants will be
+            researched automatically.
+          </p>
+        </div>
+        <button type="button" class="btn" (click)="settingsPanel.edit()">Set up your garden</button>
+      </div>
+    }
+    <div class="season-filters">
+      <label class="season-search"
+        ><ui-icon name="search" [size]="16" /><input
+          type="search"
+          aria-label="Find a plant in the year view"
+          placeholder="Find a plant…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+      /></label>
+      <div class="season-legend" aria-label="Visible seasonal guidance">
+        @for (kind of kinds; track kind.kind) {
+          <button
+            type="button"
+            [class]="'legend-item kind-' + kind.kind"
+            [class.is-muted]="!selectedKinds().has(kind.kind)"
+            [attr.aria-pressed]="selectedKinds().has(kind.kind)"
+            (click)="toggle(kind.kind)"
+          >
+            <ui-icon [name]="kind.icon" [size]="15" />{{ kind.label }}
+          </button>
+        }
+      </div>
+    </div>
+    <p class="season-explanation">
+      Bands show typical windows from regional sources, not confirmed events or a forecast for
+      {{ year() }}. Season wording is shown as an approximate window; early/mid/late qualifiers
+      narrow it. Click a band for its source and conditions.
+    </p>
+    @if (refreshError()) {
+      <p class="seasons-error" role="alert">{{ refreshError() }}</p>
+    }
+    <garden-year-overview
+      [plants]="overviewPlants()"
+      [visibleKinds]="selectedKinds()"
+      [year]="year()"
+      [timezone]="g.settings.timezone"
+      (inspect)="openFact($event.plant, $event.fact)"
+    />
+    <div
+      class="season-scroll"
+      tabindex="0"
+      role="region"
+      aria-label="Scrollable annual plant timelines"
+    >
+      <div class="season-board">
+        <div class="season-axis">
+          <span>YOUR PLANTS</span>
+          <div>
+            @for (month of months; track month) {
+              <span>{{ month }}</span>
+            }
+          </div>
+        </div>
+        @for (row of rows(); track row.plant.plantId) {
+          <article class="season-row">
+            <div class="season-plant">
+              <button type="button" class="plant-identity" (click)="openFact(row.plant, null)">
+                <span class="season-avatar">
+                  @if (row.plant.photoAssetId && !brokenImages().has(row.plant.plantId)) {
+                    <img
+                      [src]="'/api/media/' + row.plant.photoAssetId + '/medium'"
+                      alt=""
+                      (error)="imageFailed(row.plant.plantId)"
+                    />
+                  } @else {
+                    <ui-icon name="leaf" [size]="23" />
+                  }</span
+                ><span
+                  ><strong>{{ row.plant.name }}</strong
+                  ><small>{{ row.plant.cultivar || row.plant.category.toLowerCase() }}</small></span
+                >
+              </button>
+              <p class="plant-records">{{ recordSummary(row.plant.plantId) }}</p>
+              <button class="guidance-count" type="button" (click)="openFact(row.plant, null)">
+                @if (row.plant.state === 'READY') {
+                  {{ row.plant.facts.length }} guidance notes
+                } @else {
+                  {{ stateLabels[row.plant.state] }}
+                }
+                @if (row.untimed) {
+                  · {{ row.untimed }} without fixed dates
+                }
+              </button>
+            </div>
+            <div class="season-track" [style.height.px]="row.lanes * 34 + 24">
+              <div class="track-grid" aria-hidden="true">
+                @for (month of months; track month) {
+                  <span></span>
+                }
+              </div>
+              @for (segment of row.segments; track segment.fact.id + ':' + segment.start) {
+                <button
+                  type="button"
+                  [class]="'season-band kind-' + segment.fact.kind"
+                  [class.season-estimate]="segment.fact.timingBasis === 'SEASON'"
+                  [style.left.%]="((segment.start - 1) / 12) * 100"
+                  [style.width.%]="((segment.end - segment.start + 1) / 12) * 100"
+                  [style.top.px]="12 + segment.lane * 34"
+                  (focus)="focusBand($event)"
+                  [attr.title]="segment.fact.label + ' · ' + timing(segment.fact)"
+                  (click)="openFact(row.plant, segment.fact)"
+                >
+                  <ui-icon [name]="icon(segment.fact.kind)" [size]="15" /><span>{{
+                    segment.fact.label
+                  }}</span
+                  ><span class="sr-only"> — {{ row.plant.name }}, {{ timing(segment.fact) }}</span>
+                </button>
+              }
+              @if (!row.segments.length) {
+                <button class="empty-track" type="button" (click)="openFact(row.plant, null)">
+                  <ui-icon
+                    [name]="row.plant.state === 'PROCESSING' ? 'clock' : 'leaf'"
+                    [size]="16"
+                  /><span>{{
+                    row.plant.state === 'READY'
+                      ? 'No fixed seasonal windows with these filters. View the guidance notes.'
+                      : row.plant.message
+                  }}</span>
+                </button>
+              }
+            </div>
+          </article>
+        } @empty {
+          <p class="seasons-empty">
+            {{
+              g.plants.length
+                ? 'No plants match your search.'
+                : 'Your plants will appear here as you add them.'
+            }}
+          </p>
+        }
+      </div>
+    </div>
+    <p class="season-foot">
+      AI-extracted guidance · Source links and regional scope on every note · Your recorded work
+      remains in the <a routerLink="/calendar">monthly calendar</a>.
+    </p>
+  }
+</div>
+<ui-entry-dialog
+  #detailDialog
+  [open]="!!selectedPlant()"
+  [title]="selectedFact()?.label ?? selectedPlant()?.name ?? 'Plant guidance'"
+  description="Regional source guidance. Check the conditions before applying it to your plant."
+  size="wide"
+  [dirty]="false"
+  (dismissed)="closeDetail()"
+>
+  @if (selectedPlant(); as plant) {
+    <div class="guidance-detail">
+      @if (refreshError()) {
+        <p class="form-error" role="alert">{{ refreshError() }}</p>
+      }
+      <div class="guidance-state">
+        <span class="badge">{{ plant.state.toLowerCase().replace('_', ' ') }}</span>
+        <p>{{ plant.message }}</p>
+      </div>
+      @if (selectedFact(); as fact) {
+        <article class="fact-detail">
+          <div [class]="'fact-kind kind-' + fact.kind">
+            <ui-icon [name]="icon(fact.kind)" [size]="22" />{{ timing(fact) }}
+          </div>
+          <p class="fact-summary">{{ fact.summary }}</p>
+          <p class="source-scope">{{ fact.scope }}</p>
+          <a class="source-link" [href]="fact.sourceUrl" target="_blank" rel="noopener noreferrer"
+            >{{ fact.sourceTitle }}<ui-icon name="arrow-up-right" [size]="15"
+          /></a>
+          <p class="source-meta">
+            {{ fact.publisher }} · {{ fact.sourceRegion }} · Retrieved
+            {{ fact.retrievedAt.slice(0, 10) }}
+          </p>
+        </article>
+      } @else {
+        <p class="actual-records">
+          Recorded in {{ year() }}: {{ recordSummary(plant.plantId) }}. Unlogged work is unknown.
+        </p>
+        @for (fact of plant.facts; track fact.id) {
+          <button type="button" class="fact-option" (click)="selectedFact.set(fact)">
+            <span [class]="'entry-icon kind-' + fact.kind"
+              ><ui-icon [name]="icon(fact.kind)" [size]="20" /></span
+            ><span
+              ><strong>{{ fact.label }}</strong
+              ><small>{{ timing(fact) }}</small
+              ><span class="fact-preview">{{ fact.summary }}</span></span
+            ><ui-icon name="arrow-up-right" [size]="17" />
+          </button>
+        } @empty {
+          <p class="source-scope">
+            This plant’s seasonal windows are not known yet. Unsupported regions and plant types
+            stay visible here without invented dates.
+          </p>
+        }
+      }
+      <div class="form-actions">
+        <a class="btn" [routerLink]="['/plants', plant.plantId]">Open plant</a>
+        @if (garden()?.settings?.enabled) {
+          <button
+            type="button"
+            class="btn"
+            [disabled]="refreshing()"
+            (click)="refresh(plant.plantId)"
+          >
+            {{ refreshing() ? 'Queuing…' : 'Retry guidance' }}
+          </button>
+        }
+        <button type="button" class="btn btn-primary" (click)="detailDialog.requestClose()">
+          Done
+        </button>
+      </div>
+    </div>
+  }
+</ui-entry-dialog>
+<garden-chat-dialog
+  #chatDialog
+  [open]="chatOpen()"
+  [year]="year()"
+  (dismissed)="chatOpen.set(false)"
+/>

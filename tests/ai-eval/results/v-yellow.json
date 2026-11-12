@@ -1,0 +1,112 @@
+{
+  "caseId": "v-yellow",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:875c5aeb645a5df183dccb613866986f97532b5a198b25e54c91d1fab5216f9f",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "65209df5-8351-4945-888b-4f96ce8df4ba",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "898da911-7fc5-41d0-bad2-b3f47f9bbee3",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "b1b313ed-aa2a-4a3d-9b28-f462ee70410a",
+        "takenAt": "2026-10-04T08:16:50Z"
+      },
+      {
+        "id": "0a6c0beb-0687-4e76-96b9-cfaef98626ef",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "50cd7c9f-3d53-4c2c-bc6a-bf4aa8bd6283",
+        "takenAt": "2026-11-03T08:16:50Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "bdb695de-fa27-4ae1-8967-38497af135ea",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The later image may represent additional leaf-like growth near the base, but this cannot be confirmed because the images are stylized and lack scale or close-up detail.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "898da911-7fc5-41d0-bad2-b3f47f9bbee3",
+          "0a6c0beb-0687-4e76-96b9-cfaef98626ef"
+        ]
+      },
+      {
+        "text": "The yellow spots in the later image could indicate leaf spotting or discoloration, but the cause is uncertain.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "0a6c0beb-0687-4e76-96b9-cfaef98626ef"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Capture close-up photos of each leaf with a scale reference and consistent lighting.",
+      "Record leaf count, leaf size, spot size, and any changes over time.",
+      "Inspect the yellow spots for texture, spread, and associated symptoms such as wilting or browning.",
+      "Check recent watering, light, temperature, and fertilizer history before making care changes."
+    ],
+    "missingInformation": [
+      "No measurements, care activities, weather, coordinates, or approved guidance are available in the snapshot.",
+      "The images are stylized and do not provide scale, leaf texture, fenestration, soil condition, or enough detail to confirm whether the added shapes are new leaves or graphic changes.",
+      "It is not possible to determine whether the yellow spots are damage, disease, nutrient issue, or an illustration artifact."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The earlier image shows a potted plant with a single upright stem and three dark green rounded leaf shapes above the pot.",
+        "evidenceIds": [
+          "898da911-7fc5-41d0-bad2-b3f47f9bbee3"
+        ]
+      },
+      {
+        "text": "The later image appears to show the same pot and stem, with three dark green rounded leaf shapes above the stem and two lighter green rounded leaf-like shapes near the pot rim.",
+        "evidenceIds": [
+          "0a6c0beb-0687-4e76-96b9-cfaef98626ef"
+        ]
+      },
+      {
+        "text": "In the later image, one of the dark green leaf shapes has two small yellow spots.",
+        "evidenceIds": [
+          "0a6c0beb-0687-4e76-96b9-cfaef98626ef"
+        ]
+      },
+      {
+        "text": "Both images are simplified illustrations with no scale reference, soil detail, or close-up leaf texture.",
+        "evidenceIds": [
+          "898da911-7fc5-41d0-bad2-b3f47f9bbee3",
+          "0a6c0beb-0687-4e76-96b9-cfaef98626ef"
+        ]
+      }
+    ]
+  }
+}

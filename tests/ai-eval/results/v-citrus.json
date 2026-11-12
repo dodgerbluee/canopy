@@ -1,0 +1,119 @@
+{
+  "caseId": "v-citrus",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:8248e83deacfae25816edc36f3d6b449c17e76a6ea79e94fea2e77c7742ff061",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "0cd27d0b-0b9e-494f-aab3-94ff30eb0be9",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "416e4a4b-6157-4d2b-bc51-88d765fac31c",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "87627383-2012-4e57-8051-e7f6f507dc3c",
+        "takenAt": "2026-10-04T08:18:21Z"
+      },
+      {
+        "id": "ff8d84d2-274f-4c9f-a056-9fa32ccdd63d",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "1291f5f1-eafd-4a3e-9fe4-fea1f309bc45",
+        "takenAt": "2026-11-03T08:18:21Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "f965de7e-85a1-4455-8cd8-c6367e7f5d1c",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The images may be placeholder or schematic graphics rather than photographs of the actual Monstera plant.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "416e4a4b-6157-4d2b-bc51-88d765fac31c",
+          "ff8d84d2-274f-4c9f-a056-9fa32ccdd63d"
+        ]
+      },
+      {
+        "text": "The plant's health, growth, or condition cannot be assessed from the provided images.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "416e4a4b-6157-4d2b-bc51-88d765fac31c",
+          "ff8d84d2-274f-4c9f-a056-9fa32ccdd63d"
+        ]
+      },
+      {
+        "text": "The two images may depict the same subject, but this cannot be confirmed from the available visual evidence.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "416e4a4b-6157-4d2b-bc51-88d765fac31c",
+          "ff8d84d2-274f-4c9f-a056-9fa32ccdd63d"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Capture a clear full-plant photo with a scale reference and visible leaves, stem, pot, and soil.",
+      "Capture close-up photos of leaf surfaces, leaf edges, petioles, and nodes to check for fenestrations, damage, discoloration, pests, or disease signs.",
+      "Record plant measurements such as leaf length, leaf width, plant height, and pot size.",
+      "Add location coordinates or a weather snapshot if environmental context is needed.",
+      "Add care activities and approved care guidance for the workspace."
+    ],
+    "missingInformation": [
+      "The images lack scale, background, pot, soil, and identifiable plant structures, so comparison of plant condition or growth was refused.",
+      "No measurements are recorded for this plant.",
+      "No care activities are recorded for this plant.",
+      "No approved care guidance is published for this workspace.",
+      "No fresh weather snapshot exists for this location.",
+      "The workspace has no location coordinates."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The first image shows a single dark green oval shape with a darker vertical line through the center and a small rounded protrusion at the bottom.",
+        "evidenceIds": [
+          "416e4a4b-6157-4d2b-bc51-88d765fac31c"
+        ]
+      },
+      {
+        "text": "The second image shows a similar single dark green oval shape with a darker vertical line through the center and a small rounded protrusion at the bottom.",
+        "evidenceIds": [
+          "ff8d84d2-274f-4c9f-a056-9fa32ccdd63d"
+        ]
+      },
+      {
+        "text": "Neither image shows identifiable Monstera features such as fenestrations, splits, multiple leaves, petioles, nodes, soil, pot, or background context.",
+        "evidenceIds": [
+          "416e4a4b-6157-4d2b-bc51-88d765fac31c",
+          "ff8d84d2-274f-4c9f-a056-9fa32ccdd63d"
+        ]
+      }
+    ]
+  }
+}

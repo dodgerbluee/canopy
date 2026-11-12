@@ -1,0 +1,60 @@
+{
+  "note": "Purchase from 03 example with both allocations; linked twice but one expense.",
+  "operation": "PurchaseDetail",
+  "variables": { "id": "7a2b0000-0000-4000-8000-0000000000a1" },
+  "data": {
+    "purchase": {
+      "id": "7a2b0000-0000-4000-8000-0000000000a1",
+      "seller": "Fig nursery",
+      "purchasedOn": "2026-03-10",
+      "currency": "USD",
+      "totalMinor": "10000",
+      "shippingMinor": "500",
+      "taxMinor": "500",
+      "revision": 1,
+      "voidedAt": null,
+      "createdAt": "2026-03-10T12:00:00Z",
+      "updatedAt": "2026-03-10T12:00:00Z",
+      "lines": {
+        "items": [
+          {
+            "id": "7a2b0000-0000-4000-8000-0000000000b1",
+            "purchaseId": "7a2b0000-0000-4000-8000-0000000000a1",
+            "description": "Fig tree A",
+            "quantity": "1",
+            "lineTotalMinor": "4500",
+            "allocations": [
+              {
+                "id": "7a2b0000-0000-4000-8000-0000000000c1",
+                "purchaseLineId": "7a2b0000-0000-4000-8000-0000000000b1",
+                "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000010",
+                "lineMinor": "4500",
+                "taxMinor": "250",
+                "shippingMinor": "250"
+              }
+            ]
+          },
+          {
+            "id": "7a2b0000-0000-4000-8000-0000000000b2",
+            "purchaseId": "7a2b0000-0000-4000-8000-0000000000a1",
+            "description": "Fig tree B",
+            "quantity": "1",
+            "lineTotalMinor": "4500",
+            "allocations": [
+              {
+                "id": "7a2b0000-0000-4000-8000-0000000000c2",
+                "purchaseLineId": "7a2b0000-0000-4000-8000-0000000000b2",
+                "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000011",
+                "lineMinor": "4500",
+                "taxMinor": "250",
+                "shippingMinor": "250"
+              }
+            ]
+          }
+        ],
+        "pageInfo": { "endCursor": null, "hasNextPage": false }
+      },
+      "receipts": []
+    }
+  }
+}

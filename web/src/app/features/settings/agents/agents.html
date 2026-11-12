@@ -1,0 +1,305 @@
+<section class="card agents" id="agents">
+  <header>
+    <p class="eyebrow">YOUR ASSISTANTS, CONNECTED</p>
+    <h2>Agent connections</h2>
+    <p class="caption">
+      Let Hermes, Grok Bot or another MCP assistant work with your garden. Choose what each
+      connection can see and do.
+    </p>
+  </header>
+  @if (error()) {
+    <p role="alert">
+      {{ error() }} <button class="btn" (click)="load()">Retry connections</button>
+    </p>
+  }
+  @if (notice()) {
+    <p role="status" class="notice">{{ notice() }}</p>
+  }
+  @if (data(); as settings) {
+    <div class="endpoint">
+      <span class="badge">{{ settings.enabled ? 'MCP enabled' : 'MCP not enabled' }}</span
+      ><code>{{ settings.endpoint }}</code>
+    </div>
+    @if (!settings.enabled) {
+      <p class="caption">
+        The operator must enable the MCP endpoint before an assistant can connect. You can prepare
+        permissions here.
+      </p>
+    }
+    <div class="heading">
+      <h3>Your connections</h3>
+      <button class="btn btn-primary" (click)="edit()" [disabled]="busy()">
+        Add agent connection
+      </button>
+    </div>
+    @for (g of settings.grants; track g.id) {
+      <article class="grant">
+        <div class="heading">
+          <h4>{{ g.name }}</h4>
+          <span class="badge">{{
+            active(g) ? 'Active' : g.revokedAt ? 'Revoked' : 'Expired'
+          }}</span>
+        </div>
+        <div class="scope-chips">
+          @for (s of g.scopes; track s) {
+            <span class="badge">{{ scopeLabel(s) }}</span>
+          }
+        </div>
+        <p class="caption">
+          {{ g.plantIds.length ? g.plantIds.length + ' selected plants' : 'Whole garden' }} ·
+          Expires {{ date(g.expiresAt) }}
+        </p>
+        <p class="caption">
+          {{
+            g.lastUsedAt
+              ? 'Last used ' + date(g.lastUsedAt) + (g.lastTool ? ' · ' + g.lastTool : '')
+              : 'Waiting for the first successful agent tool call'
+          }}
+        </p>
+        <div class="actions">
+          @if (!g.revokedAt) {
+            <button class="btn" (click)="edit(g)" [disabled]="busy()">Edit permissions</button
+            ><button
+              class="btn"
+              (click)="formError.set(''); credentialAction.set({ grant: g, revoke: false })"
+              [disabled]="busy() || !active(g)"
+            >
+              Rotate token</button
+            ><button
+              class="btn"
+              (click)="formError.set(''); credentialAction.set({ grant: g, revoke: true })"
+              [disabled]="busy()"
+            >
+              Revoke
+            </button>
+          }
+        </div>
+      </article>
+    } @empty {
+      <p class="caption">
+        Start with read access. Add watering and rain logging when you are ready.
+      </p>
+    }
+    <details>
+      <summary>Connect Hermes or Grok Bot</summary>
+      <div class="setup">
+        <p class="caption">
+          Hermes configuration. Set CANOPY_AGENT_TOKEN in your agent’s secret environment. The token
+          is never included in this example.
+        </p>
+        <pre>{{ snippet() }}</pre>
+        <p class="caption">
+          For Grok Bot, add this MCP URL as a custom connection and provide its dedicated token
+          through the supported secret configuration. A cloud agent needs a reachable HTTPS URL;
+          localhost refers to the agent’s own machine.
+        </p>
+        <p class="caption">
+          A connection is confirmed when its first successful tool call appears above. The Strata
+          model connection uses separate credentials.
+        </p>
+      </div>
+    </details>
+    <div class="heading">
+      <h3>Agent change requests</h3>
+      <button class="btn" (click)="load()" [disabled]="busy()">Refresh activity</button>
+    </div>
+    <p class="caption">
+      Latest 100 proposals. Watering, rain and observations can be logged directly with permission.
+      Changes to existing records are reviewed here.
+    </p>
+    @for (a of settings.actions; track a.id) {
+      <article class="proposal">
+        <div>
+          <strong>{{ a.tool.replaceAll('_', ' ') }}</strong>
+          <p class="caption">{{ a.grantName }} · {{ date(a.createdAt) }} · {{ a.state }}</p>
+        </div>
+        <button class="btn" (click)="formError.set(''); review.set(a)" [disabled]="busy()">
+          {{ a.state === 'PENDING' ? 'Review change' : 'View request' }}
+        </button>
+      </article>
+    } @empty {
+      <p class="caption">No agent changes awaiting review.</p>
+    }
+  }
+</section>
+<ui-entry-dialog
+  #entry
+  [open]="open()"
+  [title]="draft.expectedRevision ? 'Edit agent connection' : 'Add agent connection'"
+  description="Read access starts small. Only enable the actions and data this assistant needs."
+  [busy]="busy()"
+  (dismissed)="open.set(false)"
+>
+  <form class="agent-form" (ngSubmit)="save()">
+    <fieldset [disabled]="busy()">
+      <label for="agent-name"
+        >Connection name<input
+          class="input"
+          id="agent-name"
+          name="name"
+          [(ngModel)]="draft.name"
+          maxlength="120"
+          required
+          placeholder="Hermes garden assistant" /></label
+      ><label for="agent-expiry"
+        >Expires on<input
+          class="input"
+          id="agent-expiry"
+          name="expiry"
+          [(ngModel)]="expires"
+          type="datetime-local"
+          required
+      /></label>
+      <p class="caption">
+        Choose an expiry within 90 days. Revoking or rotating a token immediately stops calls using
+        that token.
+      </p>
+      <div class="actions">
+        <button class="btn" type="button" (click)="preset(false)">Read-only preset</button
+        ><button class="btn" type="button" (click)="preset(true)">Garden logging preset</button>
+      </div>
+      <div class="permissions">
+        @for (scope of data()?.scopeOptions ?? []; track scope) {
+          <label class="check"
+            ><input
+              type="checkbox"
+              [name]="scope"
+              [checked]="draft.scopes.includes(scope)"
+              (change)="toggle(scope, $any($event.target).checked)"
+            /><span
+              >{{ scopeLabel(scope) }}<small>{{ scope }}</small></span
+            ></label
+          >
+        }
+      </div>
+      <label class="check"
+        ><input type="checkbox" name="restricted" [(ngModel)]="restricted" /><span
+          >Limit access to selected plants<small
+            >Financial, receipt and export access requires the whole garden.</small
+          ></span
+        ></label
+      >
+      @if (restricted) {
+        <button class="btn" type="button" (click)="search.set(''); picker.set(true)">
+          Choose plants · {{ draft.plantIds.length }} selected
+        </button>
+      }
+    </fieldset>
+    @if (formError()) {
+      <p role="alert" class="form-error">{{ formError() }}</p>
+    }
+    <div class="form-actions">
+      <button class="btn" type="button" (click)="entry.requestClose()" [disabled]="busy()">
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Saving…' : 'Save connection' }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>
+<ui-entry-dialog
+  [open]="picker()"
+  title="Choose plants for this agent"
+  description="Only these plants and their related records will be available."
+  [dirty]="false"
+  (dismissed)="picker.set(false)"
+  ><div class="agent-form">
+    <label for="agent-plant-search"
+      >Find a plant<input
+        id="agent-plant-search"
+        class="input"
+        [value]="search()"
+        (input)="search.set($any($event.target).value)"
+    /></label>
+    @for (p of filteredPlants(); track p.id) {
+      <button
+        type="button"
+        class="btn plant-choice"
+        [attr.aria-pressed]="draft.plantIds.includes(p.id)"
+        (click)="choosePlant(p.id)"
+      >
+        {{ p.name }}<span>{{ draft.plantIds.includes(p.id) ? 'Selected' : 'Select' }}</span>
+      </button>
+    }
+    <div class="form-actions">
+      <button class="btn btn-primary" (click)="picker.set(false)">Done</button>
+    </div>
+  </div></ui-entry-dialog
+>
+<ui-entry-dialog
+  [open]="reveal()"
+  title="Save your agent token"
+  description="Shown once. Store it in the agent’s secret environment. Rotate the token if you lose it."
+  [dirty]="false"
+  (dismissed)="closeReveal()"
+  ><div class="agent-form">
+    <label for="agent-token"
+      >Agent token<input
+        id="agent-token"
+        class="input token-input"
+        [type]="tokenVisible() ? 'text' : 'password'"
+        [value]="token()"
+        readonly
+        autocomplete="new-password"
+        spellcheck="false"
+        (click)="$any($event.target).select()" /></label
+    ><label class="check"
+      ><input
+        type="checkbox"
+        [checked]="tokenVisible()"
+        (change)="tokenVisible.set($any($event.target).checked)"
+      /><span>Show token</span></label
+    >
+    <p class="caption">
+      Click the field to select it, then copy. The token grants only this connection’s permissions.
+    </p>
+    <div class="form-actions">
+      <button class="btn btn-primary" (click)="closeReveal()">I have saved the token</button>
+    </div>
+  </div></ui-entry-dialog
+>
+<ui-entry-dialog
+  [open]="!!credentialAction()"
+  [title]="credentialAction()?.revoke ? 'Revoke agent access?' : 'Rotate agent token?'"
+  description="The current token will stop working. Rotation shows a replacement token once; update the agent’s secret environment."
+  [busy]="busy()"
+  [dirty]="false"
+  (dismissed)="credentialAction.set(null)"
+  ><p>{{ credentialAction()?.grant?.name }}</p>
+  @if (formError()) {
+    <p role="alert">{{ formError() }}</p>
+  }
+  <div class="form-actions">
+    <button class="btn" [disabled]="busy()" (click)="credentialAction.set(null)">Cancel</button
+    ><button class="btn btn-primary" [disabled]="busy()" (click)="changeCredential()">
+      {{ credentialAction()?.revoke ? 'Revoke access' : 'Rotate token' }}
+    </button>
+  </div></ui-entry-dialog
+>
+<ui-entry-dialog
+  [open]="!!review()"
+  title="Review agent request"
+  description="Only the exact requested change can be applied. Changed records or revoked permissions cause a conflict."
+  [busy]="busy()"
+  [dirty]="false"
+  (dismissed)="review.set(null)"
+>
+  @if (review(); as action) {
+    <div class="agent-form">
+      <p>{{ action.grantName }} · {{ action.tool.replaceAll('_', ' ') }}</p>
+      <h3>Current record at request time</h3><pre>{{ pretty(action.before) }}</pre><h3>Requested changes</h3><pre>{{ pretty(action.input) }}</pre>
+      @if (formError()) {
+        <p role="alert" class="form-error">{{ formError() }}</p>
+      }
+      <div class="form-actions">
+        <button class="btn" [disabled]="busy()" (click)="review.set(null)">Close</button>
+        @if (action.state === 'PENDING') {
+          <button class="btn" [disabled]="busy()" (click)="decide(false)">Reject</button
+          ><button class="btn btn-primary" [disabled]="busy()" (click)="decide(true)">
+            {{ busy() ? 'Applying…' : 'Approve change' }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</ui-entry-dialog>

@@ -1,0 +1,385 @@
+{
+  "reviewerLabel": "Canopy starter content: human-reviewed against cited extension publications (2026-11-02)",
+  "reviewedOn": "2026-11-02",
+  "sources": [
+    {
+      "key": "uc-anr-citrus",
+      "kind": "EXTENSION_PUBLICATION",
+      "title": "Grow Citrus at Home in the San Joaquin Valley",
+      "publisher": "University of California Agriculture & Natural Resources (publication 8157)",
+      "url": "https://anrcatalog.ucanr.edu/",
+      "region": "California (Mediterranean)",
+      "license": "UC extension guidance; short factual summary only, not a mirror of the publication.",
+      "citation": "UC ANR, 'Grow Citrus at Home in the San Joaquin Valley' (pub 8157)",
+      "summary": "Young citrus: water deeply about every 10-14 days the first year, keeping the root crown above the soil. Mature in-ground trees: deep soak roughly every 1-4 weeks depending on soil type and hot weather, letting the upper few inches dry between waterings. Feed established citrus in split applications in late winter, spring and early summer. Keep mulch a few inches thick and pulled back from the trunk. Meyer lemon is more cold-hardy than Eureka lemon.",
+      "retrievedOn": "2026-11-02"
+    },
+    {
+      "key": "uc-ipm-home",
+      "kind": "EXTENSION_PUBLICATION",
+      "title": "Home Garden Pest Guidelines (fig, strawberry and caneberry crop pages)",
+      "publisher": "UC Statewide Integrated Pest Management Program",
+      "url": "https://ipm.ucanr.edu/",
+      "region": "California",
+      "license": "UC IPM public guidance; short factual summary only.",
+      "citation": "UC Statewide IPM Program, Home Garden Pest Guidelines",
+      "summary": "Cultural practices: prune most home figs lightly in late winter while dormant; figs bear largely on new wood in mild winters. For caneberries, cut floricanes that have finished fruiting out at ground level and keep the new primocanes; trellis support is expected. For strawberries, plant with crowns exactly at the soil surface, renovate June-bearing beds after harvest, and keep beds watered and weeded during fruit development.",
+      "retrievedOn": "2026-11-02"
+    },
+    {
+      "key": "osu-straw",
+      "kind": "EXTENSION_PUBLICATION",
+      "title": "Growing Strawberries in the Home Garden",
+      "publisher": "Oregon State University Extension Service",
+      "url": "https://extension.oregonstate.edu/",
+      "region": "Pacific Northwest (US)",
+      "license": "Extension public guidance; short factual summary only.",
+      "citation": "OSU Extension, 'Growing Strawberries'",
+      "summary": "June-bearing strawberries produce one main spring/early-summer crop and send many runners; day-neutral and everbearing types fruit in succession through the warm months and set fewer runners. Pin off runners from new June-bearing plants the first season; for day-neutral types remove the first flower clusters for several weeks after planting. Replace stock every few years to manage disease.",
+      "retrievedOn": "2026-11-02"
+    },
+    {
+      "key": "wsu-cane",
+      "kind": "EXTENSION_PUBLICATION",
+      "title": "Primocane-Fruiting Blackberry Production Notes",
+      "publisher": "Washington State University Extension",
+      "url": "https://extension.wsu.edu/",
+      "region": "Pacific Northwest (US)",
+      "license": "WSU Extension public guidance; short factual summary only.",
+      "citation": "WSU Extension, primocane-fruiting blackberry production notes",
+      "summary": "Floricane-fruiting blackberries grow canes one year and fruit the next on side laterals; cut fruited floricanes out after harvest and thin to a handful of vigorous canes per foot of row. Primocane-fruiting types crop on first-year canes in late summer and fall; for a single crop mow all canes to the ground in late winter, or tip canes for a split spring-plus-fall harvest.",
+      "retrievedOn": "2026-11-02"
+    },
+    {
+      "key": "uc-anr-frost",
+      "kind": "EXTENSION_PUBLICATION",
+      "title": "Frost protection for home gardens",
+      "publisher": "University of California Agriculture & Natural Resources",
+      "url": "https://ucanr.edu/",
+      "region": "California",
+      "license": "UC ANR public guidance; short factual summary only.",
+      "citation": "UC ANR home-garden frost protection guidance (ucanr.edu)",
+      "summary": "Frost forms on clear, still nights; tender plants can be covered overnight or protected by running overhead irrigation through the frost period. Subtropical fruit such as citrus and figs need protection when temperatures approach the low 30s F, and young or newly planted specimens suffer first. Hardiness thresholds and timing vary by species and region.",
+      "retrievedOn": "2026-11-02"
+    }
+  ],
+  "profiles": [
+    {
+      "key": "citrus-meyer",
+      "category": "CITRUS",
+      "species": "Citrus × meyeri",
+      "cultivar": "Meyer",
+      "environment": { "situations": [], "hemispheres": ["NORTHERN"] },
+      "rules": [
+        {
+          "ruleKey": "water-new-citrus",
+          "kind": "ACTION",
+          "activityKind": "WATER",
+          "recurrence": { "everyNDays": { "days": 14, "anchor": "PLAN_START" } },
+          "requiredFacts": ["LOCATION_SITUATION"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "First year after planting: water deeply roughly every 10-14 days - more often in sandy soil or heat waves. Keep the root crown visible above the soil line, and mulch a few inches thick but pulled back off the trunk.",
+          "sources": ["uc-anr-citrus"]
+        },
+        {
+          "ruleKey": "water-established-citrus",
+          "kind": "ACTION",
+          "activityKind": "WATER",
+          "recurrence": { "everyNDays": { "days": 21, "anchor": "PLAN_START" } },
+          "requiredFacts": ["REGION", "LOCATION_SITUATION"],
+          "weatherSensitivity": "RAINFALL",
+          "guidanceText": "Established in-ground tree: deep soak roughly every 1-4 weeks depending on soil and weather. Let the top 2-3 inches of medium dry between waterings, and cut frequency back in cool months. Confirm the interval band for your region and soil.",
+          "sources": ["uc-anr-citrus"]
+        },
+        {
+          "ruleKey": "feed-citrus-late-winter",
+          "kind": "ACTION",
+          "activityKind": "FERTILIZE",
+          "recurrence": { "annualWindow": { "month": 2, "day": 1, "windowDays": 30 } },
+          "requiredFacts": ["REGION"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "First of three split feedings for established citrus, in late winter. Use a citrus fertilizer at the label rate for tree age and size; keep granules off the trunk and water them in.",
+          "sources": ["uc-anr-citrus"]
+        },
+        {
+          "ruleKey": "feed-citrus-late-spring",
+          "kind": "ACTION",
+          "activityKind": "FERTILIZE",
+          "recurrence": { "annualWindow": { "month": 5, "day": 1, "windowDays": 30 } },
+          "requiredFacts": ["REGION"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Second split feeding, in late spring, at the label rate; water it in.",
+          "sources": ["uc-anr-citrus"]
+        },
+        {
+          "ruleKey": "feed-citrus-early-summer",
+          "kind": "ACTION",
+          "activityKind": "FERTILIZE",
+          "recurrence": { "annualWindow": { "month": 7, "day": 1, "windowDays": 30 } },
+          "requiredFacts": ["REGION"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Third and final feeding, in early summer. After this, let growth harden off before winter rather than pushing new soft growth.",
+          "sources": ["uc-anr-citrus"]
+        },
+        {
+          "ruleKey": "frost-watch-citrus",
+          "kind": "CHECK",
+          "recurrence": { "annualWindow": { "month": 11, "day": 1, "windowDays": 90 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "FROST",
+          "guidanceText": "Citrus is subtropical. On clear, still nights when the forecast approaches the low 30s F, cover young or tender wood or run overhead irrigation through the frost period. Meyer tolerates colder than most lemons, but young trees suffer first - confirm the hardiness threshold for your cultivar and region.",
+          "sources": ["uc-anr-frost", "uc-anr-citrus"]
+        }
+      ]
+    },
+    {
+      "key": "citrus-eureka",
+      "category": "CITRUS",
+      "species": "Citrus × limon",
+      "cultivar": "Eureka",
+      "environment": { "situations": [], "hemispheres": ["NORTHERN"] },
+      "rules": [
+        {
+          "ruleKey": "water-established-citrus",
+          "kind": "ACTION",
+          "activityKind": "WATER",
+          "recurrence": { "everyNDays": { "days": 21, "anchor": "PLAN_START" } },
+          "requiredFacts": ["REGION", "LOCATION_SITUATION"],
+          "weatherSensitivity": "RAINFALL",
+          "guidanceText": "Established in-ground tree: deep soak roughly every 1-4 weeks depending on soil and weather. Let the top 2-3 inches of medium dry between waterings, and cut frequency back in cool months. Confirm the interval band for your region and soil.",
+          "sources": ["uc-anr-citrus"]
+        },
+        {
+          "ruleKey": "feed-citrus-late-winter",
+          "kind": "ACTION",
+          "activityKind": "FERTILIZE",
+          "recurrence": { "annualWindow": { "month": 2, "day": 1, "windowDays": 30 } },
+          "requiredFacts": ["REGION"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "First of three split feedings for established citrus, in late winter. Use a citrus fertilizer at the label rate for tree age and size; keep granules off the trunk and water them in.",
+          "sources": ["uc-anr-citrus"]
+        },
+        {
+          "ruleKey": "feed-citrus-late-spring",
+          "kind": "ACTION",
+          "activityKind": "FERTILIZE",
+          "recurrence": { "annualWindow": { "month": 5, "day": 1, "windowDays": 30 } },
+          "requiredFacts": ["REGION"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Second split feeding, in late spring, at the label rate; water it in.",
+          "sources": ["uc-anr-citrus"]
+        },
+        {
+          "ruleKey": "frost-watch-eureka",
+          "kind": "CHECK",
+          "recurrence": { "annualWindow": { "month": 12, "day": 1, "windowDays": 60 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "FROST",
+          "guidanceText": "Eureka lemon is less cold-hardy than Meyer: protect when temperatures approach the low 30s F. Cover young trees, and harvest ripe fruit ahead of a freeze.",
+          "sources": ["uc-anr-frost", "uc-anr-citrus"]
+        }
+      ]
+    },
+    {
+      "key": "fig-common",
+      "category": "FIG",
+      "species": "Ficus carica",
+      "cultivar": "",
+      "environment": { "situations": [], "hemispheres": ["NORTHERN"] },
+      "rules": [
+        {
+          "ruleKey": "water-new-fig",
+          "kind": "ACTION",
+          "activityKind": "WATER",
+          "recurrence": { "everyNDays": { "days": 7, "anchor": "PLAN_START" } },
+          "requiredFacts": ["LOCATION_SITUATION"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Newly planted fig: water deeply about weekly through the first season while roots establish; mulch to hold moisture but keep it off the trunk.",
+          "sources": ["uc-ipm-home"]
+        },
+        {
+          "ruleKey": "water-established-fig",
+          "kind": "ACTION",
+          "activityKind": "WATER",
+          "recurrence": { "everyNDays": { "days": 28, "anchor": "PLAN_START" } },
+          "requiredFacts": ["REGION", "LOCATION_SITUATION"],
+          "weatherSensitivity": "RAINFALL",
+          "guidanceText": "Established fig: deep soak roughly monthly during the growing season in mild-winter climates; water more through long heat spells and less in cool months. Confirm the band for your region.",
+          "sources": ["uc-ipm-home"]
+        },
+        {
+          "ruleKey": "prune-fig-dormant",
+          "kind": "ACTION",
+          "activityKind": "PRUNE",
+          "recurrence": { "annualWindow": { "month": 1, "day": 15, "windowDays": 45 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Prune lightly in late winter while fully dormant. Home figs bear largely on new wood in mild winters: tip and thin rather than heavily shorten, and avoid pushing late soft growth.",
+          "sources": ["uc-ipm-home"]
+        },
+        {
+          "ruleKey": "fig-hold-late-nitrogen",
+          "kind": "CHECK",
+          "recurrence": { "annualWindow": { "month": 7, "day": 1, "windowDays": 45 } },
+          "requiredFacts": ["REGION"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Avoid nitrogen after midsummer: late soft growth sets poorly and is frost-prone.",
+          "sources": ["uc-ipm-home"]
+        }
+      ]
+    },
+    {
+      "key": "strawberry-june-bearing",
+      "category": "STRAWBERRY",
+      "species": "Fragaria × ananassa",
+      "cultivar": "June-bearing (bearing-type group)",
+      "environment": { "situations": [], "hemispheres": ["NORTHERN"] },
+      "rules": [
+        {
+          "ruleKey": "plant-june-bearing-starts",
+          "kind": "ACTION",
+          "activityKind": "REPOT",
+          "recurrence": { "annualWindow": { "month": 9, "day": 1, "windowDays": 45 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Set new crowns or starts in early fall for a strong spring crop. Plant so the crown sits exactly at the soil surface - buried crowns rot, exposed roots dry out.",
+          "sources": ["uc-ipm-home", "osu-straw"]
+        },
+        {
+          "ruleKey": "pinch-june-bearing-runners",
+          "kind": "ACTION",
+          "activityKind": "PRUNE",
+          "recurrence": { "everyNDays": { "days": 7, "anchor": "PLAN_START" } },
+          "requiredFacts": [],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "While the bed establishes, pinch off runners so the mother plants root and strengthen instead of spreading.",
+          "sources": ["osu-straw"]
+        },
+        {
+          "ruleKey": "renovate-june-bearing-bed",
+          "kind": "ACTION",
+          "activityKind": "PRUNE",
+          "recurrence": { "annualWindow": { "month": 7, "day": 1, "windowDays": 30 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "June-bearing beds: after the last harvest, cut back or mow the foliage, thin out weeds, side-dress, and keep watered for about four weeks so next spring's fruit buds set.",
+          "sources": ["uc-ipm-home", "osu-straw"]
+        },
+        {
+          "ruleKey": "frost-cover-spring-bloom",
+          "kind": "CHECK",
+          "recurrence": { "annualWindow": { "month": 3, "day": 1, "windowDays": 60 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "FROST",
+          "guidanceText": "Early spring blooms are frost-sensitive: on clear, still frost nights cover the bed, or run overhead irrigation through the frost period.",
+          "sources": ["uc-anr-frost"]
+        }
+      ]
+    },
+    {
+      "key": "strawberry-day-neutral",
+      "category": "STRAWBERRY",
+      "species": "Fragaria × ananassa",
+      "cultivar": "day-neutral / everbearing (bearing-type group)",
+      "environment": { "situations": [], "hemispheres": ["NORTHERN"] },
+      "rules": [
+        {
+          "ruleKey": "deadhead-day-neutral",
+          "kind": "CHECK",
+          "recurrence": { "weeklyDays": { "weekdays": ["SUNDAY"] } },
+          "requiredFacts": [],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Day-neutral and everbearing types fruit in succession while temperatures stay mild: remove spent blooms and any runners weekly to keep production going.",
+          "sources": ["osu-straw"]
+        },
+        {
+          "ruleKey": "pinch-day-neutral-flowers",
+          "kind": "ACTION",
+          "activityKind": "PRUNE",
+          "recurrence": { "everyNDays": { "days": 7, "anchor": "PLAN_START" } },
+          "requiredFacts": [],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "For the first 6-8 weeks after planting, pinch off flower clusters so the roots establish before cropping.",
+          "sources": ["osu-straw"]
+        },
+        {
+          "ruleKey": "renew-day-neutral-stock",
+          "kind": "ACTION",
+          "activityKind": "REPOT",
+          "recurrence": { "annualWindow": { "month": 3, "day": 1, "windowDays": 45 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Replace stock each year or two with fresh, disease-free plants, rotated to a new bed or fresh pots.",
+          "sources": ["osu-straw"]
+        }
+      ]
+    },
+    {
+      "key": "blackberry-floricane",
+      "category": "BLACKBERRY",
+      "species": "Rubus spp.",
+      "cultivar": "floricane-fruiting (cane-type group)",
+      "environment": { "situations": [], "hemispheres": ["NORTHERN"] },
+      "rules": [
+        {
+          "ruleKey": "tip-floricane-primocanes",
+          "kind": "ACTION",
+          "activityKind": "PRUNE",
+          "recurrence": { "weeklyDays": { "weekdays": ["SATURDAY"] } },
+          "requiredFacts": [],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "During the growing season, when new primocanes reach the top trellis wire, tip them out to force side laterals - that is next year's fruiting wood. Skip this check in dormant months.",
+          "sources": ["wsu-cane", "uc-ipm-home"]
+        },
+        {
+          "ruleKey": "cut-fruited-floricanes",
+          "kind": "ACTION",
+          "activityKind": "PRUNE",
+          "recurrence": { "annualWindow": { "month": 7, "day": 1, "windowDays": 45 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Right after harvest, cut every cane that fruited (a floricane) to the ground and remove it. Do not cut the new green primocanes - they carry next season's crop.",
+          "sources": ["wsu-cane", "uc-ipm-home"]
+        },
+        {
+          "ruleKey": "thin-floricane-winter",
+          "kind": "ACTION",
+          "activityKind": "PRUNE",
+          "recurrence": { "annualWindow": { "month": 2, "day": 1, "windowDays": 30 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "In winter, thin the remaining new canes to about 4-6 vigorous canes per foot of row, tied to the trellis.",
+          "sources": ["wsu-cane"]
+        }
+      ]
+    },
+    {
+      "key": "blackberry-primocane",
+      "category": "BLACKBERRY",
+      "species": "Rubus spp.",
+      "cultivar": "primocane-fruiting (cane-type group)",
+      "environment": { "situations": [], "hemispheres": ["NORTHERN"] },
+      "rules": [
+        {
+          "ruleKey": "primocane-winter-cutback",
+          "kind": "ACTION",
+          "activityKind": "PRUNE",
+          "recurrence": { "annualWindow": { "month": 2, "day": 15, "windowDays": 45 } },
+          "requiredFacts": ["REGION", "HEMISPHERE"],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "For the simple single fall crop: mow all canes to the ground in late winter and start fresh from the crowns. (To split a spring plus fall harvest instead, tip the canes instead of removing them.)",
+          "sources": ["wsu-cane"]
+        },
+        {
+          "ruleKey": "trellis-primocanes",
+          "kind": "CHECK",
+          "recurrence": { "everyNDays": { "days": 30, "anchor": "PLAN_START" } },
+          "requiredFacts": [],
+          "weatherSensitivity": "NONE",
+          "guidanceText": "Keep new canes tied to the trellis: wind-whipped canes break and crowded canes crop poorly.",
+          "sources": ["uc-ipm-home", "wsu-cane"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,268 @@
+/* Today composition (UI01.b): photo-led main column + quiet context rail. */
+
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-6);
+}
+.page-head h1 {
+  margin: var(--sp-1) 0;
+}
+.page-head p {
+  margin: 0;
+}
+.head-actions {
+  align-items: center;
+}
+
+.today-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--sp-6);
+  align-items: start;
+}
+.main-col {
+  display: grid;
+  gap: var(--sp-6);
+  min-width: 0;
+}
+.aside-col {
+  display: grid;
+  gap: var(--sp-4);
+  min-width: 0;
+}
+
+/* ---------- hero ---------- */
+/* Dark forest plate with light type, in both themes: the mock's hero is a
+   photo under a left-weighted forest wash, not a light panel. */
+.hero {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+  border: 1px solid var(--border-decorative);
+  border-radius: var(--radius-hero);
+  background: var(--nav-surface);
+}
+.hero-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.hero-content {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-2);
+  align-content: end;
+  min-height: inherit;
+  padding: var(--sp-8) var(--sp-6);
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--nav-surface) 93%, transparent) 0%,
+    color-mix(in srgb, var(--nav-surface) 90%, transparent) 55%,
+    color-mix(in srgb, var(--nav-surface) 45%, transparent) 78%,
+    transparent 100%
+  );
+}
+.hero-content .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  color: var(--nav-brand);
+}
+.hero-content h2 {
+  font-family: var(--font-editorial);
+  font-size: 44px;
+  line-height: 1.1;
+  margin: var(--sp-2) 0;
+  max-width: 13ch;
+  color: var(--nav-brand);
+}
+.hero-content p {
+  max-width: 44ch;
+  color: var(--nav-brand);
+  margin: 0 0 var(--sp-2);
+}
+/* The hero keeps its forest surface in every theme, so the page's focus ring
+   would sit on it unchanged; only its color follows the surface. */
+.hero-content a:focus-visible {
+  outline-color: var(--nav-accent);
+}
+
+/* ---------- metric strip ---------- */
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--sp-3);
+  padding: var(--sp-4) 0;
+  border-block: 1px solid var(--border-decorative);
+}
+.metric {
+  display: grid;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.metric > span {
+  font-size: var(--fs-caption);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+.metric strong {
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.metric small {
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+
+/* ---------- collection cards ---------- */
+.section-block {
+  display: grid;
+  gap: var(--sp-3);
+}
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.section-heading h2 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 28px;
+}
+.section-heading p {
+  margin: var(--sp-1) 0 0;
+}
+.plant-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-4);
+}
+
+/* ---------- journal ---------- */
+.journal-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.journal-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  border-top: 1px solid var(--border-decorative);
+  padding: var(--sp-3) 0;
+}
+.journal-list li:first-child {
+  border-top: 0;
+}
+.journal-text {
+  min-width: 0;
+}
+
+/* ---------- conditions ---------- */
+.weather-temp {
+  font-size: 26px;
+  font-weight: 700;
+}
+.weather-note {
+  margin: var(--sp-2) 0;
+}
+
+/* ---------- due list ---------- */
+.due-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-4);
+}
+.due-group h3 {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--fs-small);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+.no-due {
+  margin: 0 0 var(--sp-1);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-primary);
+  font-weight: 650;
+}
+.due-item {
+  display: grid;
+  gap: var(--sp-2);
+  border: 1px solid var(--border-decorative);
+  border-radius: var(--radius-card);
+  background: var(--surface-raised);
+  padding: var(--sp-3);
+  margin-bottom: var(--sp-2);
+}
+.due-item p {
+  margin: 0;
+}
+.due-item .row.wrap {
+  margin-top: var(--sp-1);
+}
+.is-check {
+  border-left: 3px solid var(--accent);
+}
+.badge-check {
+  font-style: italic;
+}
+.field-label {
+  display: block;
+}
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1199px) {
+  .today-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .plant-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .hero {
+    min-height: 280px;
+  }
+  .hero-content {
+    padding: var(--sp-6) var(--sp-4);
+  }
+  .hero-content h2 {
+    font-size: 34px;
+  }
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-4);
+  }
+  .plant-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .head-actions .btn {
+    flex: 1;
+  }
+}

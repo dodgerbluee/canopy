@@ -1,0 +1,195 @@
+{
+  "caseId": "t-schedule-drift",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:94b28b41f1e63274973053cd1d135dbb94cfa08edca1d304c20a44683ff7673a",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "6807678c-f2f3-4f7b-aabd-6980dbd1cdf0",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "688ab164-6f6f-4b1b-9f0f-4be91cc33b07",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "79116aef-4464-4ffe-9644-be11989bc76f",
+        "kind": "WATER",
+        "note": "watered",
+        "occurredAt": "2026-11-01T08:26:52Z"
+      },
+      {
+        "id": "bb634023-82c2-403c-a20d-b4d343694d14",
+        "kind": "WATER",
+        "note": "watered",
+        "occurredAt": "2026-10-30T08:26:52Z"
+      },
+      {
+        "id": "6e373f0d-fe50-4406-ab78-cf547345b911",
+        "kind": "WATER",
+        "note": "watered",
+        "occurredAt": "2026-10-25T08:26:52Z"
+      },
+      {
+        "id": "a3c15666-9b05-4433-bcb0-fd9565b3d618",
+        "kind": "WATER",
+        "note": "watered",
+        "occurredAt": "2026-10-13T08:26:52Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The recent watering dates may be associated with a period of more frequent watering, but the record does not show whether the plant's condition supported that change.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "79116aef-4464-4ffe-9644-be11989bc76f",
+          "bb634023-82c2-403c-a20d-b4d343694d14",
+          "6e373f0d-fe50-4406-ab78-cf547345b911",
+          "a3c15666-9b05-4433-bcb0-fd9565b3d618"
+        ]
+      },
+      {
+        "text": "The plant may be receiving enough water, too much water, or too little water; the record alone is insufficient to distinguish these possibilities.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "79116aef-4464-4ffe-9644-be11989bc76f",
+          "bb634023-82c2-403c-a20d-b4d343694d14",
+          "6e373f0d-fe50-4406-ab78-cf547345b911",
+          "a3c15666-9b05-4433-bcb0-fd9565b3d618"
+        ]
+      },
+      {
+        "text": "The Monstera may be in an indoor setting where watering frequency may be associated with light, temperature, humidity, pot size, and soil mix, but those factors are not recorded.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "79116aef-4464-4ffe-9644-be11989bc76f",
+          "bb634023-82c2-403c-a20d-b4d343694d14",
+          "6e373f0d-fe50-4406-ab78-cf547345b911",
+          "a3c15666-9b05-4433-bcb0-fd9565b3d618"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Check soil moisture by inserting a finger or moisture meter 2-5 cm deep; water only if the top layer is dry, then reassess in 2-3 days.",
+      "Inspect leaves for yellowing, browning, drooping, or spots, and check drainage holes for standing water; repeat weekly.",
+      "Review light conditions and seasonal changes; if growth has slowed, allow more drying between waterings and reassess in 1-2 weeks.",
+      "Record pot size, soil type, and approximate light level to make future watering decisions more comparable.",
+      "If symptoms appear, take photos and note date/time, then compare with prior watering dates.",
+      "If the plant is in a pot, verify that excess water drains freely and that the pot is not sitting in water."
+    ],
+    "missingInformation": [
+      "No photos or visual condition data are available to assess leaf color, turgor, pests, or overall health.",
+      "No soil moisture, pot size, soil type, drainage, light, temperature, humidity, or fertilizer measurements are recorded.",
+      "No weather or location coordinates are available to contextualize watering frequency.",
+      "No guidance entries are present to compare watering practices against recommended care.",
+      "No purchases or costs are recorded, so potting mix, fertilizer, or equipment inputs are unknown.",
+      "No activity notes beyond 'watered' are present, so amount, method, and water volume are unknown."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The plant record identifies a Monstera with status ACTIVE.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The workspace timezone is UTC and the workspace has no coordinates.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no photos, no measurements, no weather entries, and no guidance entries.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no purchases with costs allocated to this plant.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The record contains four activities, all of kind WATER.",
+        "evidenceIds": [
+          "79116aef-4464-4ffe-9644-be11989bc76f",
+          "bb634023-82c2-403c-a20d-b4d343694d14",
+          "6e373f0d-fe50-4406-ab78-cf547345b911",
+          "a3c15666-9b05-4433-bcb0-fd9565b3d618"
+        ]
+      },
+      {
+        "text": "The watering notes are all 'watered'.",
+        "evidenceIds": [
+          "79116aef-4464-4ffe-9644-be11989bc76f",
+          "bb634023-82c2-403c-a20d-b4d343694d14",
+          "6e373f0d-fe50-4406-ab78-cf547345b911",
+          "a3c15666-9b05-4433-bcb0-fd9565b3d618"
+        ]
+      },
+      {
+        "text": "The watering activities occurred at 08:26:52Z on 2026-11-01, 2026-10-30, 2026-10-25, and 2026-10-13.",
+        "evidenceIds": [
+          "79116aef-4464-4ffe-9644-be11989bc76f",
+          "bb634023-82c2-403c-a20d-b4d343694d14",
+          "6e373f0d-fe50-4406-ab78-cf547345b911",
+          "a3c15666-9b05-4433-bcb0-fd9565b3d618"
+        ]
+      },
+      {
+        "text": "The latest recorded watering is 2026-11-01.",
+        "evidenceIds": [
+          "79116aef-4464-4ffe-9644-be11989bc76f"
+        ]
+      },
+      {
+        "text": "The previous recorded watering is 2026-10-30.",
+        "evidenceIds": [
+          "bb634023-82c2-403c-a20d-b4d343694d14"
+        ]
+      },
+      {
+        "text": "The previous recorded watering is 2026-10-25.",
+        "evidenceIds": [
+          "6e373f0d-fe50-4406-ab78-cf547345b911"
+        ]
+      },
+      {
+        "text": "The earliest recorded watering is 2026-10-13.",
+        "evidenceIds": [
+          "a3c15666-9b05-4433-bcb0-fd9565b3d618"
+        ]
+      },
+      {
+        "text": "The intervals between successive recorded waterings were 12, 5, and 2 days.",
+        "evidenceIds": [
+          "79116aef-4464-4ffe-9644-be11989bc76f",
+          "bb634023-82c2-403c-a20d-b4d343694d14",
+          "6e373f0d-fe50-4406-ab78-cf547345b911",
+          "a3c15666-9b05-4433-bcb0-fd9565b3d618"
+        ]
+      }
+    ]
+  }
+}

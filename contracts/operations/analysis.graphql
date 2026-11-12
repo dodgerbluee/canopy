@@ -1,0 +1,225 @@
+# AI/analysis operations — frozen by T01.ai. Polling loop per 04: while an
+# AnalysisRun detail is visible, poll AnalysisRunStatus at 2s, backing off
+# exponentially to 15s; stop on terminal state (SUCCEEDED/FAILED/CANCELLED/
+# STALE) or route leave.
+
+fragment AnalysisRunFields on AnalysisRun {
+  id
+  revision
+  kind
+  plantId
+  receiptAssetId
+  state
+  attempts
+  requestedAt
+  startedAt
+  finishedAt
+  failureCode
+  failureMessage
+  provider
+  model
+  promptVersion
+  resultSchemaVersion
+  costReservedMicroUsd
+  costActualMicroUsd
+  evidence {
+    activityIds
+    measurementIds
+    photoIds
+    sourceVersionIds
+    weatherSnapshotIds
+    missingFacts
+    inputHash
+  }
+  result {
+    __typename
+    ... on ObservationAnalysisResult {
+      visibleObservations {
+        text
+        evidenceIds
+      }
+      hypotheses {
+        text
+        confidence
+        evidenceIds
+      }
+      missingInformation
+      followUpChecks
+      citations {
+        sourceId
+        sourceVersionId
+        title
+        publisher
+        retrievedOn
+        region
+        license
+      }
+    }
+    ... on IdentificationResult {
+      candidates {
+        rank
+        scientificName
+        commonName
+        confidence
+        evidenceNote
+      }
+      cultivar
+      cultivarEvidenced
+    }
+    ... on ReceiptExtractionResult {
+      currency
+      lines {
+        description
+        amountMinor
+      }
+      totalMinor
+      shippingMinor
+      taxMinor
+      purchasedOn
+      seller
+      needsReconciliation
+    }
+  }
+  suggestions {
+    ...SuggestionFields
+  }
+}
+
+fragment SuggestionFields on Suggestion {
+  id
+  revision
+  plantId
+  runId
+  kind
+  severity
+  status
+  observation
+  hypothesis
+  action
+  evidenceIds
+  missingFacts
+  createdAt
+  expiresAt
+  needsReview
+  acceptedTaskId
+  dismissReason
+}
+
+query ProviderCapabilities {
+  providerCapabilities {
+    text {
+      available
+      model
+      externalData
+      unavailableReason
+    }
+    vision {
+      available
+      model
+      externalData
+      unavailableReason
+    }
+    identification {
+      available
+      model
+      externalData
+      unavailableReason
+    }
+    receiptExtraction {
+      available
+      model
+      externalData
+      unavailableReason
+    }
+    budget {
+      dailyRunsUsed
+      dailyRunLimit
+      concurrentRunLimit
+      monthUtc
+      monthCeilingMicroUsd
+      monthReservedMicroUsd
+      monthSpentMicroUsd
+    }
+  }
+}
+
+query AnalysisRunStatus($runId: ID!) {
+  analysisRun(id: $runId) {
+    ...AnalysisRunFields
+  }
+}
+
+query SuggestionsPage($first: Int = 25, $after: String, $filter: SuggestionFilter) {
+  suggestions(first: $first, after: $after, filter: $filter) {
+    items {
+      ...SuggestionFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+mutation RequestAnalysis($input: RequestAnalysisInput!, $clientMutationId: String) {
+  requestAnalysis(input: $input, clientMutationId: $clientMutationId) {
+    run {
+      ...AnalysisRunFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation CancelAnalysis($input: CancelAnalysisInput!, $clientMutationId: String) {
+  cancelAnalysis(input: $input, clientMutationId: $clientMutationId) {
+    run {
+      ...AnalysisRunFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation AcceptSuggestion($input: AcceptSuggestionInput!, $clientMutationId: String) {
+  acceptSuggestion(input: $input, clientMutationId: $clientMutationId) {
+    suggestion {
+      ...SuggestionFields
+    }
+    occurrence {
+      ...CareOccurrenceFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation DismissSuggestion($input: DismissSuggestionInput!, $clientMutationId: String) {
+  dismissSuggestion(input: $input, clientMutationId: $clientMutationId) {
+    suggestion {
+      ...SuggestionFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}

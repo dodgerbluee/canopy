@@ -1,0 +1,118 @@
+{
+  "caseId": "v-fig",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:3c922ba12da4686354d0df0ae11925473743dbc6697cfd9de3525cee4be93aae",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "f4aee4b0-3655-41d7-8960-bd5784b16045",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "ee06ce95-c7f8-4e7c-b83c-14dabde47cbd",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "e245043a-c744-4594-b540-a7648ff4ac32",
+        "takenAt": "2026-10-04T08:18:51Z"
+      },
+      {
+        "id": "42d7cd33-0811-45bb-baaf-ea31a772455d",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "9a8871f3-1584-4e54-a628-7c1e84ac9b00",
+        "takenAt": "2026-11-03T08:18:51Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "79bafa38-1d26-44d7-8f24-24d14e045b07",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The plant may currently appear visually stable between the two captures, with no obvious change in canopy shape or color.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "ee06ce95-c7f8-4e7c-b83c-14dabde47cbd",
+          "42d7cd33-0811-45bb-baaf-ea31a772455d"
+        ]
+      },
+      {
+        "text": "The plant may not show obvious severe stress or damage in the visible portions, but the low-detail images limit confidence.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "ee06ce95-c7f8-4e7c-b83c-14dabde47cbd",
+          "42d7cd33-0811-45bb-baaf-ea31a772455d"
+        ]
+      },
+      {
+        "text": "The plant may be a young or compact Monstera-like plant, but the images are too stylized to confirm species or growth stage.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "ee06ce95-c7f8-4e7c-b83c-14dabde47cbd",
+          "42d7cd33-0811-45bb-baaf-ea31a772455d"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Capture clearer photos from the same angle and distance with a scale reference and include pot and soil.",
+      "Record measurements such as plant height, leaf count, leaf length and width, and pot size.",
+      "Check for fenestrations, new leaves, discoloration, pests, and substrate moisture.",
+      "Add care guidance, location coordinates, and weather context for the workspace."
+    ],
+    "missingInformation": [
+      "No scale reference, pot, soil, or full plant context is visible, so size, growth rate, and health cannot be assessed quantitatively.",
+      "No measurements, activities, weather, coordinates, or approved care guidance are available in the snapshot.",
+      "The images are low-detail and may not provide enough visual evidence to confirm the same plant, exact orientation, or condition.",
+      "No close-up views of leaves, stems, roots, fenestrations, pests, or substrate are available."
+    ],
+    "visibleObservations": [
+      {
+        "text": "Both images show a green plant-like form with a broad upper lobe and two side lobes, supported by a single brown vertical stem against a plain light background.",
+        "evidenceIds": [
+          "ee06ce95-c7f8-4e7c-b83c-14dabde47cbd",
+          "42d7cd33-0811-45bb-baaf-ea31a772455d"
+        ]
+      },
+      {
+        "text": "The visible foliage appears uniformly green in both images, with no clearly visible yellowing, browning, spots, holes, wilting, flowers, fruit, soil, pot, or support structure.",
+        "evidenceIds": [
+          "ee06ce95-c7f8-4e7c-b83c-14dabde47cbd",
+          "42d7cd33-0811-45bb-baaf-ea31a772455d"
+        ]
+      },
+      {
+        "text": "The two images look very similar in overall shape and color, but they provide no scale, angle, or environmental context.",
+        "evidenceIds": [
+          "ee06ce95-c7f8-4e7c-b83c-14dabde47cbd",
+          "42d7cd33-0811-45bb-baaf-ea31a772455d"
+        ]
+      }
+    ]
+  }
+}

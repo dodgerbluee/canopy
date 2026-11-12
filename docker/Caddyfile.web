@@ -1,0 +1,19 @@
+{
+	admin off
+}
+
+{$CANOPY_SITE:localhost} {
+	encode zstd gzip
+	@api path /api/* /mcp /agent/* /healthz /readyz
+	handle @api {
+		reverse_proxy {$CANOPY_API_UPSTREAM:api:8080} {
+			flush_interval -1
+		}
+	}
+	handle {
+		root * /srv
+		header Cache-Control "no-cache"
+		try_files {path} /index.html
+		file_server
+	}
+}

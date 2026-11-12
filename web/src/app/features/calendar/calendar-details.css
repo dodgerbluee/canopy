@@ -1,0 +1,128 @@
+.day-panel {
+  margin-top: 24px;
+  padding: 24px;
+}
+.day-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.day-heading h2 {
+  font-size: 17px;
+  font-weight: 600;
+  margin: 8px 0 0;
+}
+.calendar-entry {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 17px 0;
+  border-top: 1px solid var(--border-decorative);
+}
+.entry-icon {
+  display: grid;
+  place-items: center;
+  background: var(--surface-raised);
+  color: var(--accent);
+  border-radius: 10px;
+  width: 44px;
+  height: 44px;
+  flex: none;
+}
+.is-rain {
+  border: 1px dashed var(--border);
+}
+.entry-copy {
+  flex: 1;
+  min-width: 0;
+}
+.entry-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0 0 4px;
+  overflow-wrap: anywhere;
+}
+.entry-plant,
+.entry-meta,
+.entry-note {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.entry-note {
+  margin-top: 5px;
+  white-space: pre-wrap;
+}
+.remove-rain {
+  font-size: 12px;
+}
+.day-empty {
+  padding: 28px 8px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+.day-empty p {
+  margin: 12px 0 6px;
+}
+.day-empty span {
+  font-size: 12px;
+}
+.calendar-error {
+  padding: 20px 24px;
+  background: var(--surface-raised);
+  font-size: 14px;
+}
+.calendar-error p {
+  color: var(--text-muted);
+}
+.mobile-filter-bar {
+  display: none;
+}
+.rain-form {
+  display: grid;
+  gap: 16px;
+}
+.rain-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+}
+.rain-depth {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 100px;
+  gap: 12px;
+}
+.rain-form .optional {
+  display: contents;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+.rain-form .field-hint {
+  margin: -8px 0 0;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.rain-form textarea {
+  resize: vertical;
+}
+.mobile-filters {
+  display: grid;
+  gap: 4px;
+}
+.mobile-filters > .btn {
+  margin-top: 16px;
+}
+.form-error {
+  color: var(--danger);
+  font-size: 13px;
+  line-height: 1.6;
+}

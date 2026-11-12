@@ -1,0 +1,58 @@
+/* Inbox (UI01.d): editorial head, consistent notice rows, tokens only. */
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-6);
+}
+.page-head-main {
+  display: grid;
+  gap: var(--sp-2);
+}
+.page-head h1 {
+  margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.page-head-main > p:last-child {
+  margin: 0;
+  max-width: 62ch;
+}
+.notice-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.is-unread {
+  border-left: 3px solid var(--accent);
+}
+.notice-grid {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-4);
+  align-items: start;
+}
+.chan {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--border);
+  background: var(--surface-base);
+  color: var(--text-muted);
+}
+.notice-content {
+  min-width: 0;
+}
+.notice-body {
+  margin: var(--sp-2) 0 0;
+  white-space: pre-line;
+}
+.notice-actions {
+  margin-top: var(--sp-3);
+}

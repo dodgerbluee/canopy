@@ -1,0 +1,458 @@
+<!-- Insights tab (T34): engines/budget, analysis requests with progress/
+     cancel/retry, the run's structured findings with evidence trails, and
+     this plant's open suggestions. All copy is stored records — no claims. -->
+
+<section class="card" aria-labelledby="cap-h">
+  <h2 id="cap-h">Analysis engines</h2>
+  @if (caps(); as c) {
+    <ul class="caplist">
+      <li>
+        <span>Text analysis</span>
+        @if (c.text.available) {
+          <ui-status kind="ok" [label]="'available' + (c.text.model ? ' · ' + c.text.model : '')" />
+        } @else {
+          <ui-status kind="warn" label="not configured" />
+          <p class="caption">
+            {{ c.text.unavailableReason ?? 'No text engine is configured.' }}
+          </p>
+        }
+      </li>
+      <li>
+        <span>Photo comparison</span>
+        @if (c.vision.available) {
+          <ui-status
+            kind="ok"
+            [label]="'available' + (c.vision.model ? ' · ' + c.vision.model : '')"
+          />
+        } @else {
+          <ui-status kind="warn" label="not configured" />
+          <p class="caption">
+            {{ c.vision.unavailableReason ?? 'No vision engine is configured.' }}
+          </p>
+        }
+      </li>
+      <li>
+        <span>Plant identification</span>
+        @if (c.identification.available) {
+          <ui-status
+            kind="ok"
+            [label]="'available' + (c.identification.model ? ' · ' + c.identification.model : '')"
+          />
+        } @else {
+          <ui-status kind="warn" label="not configured" />
+          <p class="caption">
+            {{
+              c.identification.unavailableReason ??
+                'No identification service is
+        configured.'
+            }}
+          </p>
+        }
+      </li>
+      <li>
+        <span>Receipt extraction</span>
+        @if (c.receiptExtraction.available) {
+          <ui-status kind="ok" label="available" />
+        } @else {
+          <ui-status kind="warn" label="not configured" />
+          <p class="caption">
+            {{
+              c.receiptExtraction.unavailableReason ??
+                'No extraction engine is
+        configured.'
+            }}
+          </p>
+        }
+      </li>
+    </ul>
+    <p class="caption">
+      Budget: {{ c.budget.dailyRunsUsed }} of {{ c.budget.dailyRunLimit }} runs today ·
+      {{ budgetSpent() }} · reserved {{ usd(c.budget.monthReservedMicroUsd) }}
+    </p>
+    @if (c.text.externalData || (c.vision.available && c.vision.externalData)) {
+      <p class="caption">
+        External engines receive the snapshot of this plant’s records you send — nothing is sent
+        unless you start a review.
+      </p>
+    }
+  } @else {
+    <p class="caption">Checking engine state…</p>
+  }
+</section>
+
+<section class="card" style="margin-top: var(--sp-4)" aria-labelledby="req-h">
+  <h2 id="req-h">Ask for a review</h2>
+  <p class="caption">
+    Nothing is analysed on its own. Each review below is something you start, and it is billed
+    against the budget shown above.
+  </p>
+  <div class="row wrap" style="gap: var(--sp-3)">
+    <div>
+      <button
+        type="button"
+        class="btn btn-primary"
+        (click)="openReview()"
+        [disabled]="busy() || anyDialogOpen() || !caps()?.text?.available || dailyExhausted()"
+      >
+        Review this plant’s history
+      </button>
+      @if (caps(); as c) {
+        @if (!c.text.available) {
+          <p class="caption">
+            History review needs a text engine:
+            {{
+              c.text.unavailableReason ??
+                'none
+        configured.'
+            }}
+          </p>
+        }
+      }
+      @if (dailyExhausted()) {
+        <p class="caption">
+          Daily analysis limit reached — the count resets at the workspace’s local midnight.
+        </p>
+      }
+    </div>
+    @if (photos().length >= 2) {
+      <div>
+        <button
+          type="button"
+          class="btn"
+          (click)="openCompare()"
+          [disabled]="busy() || anyDialogOpen() || !caps()?.vision?.available"
+        >
+          Compare growth in two photos
+        </button>
+        @if (caps(); as c) {
+          @if (!c.vision.available) {
+            <p class="caption">
+              Photo comparison needs a vision engine:
+              {{ c.vision.unavailableReason ?? 'none configured.' }}
+            </p>
+          }
+        }
+      </div>
+    }
+  </div>
+  @if (note()) {
+    <p role="status" class="caption" style="margin-top: var(--sp-2)">
+      {{ note() }}
+    </p>
+  }
+</section>
+
+<!-- History review: the engine/budget/external-data facts are read here before
+     anything is billed; the request itself only happens on Start review. -->
+<ui-entry-dialog
+  #reviewEntry
+  [open]="reviewOpen()"
+  title="Review this plant’s history"
+  description="Reads the records for this plant and reports what it finds"
+  size="compact"
+  [busy]="busy()"
+  (dismissed)="onReviewDismissed()"
+>
+  @if (reviewOpen()) {
+    <div class="entry-form">
+      <div class="form-section">
+        <p class="field-hint">{{ reviewSummary() }}</p>
+        @if (dailyExhausted()) {
+          <p class="field-error">
+            Daily analysis limit reached — the count resets at the workspace’s local midnight.
+          </p>
+        }
+        @if (note()) {
+          <p role="status" class="field-error">{{ note() }}</p>
+        }
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" (click)="closeReview()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="busy() || !caps()?.text?.available || dailyExhausted()"
+          (click)="request('SYNTHESIS')"
+        >
+          Start review
+        </button>
+      </div>
+    </div>
+  }
+</ui-entry-dialog>
+
+<!-- Photo comparison: the same native photo checkboxes as before, now inside
+     the shared modal; the two-photo rule and the explicit Compare growth
+     submit are unchanged. -->
+<ui-entry-dialog
+  #compareEntry
+  [open]="compareOpen()"
+  title="Compare growth in two photos"
+  description="Pick exactly two photos, then start the comparison"
+  size="regular"
+  [busy]="busy()"
+  [dirty]="picked().length > 0"
+  (dismissed)="onCompareDismissed()"
+>
+  @if (compareOpen()) {
+    <div class="entry-form">
+      <div class="form-section">
+        <p class="field-hint">{{ compareSummary() }}</p>
+        <fieldset>
+          <legend>Photos of this plant</legend>
+          @for (ph of photos(); track ph.id) {
+            <label class="chip chip-check">
+              <input
+                type="checkbox"
+                [checked]="picked().includes(ph.id)"
+                [disabled]="!picked().includes(ph.id) && picked().length >= 2"
+                (change)="togglePhoto(ph.id)"
+              />
+              {{ photoLabel(ph) }}
+            </label>
+          }
+        </fieldset>
+        <p class="field-hint">
+          {{ picked().length }} of 2 selected — a comparison needs exactly two photos.
+        </p>
+        @if (note()) {
+          <p role="status" class="field-error">{{ note() }}</p>
+        }
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" (click)="closeCompare()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="busy() || picked().length !== 2 || !caps()?.vision?.available"
+          (click)="request('VISION')"
+        >
+          Compare growth
+        </button>
+      </div>
+    </div>
+  }
+</ui-entry-dialog>
+
+<!-- Rerun: the only path that re-bills the same inputs, so the billing
+     consequence is stated before the owner confirms. -->
+<ui-entry-dialog
+  #rerunEntry
+  [open]="isRerunBilled()"
+  [title]="rerunTitle()"
+  description="Running again bills this run again"
+  size="compact"
+  [busy]="busy()"
+  (dismissed)="onRerunDismissed()"
+>
+  @if (rerun(); as kind) {
+    <div class="entry-form">
+      <div class="form-section">
+        <p class="field-hint">{{ rerunSummary() }}</p>
+        @if (kind === 'VISION') {
+          <p class="field-hint">
+            Photos used:
+            {{
+              picked()
+                .map((id) => photoLabelById(id))
+                .join(' and ')
+            }}.
+          </p>
+        }
+        @if (note()) {
+          <p role="status" class="field-error">{{ note() }}</p>
+        }
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" (click)="closeRerun()">Cancel</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="busy() || (kind === 'VISION' && picked().length !== 2)"
+          (click)="request(kind === 'VISION' ? 'VISION' : 'SYNTHESIS', true)"
+        >
+          Run again (billed again)
+        </button>
+      </div>
+    </div>
+  }
+</ui-entry-dialog>
+
+@if (run(); as r) {
+  <section class="card runpanel" style="margin-top: var(--sp-4)" aria-labelledby="run-h">
+    <div class="row" style="justify-content: space-between; align-items: baseline">
+      <h2 id="run-h" style="margin: 0">
+        {{ r.kind === 'VISION' ? 'Photo comparison' : 'History review' }}
+      </h2>
+      <ui-status [kind]="stateKind(r.state)" [label]="stateLabel(r.state)" />
+    </div>
+
+    @if (r.state === 'QUEUED' || r.state === 'RUNNING') {
+      <p class="caption">
+        Attempt {{ r.attempts }} — this page polls for it; leaving stops the poll.
+        <button type="button" class="btn" (click)="cancel()" [disabled]="busy()">Cancel</button>
+      </p>
+    }
+    @if (r.state === 'FAILED' || r.state === 'STALE' || r.state === 'CANCELLED') {
+      @if (r.failureMessage) {
+        <p role="status" class="caption">{{ r.failureMessage }}</p>
+      }
+    }
+    @if (
+      (r.kind === 'SYNTHESIS' || r.kind === 'VISION') &&
+      (r.state === 'FAILED' ||
+        r.state === 'STALE' ||
+        r.state === 'CANCELLED' ||
+        r.state === 'SUCCEEDED')
+    ) {
+      <!-- an explicit rerun is the only way to re-bill the same inputs (03);
+           owners may also re-run after a success if they want a fresh pass.
+           The confirmation states the billing before the owner commits. -->
+      <p style="margin-top: var(--sp-2)">
+        <button
+          type="button"
+          class="btn"
+          (click)="openRerun(r.kind)"
+          [disabled]="busy() || anyDialogOpen() || (r.kind === 'VISION' && picked().length !== 2)"
+        >
+          Run again (billed again)
+        </button>
+      </p>
+    }
+    @if (obsResult(); as o) {
+      @if (o.visibleObservations.length) {
+        <h3>What was observed</h3>
+        <ul class="findings">
+          @for (v of o.visibleObservations; track $index) {
+            <li>
+              <p>{{ v.text }}</p>
+              @if (v.evidenceIds.length) {
+                <span class="row wrap" style="gap: var(--sp-1)">
+                  @for (id of v.evidenceIds; track id) {
+                    @if (compareLink(id); as pair) {
+                      <a
+                        class="chip"
+                        [routerLink]="['/plants', plantId(), 'compare']"
+                        [queryParams]="pair"
+                        >evidence: {{ evidenceKind(id) }} — compare</a
+                      >
+                    } @else {
+                      <span class="chip">evidence: {{ evidenceKind(id) }}</span>
+                    }
+                  }
+                </span>
+              } @else {
+                <span class="chip chip-warn">no evidence referenced — treat as unsupported</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+      @if (o.hypotheses.length) {
+        <h3>Hypotheses — possible explanations, not diagnoses</h3>
+        <ul class="findings">
+          @for (h of o.hypotheses; track $index) {
+            <li>
+              <p>
+                {{ h.text }}
+                <span class="chip">{{ lower(h.confidence) }} confidence</span>
+              </p>
+              @if (h.evidenceIds.length) {
+                <span class="row wrap" style="gap: var(--sp-1)">
+                  @for (id of h.evidenceIds; track id) {
+                    @if (compareLink(id); as pair) {
+                      <a
+                        class="chip"
+                        [routerLink]="['/plants', plantId(), 'compare']"
+                        [queryParams]="pair"
+                        >evidence: {{ evidenceKind(id) }} — compare</a
+                      >
+                    } @else {
+                      <span class="chip">evidence: {{ evidenceKind(id) }}</span>
+                    }
+                  }
+                </span>
+              } @else {
+                <span class="chip chip-warn">no evidence referenced — treat as unsupported</span>
+              }
+            </li>
+          }
+        </ul>
+      }
+      @if (o.missingInformation.length) {
+        <h3>Missing context</h3>
+        <ul>
+          @for (m of o.missingInformation; track $index) {
+            <li>{{ m }}</li>
+          }
+        </ul>
+      }
+      @if (o.followUpChecks.length) {
+        <h3>Suggested follow-up checks</h3>
+        <ul>
+          @for (f of o.followUpChecks; track $index) {
+            <li>{{ f }}</li>
+          }
+        </ul>
+      }
+      @if (o.citations.length) {
+        <h3>Sources used</h3>
+        <ul class="sources">
+          @for (c of o.citations; track c.sourceVersionId) {
+            <li>
+              {{ c.title }} — {{ c.publisher ?? 'publisher not given' }}, retrieved
+              {{ c.retrievedOn }}
+              @if (c.region) {
+                , {{ c.region }}
+              }
+              @if (c.license) {
+                · {{ c.license }}
+              }
+            </li>
+          }
+        </ul>
+      }
+      <p class="caption">
+        Engine: {{ r.provider ?? 'unknown' }}
+        @if (r.model) {
+          · {{ r.model }}
+        }
+        · prompt {{ r.promptVersion }} · input {{ r.evidence.inputHash.slice(0, 12) }} · cost
+        reserved {{ usd(r.costReservedMicroUsd) }}, actual {{ usd(r.costActualMicroUsd) }}
+      </p>
+      @if (r.evidence.missingFacts.length) {
+        <p class="caption">
+          Facts that were missing when this ran: {{ r.evidence.missingFacts.join('; ') }}
+        </p>
+      }
+    }
+  </section>
+}
+
+<section class="suggestions-section" aria-labelledby="sug-h">
+  <header class="suggestions-heading">
+    <div>
+      <p class="eyebrow">NEXT STEPS</p>
+      <h2 id="sug-h">Suggestions to review</h2>
+    </div>
+    @if (suggestions().length) {
+      <span class="suggestion-count">{{ suggestions().length }} open</span>
+    }
+  </header>
+  @if (suggestions().length) {
+    <p class="suggestions-intro">
+      Choose what’s useful. Adding a suggestion schedules a check in Care.
+    </p>
+    <div class="suggestions-list">
+      @for (s of suggestions(); track s.id) {
+        <insight-suggestion-card
+          [suggestion]="s"
+          [evidence]="evidenceFor(s)"
+          (changed)="onSuggestionChanged($event)"
+        />
+      }
+    </div>
+  } @else {
+    <p class="caption">You’re all caught up. A plant review can suggest what to check next.</p>
+  }
+</section>

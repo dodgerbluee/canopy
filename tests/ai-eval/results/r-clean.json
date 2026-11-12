@@ -1,0 +1,56 @@
+{
+  "caseId": "r-clean",
+  "kind": "RECEIPT",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:0d0f9cf44ebbf12da30dde44dbf79380f1f1ea21e4e19e256f334d991eaa7e97",
+  "snapshot": {
+    "kind": "RECEIPT_EXTRACTION",
+    "costs": [],
+    "plant": {
+      "id": "",
+      "name": "",
+      "status": "",
+      "revision": 0
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "167cf484-ceee-447d-ac01-887404420c88",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "lines": [
+      {
+        "amountMinor": "2800",
+        "description": "Monstera deliciosa 6in"
+      }
+    ],
+    "seller": "GREEN GARDEN NURSERY",
+    "currency": "USD",
+    "taxMinor": "",
+    "totalMinor": "2800",
+    "purchasedOn": "2026-05-14",
+    "shippingMinor": "",
+    "needsReconciliation": false
+  }
+}

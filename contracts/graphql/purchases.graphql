@@ -1,0 +1,89 @@
+# Purchases, lines, allocations, spending. Exact arithmetic per 03. Frozen by T01.r1.
+
+type Purchase {
+  id: ID!
+  seller: String
+  purchasedOn: LocalDate
+  "ISO 4217. Totals group by currency; never implicitly converted."
+  currency: String!
+  "Includes shipping and tax; tax+shipping <= total."
+  totalMinor: MinorUnits!
+  shippingMinor: MinorUnits!
+  taxMinor: MinorUnits!
+  revision: Int!
+  voidedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  lines(first: Int, after: String): PurchaseLineConnection!
+  receipts: [PurchaseReceipt!]!
+}
+
+type PurchaseConnection {
+  items: [Purchase!]!
+  pageInfo: PageInfo!
+}
+
+"May represent a plant item or supplies. Sum of lineTotalMinor equals total - tax - shipping."
+type PurchaseLine {
+  id: ID!
+  purchaseId: ID!
+  description: String!
+  quantity: Decimal!
+  lineTotalMinor: MinorUnits!
+  allocations: [PurchaseAllocation!]!
+}
+
+type PurchaseLineConnection {
+  items: [PurchaseLine!]!
+  pageInfo: PageInfo!
+}
+
+"plantId null = unallocated supplies (in workspace total, not plant totals). Per-line lineMinor sums to lineTotalMinor; overhead components sum to purchase overhead including unallocated bucket."
+type PurchaseAllocation {
+  id: ID!
+  purchaseLineId: ID!
+  plantId: ID
+  lineMinor: MinorUnits!
+  taxMinor: MinorUnits!
+  shippingMinor: MinorUnits!
+}
+
+input PurchaseLineInput {
+  "On update, id preserves the allocation-bearing line; omit to create."
+  id: ID
+  description: String!
+  quantity: Decimal!
+  lineTotalMinor: MinorUnits!
+  allocations: [PurchaseAllocationInput!]
+}
+
+input PurchaseAllocationInput {
+  "On update, id keeps the existing allocation (required for acquisition-linked allocations that are retained)."
+  id: ID
+  "Null = unallocated supplies."
+  plantId: ID
+  lineMinor: MinorUnits!
+  taxMinor: MinorUnits!
+  shippingMinor: MinorUnits!
+}
+
+input PurchaseFilter {
+  sellerQuery: String
+  from: LocalDate
+  to: LocalDate
+  currency: String
+  "Default false: voided excluded."
+  includeVoided: Boolean
+}
+
+"Known free acquisition = zero-total purchase (displays Free). UNKNOWN = Price unknown. Missing record = Acquisition not recorded. Decimal zero is never used for missing information."
+type Spending {
+  knownSpendingByCurrency: [CurrencyTotal!]!
+  unknownAcquisitionCostCount: Int!
+  missingAcquisitionRecordCount: Int!
+}
+
+type CurrencyTotal {
+  currency: String!
+  total: Money!
+}

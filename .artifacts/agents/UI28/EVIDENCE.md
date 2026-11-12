@@ -1,0 +1,22 @@
+# Public acceptance record: UI28
+
+This is a source-release summary. Original local execution artifacts remain private because they may include personal garden data. Current GitHub CI reproduces the verification gates.
+
+| 2026-11-11 | UI28 | ACCEPTED | Fullscreen original-saving photo viewer and dense plant Gallery with all-page comparison. 58 tests, production build, five desktop/phone accessibility flows and actual authenticated photo download pass. Published to local previews. Evidence: `.artifacts/agents/UI28/`. |
+
+# UI28 — Fullscreen photos and compact plant gallery
+
+Status: ACCEPTED.
+
+Added a reusable presentation-only fullscreen photo viewer with uncropped display images, Save original, zoom, keyboard/thumbnail navigation, focus trapping/restoration, background isolation, safe-area spacing and honest image failure states. Plant heroes, journal photos, dashboard hero and side-by-side comparisons open the viewer. Original downloads use the existing authenticated original endpoint without re-encoding or changing capture metadata.
+
+Plant detail now has a dedicated Gallery tab: a compact contact sheet, quiet contextual options, full photo pagination and selection of any two photos for the existing side/overlay comparison. Capture dates determine ordering; unknown/upload-fallback captures remain explicit and sort after known captures. Photo details, cover selection and guarded removal remain available. Comparisons now load every page, use display-size images and report read failures rather than calling them an empty photo collection.
+
+Executed evidence under `.artifacts/agents/UI28/`:
+
+- `tests.log`: 58 tests pass across viewer, photo/framing, comparison and journal suites. Covers original download targets after navigation, bounded previous/next, Escape/focus restoration and failed-image recovery.
+- `build.log`: production Angular build passes using Node 24 Docker.
+- `browser-report.json`: 320/390/1440 layouts, light/dark, 103 photos over multiple pages, full viewport/contain rendering, byte-identical original download, cross-page pair selection, photo management and zero axe violations/browser errors.
+- `live-report.json`: actual authenticated garden on Android-emulated phone; five real photos, uncropped fullscreen viewer, successful 2,212,976-byte original download, accessible details and zero browser errors. No garden mutations.
+- `published.json`: final assets published to the existing desktop and Docker progress/phone previews, retaining previous chunks and replacing index last.
+- `plan-boundary.log`: plan/packet/dispatch and import boundaries pass. No backend changes or API/worker restart required.

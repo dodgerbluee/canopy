@@ -1,0 +1,102 @@
+{
+  "note": "Care agenda positive fixture (T01.care): ACTION vs CHECK visibly distinct, typed reason with pinned source version, missing-fact abstention, snooze as a field (logical key unchanged), original vs current due dates both present.",
+  "operation": "CareAgenda",
+  "variables": {
+    "from": "2026-11-02",
+    "to": "2026-12-31",
+    "first": 25
+  },
+  "data": {
+    "careAgenda": {
+      "items": [
+        {
+          "id": "5f0c1b6e-2222-4aaa-8bbb-000000000001",
+          "planId": "5f0c1b6e-2222-4aaa-8bbb-0000000000a1",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "ruleKey": "water-meyer-lemon",
+          "kind": "ACTION",
+          "activityKind": "WATER",
+          "occurrenceKey": "5f0c1b6e-2222-4aaa-8bbb-0000000000a1:water-meyer-lemon:2026-11-04",
+          "originalDueDate": "2026-11-04",
+          "currentDueDate": "2026-11-04",
+          "snoozedUntil": null,
+          "status": "DUE",
+          "completedActivityId": null,
+          "resolvedAt": null,
+          "planTimezone": "America/Los_Angeles",
+          "reason": {
+            "text": "Every 7 days since last watering; soil check first if rain landed.",
+            "evidence": [
+              {
+                "sourceVersion": {
+                  "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000b1",
+                  "sourceId": "5f0c1b6e-2222-4aaa-8bbb-0000000000c1",
+                  "citation": "UC CEFAEN, Citrus Irrigation Guidance (2024)",
+                  "summary": "Container citrus: water when top 2-3 cm of medium is dry; reduce frequency in cool months.",
+                  "retrievedOn": "2026-10-01",
+                  "contentSha256": "3d4f5e6a7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f80",
+                  "createdAt": "2026-10-01T18:00:00Z"
+                },
+                "weatherSnapshot": null,
+                "note": null
+              }
+            ],
+            "missingFacts": []
+          }
+        },
+        {
+          "id": "5f0c1b6e-2222-4aaa-8bbb-000000000002",
+          "planId": "5f0c1b6e-2222-4aaa-8bbb-0000000000a1",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "ruleKey": "frost-watch-meyer",
+          "kind": "CHECK",
+          "activityKind": null,
+          "occurrenceKey": "5f0c1b6e-2222-4aaa-8bbb-0000000000a1:frost-watch-meyer:2026-11-15",
+          "originalDueDate": "2026-11-15",
+          "currentDueDate": "2026-11-15",
+          "snoozedUntil": null,
+          "status": "DUE",
+          "completedActivityId": null,
+          "resolvedAt": null,
+          "planTimezone": "America/Los_Angeles",
+          "reason": {
+            "text": "Needs context: frost checks stay inactive until the plant's placement and region are recorded.",
+            "evidence": [],
+            "missingFacts": ["PLACEMENT", "REGION"]
+          }
+        },
+        {
+          "id": "5f0c1b6e-2222-4aaa-8bbb-000000000003",
+          "planId": "5f0c1b6e-2222-4aaa-8bbb-0000000000a2",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000002",
+          "ruleKey": "fig-observe-leaf-drop",
+          "kind": "CHECK",
+          "activityKind": null,
+          "occurrenceKey": "5f0c1b6e-2222-4aaa-8bbb-0000000000a2:fig-observe-leaf-drop:2026-11-10",
+          "originalDueDate": "2026-11-10",
+          "currentDueDate": "2026-11-13",
+          "snoozedUntil": "2026-11-13",
+          "status": "DUE",
+          "completedActivityId": null,
+          "resolvedAt": null,
+          "planTimezone": "America/New_York",
+          "reason": {
+            "text": "Weekly observation check; snoozed once, cadence unchanged.",
+            "evidence": [
+              {
+                "sourceVersion": null,
+                "weatherSnapshot": null,
+                "note": "Owner snoozed from 2026-11-10 to 2026-11-13."
+              }
+            ],
+            "missingFacts": []
+          }
+        }
+      ],
+      "pageInfo": {
+        "endCursor": "Y3Vyc29yLTIwMjYtMTEtMTM6NWYwYzFiNmUtMjIyMi00YWFhLThiYmItMDAwMDAwMDAwMDAz",
+        "hasNextPage": false
+      }
+    }
+  }
+}

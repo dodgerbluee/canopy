@@ -1,0 +1,570 @@
+@if (state() === 'loading') {
+  <p class="caption">Loading plant…</p>
+} @else if (state() === 'missing') {
+  <section class="card" role="alert" aria-live="assertive" style="max-width: 560px">
+    <h2>Plant not found</h2>
+    <p class="caption">It may have been archived-and-purged, or it belongs to another workspace.</p>
+    <div>
+      <a class="btn btn-primary" routerLink="/plants">Back to collection</a>
+    </div>
+  </section>
+} @else if (plant(); as p) {
+  @if (banner()) {
+    <section
+      class="card"
+      role="alert"
+      aria-live="assertive"
+      style="max-width: 640px; margin-bottom: var(--sp-4)"
+    >
+      <p class="caption" style="margin: 0">{{ banner() }}</p>
+      <div class="row">
+        <button type="button" class="btn btn-primary" (click)="reload()">Reload this plant</button>
+      </div>
+    </section>
+  }
+
+  <!-- Quiet back link above the hero (mock .back-link): a plain text link, not a pill. -->
+  <div class="plant-heading-row">
+    <p class="hero-back">
+      <a routerLink="/plants">
+        <ui-icon name="back" [size]="15" />
+        Back to collection
+      </a>
+    </p>
+  </div>
+
+  <!-- Identity hero: the plant's own cover photo, not a stock image. -->
+  <section class="detail-hero" aria-labelledby="ph">
+    <div class="detail-hero-media">
+      @if (coverUrl(p); as cover) {
+        <ui-photo
+          [expandable]="true"
+          [originalSrc]="p.coverPhoto ? mediaUrl(p.coverPhoto.asset.id, 'original') : null"
+          [src]="cover"
+          [alt]="'Cover photo of ' + p.name"
+          framing="auto"
+        />
+      } @else {
+        <div
+          class="detail-hero-empty"
+          role="img"
+          [attr.aria-label]="'No photo of ' + p.name + ' yet'"
+        >
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M12 3c4 4 6 7 6 10a6 6 0 0 1-12 0c0-3 2-6 6-10Z" />
+            <path d="M12 21V11" />
+          </svg>
+        </div>
+      }
+    </div>
+    <div class="detail-hero-body">
+      <div class="plant-header-actions" role="group" aria-label="Plant actions">
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Add photo"
+          title="Add photo"
+          (click)="openPhotoDialog()"
+        >
+          <ui-icon name="camera" [size]="18" />
+        </button>
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Log watering"
+          title="Log watering"
+          (click)="waterDialogOpen.set(true)"
+        >
+          <ui-icon name="drop" [size]="18" />
+        </button>
+        <a
+          class="icon-button detail-edit"
+          [routerLink]="['/plants', p.id, 'edit']"
+          aria-label="Edit plant"
+          title="Edit plant"
+          ><ui-icon name="pencil" [size]="18"
+        /></a>
+      </div>
+      @if (p.status === 'ARCHIVED') {
+        <p class="caption" style="margin: 0 0 var(--sp-2)">
+          Archived — hidden from the default collection view.
+        </p>
+      }
+      <p class="eyebrow">
+        {{ p.category.toLowerCase() }}<span class="hero-dot"> · </span>{{ p.type.toLowerCase() }}
+      </p>
+      <h1 id="ph" class="editorial" style="margin: 0">
+        {{ p.name }}
+        @if (p.cultivar) {
+          <span class="hero-cultivar">‘{{ p.cultivar }}’</span>
+        }
+      </h1>
+      @if (p.scientificName) {
+        <p class="hero-sci">{{ p.scientificName }}</p>
+      }
+
+      <!-- Facts the workspace already records. Anything not recorded says so; nothing is inferred. -->
+      <dl class="hero-facts">
+        <div class="hero-fact">
+          <dt>At home in</dt>
+          <dd>
+            {{ p.currentContext ? locationPath(p.currentContext) : 'Not recorded' }}
+          </dd>
+        </div>
+        <div class="hero-fact">
+          <dt>Acquired</dt>
+          <dd>{{ acquiredOn(p) ?? 'Not recorded' }}</dd>
+        </div>
+        @if (p.type === 'GROUP') {
+          <div class="hero-fact">
+            <dt>Group size</dt>
+            <dd>{{ p.count ?? 'Not recorded' }}</dd>
+          </div>
+        }
+      </dl>
+
+      <!-- The e2e contract states an unknown cultivar on this page; kept quiet, never guessed. -->
+      @if (!p.cultivar) {
+        <p class="caption hero-note">Cultivar unknown</p>
+      }
+      @if (p.status === 'DEAD') {
+        <p class="caption hero-note">Dead</p>
+      }
+    </div>
+  </section>
+
+  <nav class="detail-tabs" aria-label="Plant sections">
+    <ui-tabs appearance="sections" [selectedValue]="tab()" (selectionChange)="onTabSelect($event)">
+      <button uiTab value="journey">Journey</button>
+      <button uiTab value="gallery">Gallery</button>
+      <button uiTab value="care">Care</button>
+      <button uiTab value="insights">Insights</button>
+      <button uiTab value="details">Details</button>
+    </ui-tabs>
+  </nav>
+
+  @if (tab() === 'journey') {
+    <div role="tabpanel" id="tabpanel-journey" aria-labelledby="tab-journey">
+      <journal-timeline [plantId]="p.id" />
+    </div>
+  }
+  @if (tab() === 'care') {
+    <div role="tabpanel" id="tabpanel-care" aria-labelledby="tab-care">
+      <care-tab [plantId]="p.id" />
+    </div>
+  }
+  @if (tab() === 'insights') {
+    <div role="tabpanel" id="tabpanel-insights" aria-labelledby="tab-insights">
+      <insights-tab [plantId]="p.id" [photos]="photos()" />
+    </div>
+  }
+  @if (tab() === 'gallery') {
+    <section
+      class="plant-gallery"
+      role="tabpanel"
+      id="tabpanel-gallery"
+      aria-labelledby="tab-gallery"
+    >
+      <header class="gallery-heading">
+        <div>
+          <h2>Every moment, together.</h2>
+          <p class="caption">{{ photos().length }} photos · Newest capture first</p>
+        </div>
+        <div class="row wrap">
+          <button
+            class="btn"
+            [attr.aria-pressed]="choosingComparison()"
+            (click)="choosingComparison.set(!choosingComparison()); compareSelection.set([])"
+          >
+            {{ choosingComparison() ? 'Cancel selection' : 'Select to compare' }}
+          </button>
+          <button class="btn btn-quiet" (click)="openPhotoDialog()">Add photos</button>
+        </div>
+      </header>
+      @if (choosingComparison()) {
+        <div class="gallery-compare-bar">
+          <p>Select two photos · {{ compareSelection().length }} / 2</p>
+          <button
+            class="btn btn-primary"
+            [disabled]="compareSelection().length !== 2"
+            (click)="comparePhotos()"
+          >
+            Compare selected photos
+          </button>
+        </div>
+      }
+      @if (photoError()) {
+        <p role="alert">
+          {{ photoError() }} <button class="btn" (click)="loadPhotos(p.id)">Retry photos</button>
+        </p>
+      }
+      @if (photoLoading()) {
+        <p role="status" class="caption">Loading photos…</p>
+      }
+      @if (photos().length) {
+        <ul class="gallery-grid">
+          @for (ph of photos(); track ph.id) {
+            <li class="gallery-tile" [class.selected]="compareSelection().includes(ph.id)">
+              <button
+                type="button"
+                class="gallery-open"
+                [attr.aria-label]="
+                  (ph.isCover ? 'Cover photo · ' : '') +
+                  (choosingComparison() ? 'Select ' : 'View ') +
+                  (ph.caption || 'photo of ' + p.name) +
+                  ', ' +
+                  photoDate(ph)
+                "
+                [attr.aria-pressed]="
+                  choosingComparison() ? compareSelection().includes(ph.id) : null
+                "
+                (click)="openPhoto(ph)"
+              >
+                <ui-photo
+                  [src]="mediaUrl(ph.asset.id, 'thumb')"
+                  [alt]="ph.caption || 'Photo of ' + p.name"
+                  [compact]="true"
+                  framing="auto"
+                />
+                @if (ph.isCover) {
+                  <span class="gallery-cover">Cover</span>
+                }
+                @if (compareSelection().includes(ph.id)) {
+                  <span class="gallery-selected" aria-hidden="true">✓</span>
+                }
+              </button>
+              <button
+                type="button"
+                class="gallery-options"
+                [attr.aria-label]="'Photo options: ' + (ph.caption || photoDate(ph))"
+                (click)="photoOptions.set(ph)"
+              >
+                •••
+              </button>
+            </li>
+          }
+        </ul>
+      } @else if (!photoLoading() && !photoError()) {
+        <div class="gallery-empty">
+          <h3>Your plant's story starts here.</h3>
+          <p>Add a photo to start its gallery.</p>
+          <button class="btn btn-quiet" (click)="openPhotoDialog()">Add photos</button>
+        </div>
+      }
+    </section>
+  }
+  @if (tab() === 'details') {
+    <div role="tabpanel" id="tabpanel-details" aria-labelledby="tab-details">
+      <section
+        class="card card-raised"
+        aria-labelledby="ctx-h"
+        style="margin-top: var(--sp-4); max-width: 640px"
+      >
+        <div class="row spread">
+          <h2 id="ctx-h" style="margin: 0">Current context</h2>
+          <button type="button" class="btn" (click)="startMove()">Move</button>
+        </div>
+        @if (p.currentContext; as c) {
+          <p style="margin: var(--sp-2) 0">
+            <strong>{{ locationPath(c) }}</strong>
+            <span class="caption"> · {{ c.placement.toLowerCase() }}</span>
+          </p>
+          <p class="caption" style="margin: 0">
+            @if (c.potVolumeLiters) {
+              Pot: {{ c.potVolumeLiters }} L ·
+            }
+            @if (c.mediumNote) {
+              Medium: {{ c.mediumNote }} ·
+            }
+            @if (c.lightNote) {
+              Light: {{ c.lightNote }} ·
+            }
+            Since {{ c.effectiveFrom }}
+          </p>
+        } @else {
+          <p class="caption" style="margin: var(--sp-2) 0">No location set yet.</p>
+        }
+      </section>
+
+      <section
+        class="card card-raised"
+        aria-labelledby="prov-h"
+        style="margin-top: var(--sp-4); max-width: 640px"
+      >
+        <h2 id="prov-h">Provenance</h2>
+        <dl class="deflist">
+          <dt>Acquired</dt>
+          <dd>{{ p.acquisition?.acquiredOn ?? p.acquiredOn ?? 'not recorded' }}</dd>
+          <dt>Seller</dt>
+          <dd>{{ p.acquisition?.seller ?? 'unknown' }}</dd>
+          <dt>Price</dt>
+          <dd>
+            @if (p.acquisition?.pricingState === 'KNOWN') {
+              Recorded — see
+              <a routerLink="/purchases">purchases</a>
+            } @else {
+              unknown
+            }
+          </dd>
+          <dt>Planted on</dt>
+          <dd>{{ p.plantedOn ?? 'not recorded' }}</dd>
+          <dt>Estimated age</dt>
+          <dd>
+            {{ p.estimatedAgeYears != null ? p.estimatedAgeYears + ' years' : 'unknown' }}
+          </dd>
+        </dl>
+      </section>
+
+      <section
+        class="card card-raised"
+        aria-labelledby="tags-h"
+        style="margin-top: var(--sp-4); max-width: 640px"
+      >
+        <div class="row spread">
+          <h2 id="tags-h" style="margin: 0">Tags</h2>
+          <button type="button" class="btn" (click)="startTagEdit()">Edit tags</button>
+        </div>
+        @if (tagIds().size) {
+          <div class="row wrap" style="margin-top: var(--sp-2)" aria-label="Tags on this plant">
+            @for (t of availableTags(); track t.id) {
+              @if (tagIds().has(t.id)) {
+                <span class="chip">{{ t.label }}</span>
+              }
+            }
+          </div>
+        } @else {
+          <p class="caption" style="margin: var(--sp-2) 0 0">No tags yet.</p>
+        }
+      </section>
+    </div>
+  }
+}
+
+<!-- Child outlet for the edit-form modal (nesting lands in a later pass).
+     When the form deactivates, the plant re-reads so saved edits show. -->
+<router-outlet (deactivate)="onOutletDeactivate()" />
+
+<!-- Move: the same form, now in the shared entry modal. Context stays read-only
+     on the page; the form keeps its native selects and the revision-conflict
+     retry. -->
+<ui-entry-dialog
+  #moveEntry
+  [open]="moving()"
+  title="Move plant"
+  description="A new situation starts a new history entry"
+  size="regular"
+  [busy]="busy()"
+  (dismissed)="onMoveDismissed()"
+>
+  @if (moving() && plant(); as p) {
+    <form class="entry-form" #moveForm (submit)="$event.preventDefault(); move(moveForm)">
+      <div class="form-section">
+        <label class="field-label" for="m-loc">Location</label>
+        <select id="m-loc" class="input" name="locationId">
+          <option value="">No location</option>
+          @for (l of locations(); track l.id) {
+            <option [value]="l.id" [selected]="p.currentContext?.location?.id === l.id">
+              {{ l.name }}{{ l.parent ? ' · ' + l.parent.name : '' }}
+            </option>
+          }
+        </select>
+      </div>
+      <div class="form-grid">
+        <div>
+          <label class="field-label" for="m-place">Placement</label>
+          <select id="m-place" class="input" name="placement">
+            @for (pl of placements; track pl) {
+              <option [value]="pl" [selected]="(p.currentContext?.placement ?? 'CONTAINER') === pl">
+                {{ pl.toLowerCase() }}
+              </option>
+            }
+          </select>
+        </div>
+        <div>
+          <label class="field-label" for="m-pot">Pot volume (L)</label>
+          <input
+            id="m-pot"
+            class="input"
+            name="potVolumeLiters"
+            inputmode="decimal"
+            [value]="p.currentContext?.potVolumeLiters ?? ''"
+            placeholder="blank = unknown"
+          />
+        </div>
+      </div>
+      <div class="form-section">
+        <label class="field-label" for="m-newloc">Or add a new location</label>
+        <input id="m-newloc" class="input" name="newLocation" placeholder="e.g. Greenhouse bench" />
+        <div class="form-grid">
+          <div>
+            <label class="field-label" for="m-newsit">Situation</label>
+            <select id="m-newsit" class="input" name="newLocationSituation">
+              @for (s of situations; track s) {
+                <option [value]="s">{{ s.toLowerCase() }}</option>
+              }
+            </select>
+          </div>
+          <div></div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" (click)="cancelMove()">Cancel</button>
+        <button type="submit" class="btn btn-primary" [disabled]="busy()">Save move</button>
+      </div>
+    </form>
+  }
+</ui-entry-dialog>
+
+<!-- Tags: the checkbox draft lives in the modal; the page keeps a read-only
+     record. Discard waits for the shared confirmation, so an X never silently
+     loses selected tags. -->
+<ui-entry-dialog
+  #tagEntry
+  [open]="tagEditing()"
+  title="Edit tags"
+  size="regular"
+  [busy]="busy()"
+  [dirty]="tagDirty()"
+  (dismissed)="onTagsDismissed()"
+>
+  @if (tagEditing()) {
+    <div class="entry-form">
+      <div class="form-section">
+        <div class="row wrap" role="group" aria-label="Tags on this plant">
+          @for (t of availableTags(); track t.id) {
+            <label class="chip chip-check">
+              <input
+                type="checkbox"
+                [checked]="tagDraft().includes(t.id)"
+                (change)="toggleTag(t.id)"
+              />
+              {{ t.label }}
+            </label>
+          }
+          @if (availableTags().length === 0) {
+            <span class="caption">No tags in this workspace yet.</span>
+          }
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn" (click)="cancelTagEdit()">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="busy()" (click)="saveTags()">
+          Save tags
+        </button>
+      </div>
+    </div>
+  }
+</ui-entry-dialog>
+
+<!-- Photos: the queue (and its per-photo caption/date/viewpoint/cover fields)
+     moves into the shared modal. Its busy/dirty come from the queue's real
+     state, so closing after uploads never claims attached photos are lost. -->
+<ui-entry-dialog
+  #photoEntry
+  [open]="photosDialogOpen()"
+  title="Add photos"
+  size="wide"
+  [busy]="queueBusy()"
+  [dirty]="queueDirty()"
+  (dismissed)="onPhotosDismissed()"
+>
+  @if (plant(); as p) {
+    <photo-queue
+      #queue
+      [plantId]="p.id"
+      [hasCover]="!!p.coverPhoto"
+      (changed)="onPhotosChanged()"
+    />
+    <div class="form-actions">
+      <button
+        type="button"
+        class="btn btn-primary"
+        [disabled]="queueBusy()"
+        (click)="photoEntry.requestClose()"
+      >
+        Done
+      </button>
+    </div>
+  }
+</ui-entry-dialog>
+
+<!-- Removing a photo keeps its two-step confirmation, now in the shared
+     compact modal; the confirmation stays mounted while the delete runs. -->
+<ui-entry-dialog
+  #removeEntry
+  [open]="confirmPhoto() != null"
+  title="Remove photo"
+  size="compact"
+  [busy]="busy()"
+  (dismissed)="removeEntry.requestClose()"
+>
+  @if (confirmPhoto(); as id) {
+    <p class="body-quiet" style="margin: 0">This removes the photo from this plant’s gallery.</p>
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="removeEntry.requestClose()">Keep</button>
+      <button type="button" class="btn btn-danger" [disabled]="busy()" (click)="removePhoto()">
+        Confirm remove
+      </button>
+    </div>
+  }
+</ui-entry-dialog>
+
+<ui-entry-dialog
+  [open]="!!photoOptions()"
+  title="Photo details"
+  [dirty]="false"
+  (dismissed)="photoOptions.set(null)"
+>
+  @if (photoOptions(); as photo) {
+    <p>{{ photoDate(photo) }}</p>
+    @if (photo.caption) {
+      <p>{{ photo.caption }}</p>
+    }
+    <div class="row wrap">
+      <button class="btn" (click)="photoOptions.set(null); openPhoto(photo, true)">
+        View fullscreen
+      </button>
+      <a class="btn" [href]="mediaUrl(photo.asset.id, 'original')" download>Save original</a>
+      @if (!photo.isCover) {
+        <button class="btn" [disabled]="busy()" (click)="makeCover(photo); photoOptions.set(null)">
+          Make cover
+        </button>
+      }
+      <button
+        class="btn"
+        [disabled]="busy()"
+        (click)="photoOptions.set(null); confirmPhoto.set(photo.id)"
+      >
+        Remove photo
+      </button>
+    </div>
+  }
+</ui-entry-dialog>
+
+<ui-entry-dialog
+  #waterEntry
+  [open]="waterDialogOpen()"
+  title="Log watering"
+  [busy]="waterBusy()"
+  (dismissed)="waterDialogOpen.set(false)"
+>
+  @if (waterDialogOpen()) {
+    @if (plant(); as p) {
+      <quick-log
+        [plantId]="p.id"
+        initialKind="WATER"
+        (busyChange)="waterBusy.set($event)"
+        (saved)="onWaterSaved()"
+        (cancelled)="waterEntry.requestClose()"
+      />
+    }
+  }
+</ui-entry-dialog>

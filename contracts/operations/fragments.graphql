@@ -1,0 +1,113 @@
+fragment LocationFields on Location {
+  id
+  name
+  parent {
+    id
+    name
+  }
+  situation
+  latitude
+  longitude
+  label
+  revision
+  createdAt
+  updatedAt
+}
+
+fragment AssetFields on Asset {
+  id
+  purpose
+  state
+  byteCount
+  mimeType
+  sha256
+  displayName
+  errorCode
+  expiresAt
+  variants {
+    name
+    widthPx
+    heightPx
+  }
+  createdAt
+  updatedAt
+}
+
+fragment PhotoFields on PlantPhoto {
+  id
+  plantId
+  takenAt
+  dateSource
+  timezone
+  caption
+  viewpoint
+  isCover
+  revision
+  deletedAt
+  createdAt
+  updatedAt
+  asset {
+    ...AssetFields
+  }
+}
+
+fragment AllocationFields on PurchaseAllocation {
+  id
+  purchaseLineId
+  plantId
+  lineMinor
+  taxMinor
+  shippingMinor
+}
+
+fragment AcquisitionFields on Acquisition {
+  id
+  seller
+  acquiredOn
+  pricingState
+  revision
+  initialPurchaseAllocation {
+    ...AllocationFields
+  }
+}
+
+fragment PlantFields on Plant {
+  id
+  name
+  scientificName
+  cultivar
+  rootstock
+  type
+  count
+  category
+  acquiredOn
+  plantedOn
+  estimatedAgeYears
+  status
+  revision
+  createdAt
+  updatedAt
+  tags {
+    id
+    label
+  }
+  photoCount
+  coverPhoto {
+    ...PhotoFields
+  }
+  currentContext {
+    id
+    effectiveFrom
+    location {
+      ...LocationFields
+    }
+    placement
+    potVolumeLiters
+    mediumNote
+    lightNote
+    createdAt
+  }
+  acquisition {
+    ...AcquisitionFields
+  }
+}

@@ -1,0 +1,114 @@
+{
+  "caseId": "t-sparse",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:8c1e83e407ba377351239975b2a350520763c3e41e467b52ffc7a859032928a7",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "42279ccf-0e3b-4f2f-b8ea-df495a7986c5",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "44e976ec-a051-4484-8335-5eadde1f2586",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The Monstera's current condition is indeterminate from the available evidence.",
+        "confidence": "LOW",
+        "evidenceIds": []
+      },
+      {
+        "text": "The Monstera may be healthy, may be experiencing unobserved stress, or may simply be unobserved; the available evidence does not distinguish these.",
+        "confidence": "LOW",
+        "evidenceIds": []
+      },
+      {
+        "text": "If the Monstera is kept in typical indoor conditions, it may be stable, but this cannot be confirmed from the snapshot.",
+        "confidence": "LOW",
+        "evidenceIds": []
+      }
+    ],
+    "followUpChecks": [
+      "Within 24-48 hours, take clear photos of the whole plant, several leaves, stem, and pot.",
+      "Check soil moisture with a finger or moisture meter before watering; record the result.",
+      "Inspect leaves and stems for discoloration, spots, wilting, curling, or pests.",
+      "Record baseline measurements such as plant height, leaf count, and pot size.",
+      "Note the plant's location, light exposure, and approximate temperature or humidity if known.",
+      "Add care activities such as watering or fertilizing to the record when performed.",
+      "Set workspace location coordinates if possible so weather context can be retrieved."
+    ],
+    "missingInformation": [
+      "No photos of leaves, stems, roots, pot, or overall plant are available.",
+      "No measurements such as height, leaf count, soil moisture, or pot size are recorded.",
+      "No care activities such as watering, fertilizing, repotting, pruning, or pest treatment are recorded.",
+      "No environmental details such as light level, temperature, humidity, or location are recorded.",
+      "No weather snapshot or location coordinates are available for the workspace.",
+      "No approved care guidance is available for this workspace.",
+      "No purchase or cost allocation data are available for this plant."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The plant record identifies the plant as Monstera and lists its status as ACTIVE.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no photos.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no care activities.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no measurements.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no approved care guidance entries.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The snapshot contains no weather entries.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The workspace is set to UTC and has no location coordinates.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The record lists missing facts including no purchases with costs allocated, no approved care guidance, no fresh weather snapshot, no coordinates, no measurements, and no care activities.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

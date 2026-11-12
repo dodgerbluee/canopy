@@ -1,0 +1,46 @@
+name: ci
+on:
+  push:
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: devpw
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      PGTEST_DSN: postgres://postgres:devpw@localhost:5432/postgres?sslmode=disable
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+      # web/contract tooling stays on the pinned node:24 image (ADR-0001)
+      - name: release tooling
+        run: |
+          python3 -m unittest discover -s scripts/release -p 'test_*.py'
+          go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.7
+      - name: install deps
+        run: docker run --rm -v "$PWD":/w -w /w node:24 sh -c "cd /w/contracts && npm ci --no-audit --no-fund && cd /w/web && npm ci --no-audit --no-fund"
+      - name: generation leaves no diff
+        run: make gen-check
+      - name: plan + boundary gates
+        run: make plan-validate boundary
+      - name: lint
+        run: make lint
+      - name: unit tests
+        run: make test-unit
+      - name: integration tests (real postgres:17)
+        run: make test-integration

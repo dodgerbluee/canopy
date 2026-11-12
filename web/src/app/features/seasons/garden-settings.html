@@ -1,0 +1,184 @@
+<button class="btn" type="button" (click)="edit()" [disabled]="loading()">
+  <ui-icon name="location" [size]="16" />{{ loading() ? 'Loading…' : 'Garden location' }}
+</button>
+@if (error() && !open()) {
+  <p class="form-error" role="alert">{{ error() }}</p>
+}
+<ui-entry-dialog
+  #entry
+  [open]="open()"
+  title="Your growing location"
+  description="Choose where your garden grows. Timezone and hardiness zone are separate settings."
+  size="regular"
+  [busy]="busy()"
+  (dismissed)="open.set(false)"
+>
+  <form class="garden-form" (ngSubmit)="save()">
+    <div class="place-search">
+      <label for="garden-search"
+        >City or postal code<input
+          id="garden-search"
+          class="input"
+          name="search"
+          placeholder="Carrollton, Texas · London, GB…"
+          [ngModel]="search()"
+          (ngModelChange)="search.set($event)"
+          [disabled]="busy()" /></label
+      ><button
+        class="btn"
+        type="button"
+        (click)="find()"
+        [disabled]="searching() || busy() || search().trim().length < 3"
+      >
+        {{ searching() ? 'Searching…' : 'Find' }}
+      </button>
+    </div>
+    <p class="field-hint">
+      Search sends the entered place to Open-Meteo / GeoNames. You can enter the location manually
+      instead.
+    </p>
+    @if (searchError()) {
+      <p class="field-hint" role="status">{{ searchError() }}</p>
+    }
+    @if (places().length) {
+      <div class="place-results" aria-label="Matching garden locations">
+        @for (p of places(); track $index) {
+          <button type="button" [disabled]="busy()" (click)="select(p)">
+            <ui-icon name="location" [size]="16" /><span
+              >{{ p.name }}<small>{{ p.region }} · {{ p.country }} · {{ p.timezone }}</small></span
+            >
+          </button>
+        }
+      </div>
+    }
+    <div class="garden-fields">
+      <label for="garden-place"
+        >Garden location<input
+          id="garden-place"
+          name="place"
+          class="input"
+          required
+          maxlength="160"
+          [ngModel]="place()"
+          (ngModelChange)="geography('place', $event)"
+          [disabled]="busy()" /></label
+      ><label for="garden-country"
+        >Country code<input
+          id="garden-country"
+          name="country"
+          class="input"
+          required
+          maxlength="2"
+          placeholder="US, GB, AU…"
+          [ngModel]="country()"
+          (ngModelChange)="geography('country', $event)"
+          [disabled]="busy()" /></label
+      ><label for="garden-region"
+        >State / region<input
+          id="garden-region"
+          name="region"
+          class="input"
+          required
+          maxlength="160"
+          [ngModel]="region()"
+          (ngModelChange)="geography('region', $event)"
+          [disabled]="busy()" /></label
+      ><label for="garden-timezone"
+        >Timezone<input
+          id="garden-timezone"
+          name="timezone"
+          class="input"
+          required
+          placeholder="America/Chicago"
+          [ngModel]="timezone()"
+          (ngModelChange)="timezone.set($event)"
+          [disabled]="busy()" /></label
+      ><label for="garden-zone"
+        >Hardiness zone <span class="optional">optional</span
+        ><input
+          id="garden-zone"
+          name="zone"
+          class="input"
+          maxlength="40"
+          placeholder="For example, 8b"
+          [ngModel]="zone()"
+          (ngModelChange)="zone.set($event)"
+          [disabled]="busy()" /></label
+      ><label for="garden-zone-system"
+        >Zone system<select
+          id="garden-zone-system"
+          name="zoneSystem"
+          class="input"
+          [ngModel]="zoneSystem()"
+          (ngModelChange)="zoneSystem.set($event)"
+          [disabled]="busy()"
+        >
+          <option value="USDA">USDA</option>
+          <option value="RHS">RHS</option>
+          <option value="Other">Other</option>
+        </select></label
+      >
+    </div>
+    <p class="field-hint">
+      Hardiness zones are optional and entered from a regional map.
+      <a href="https://planthardiness.ars.usda.gov/" target="_blank" rel="noopener noreferrer"
+        >Find a US zone</a
+      >. No zone is inferred from your timezone.
+    </p>
+    <fieldset class="coordinates">
+      <legend>Approximate coordinates <span class="optional">optional</span></legend>
+      <div class="garden-fields">
+        <label for="garden-latitude"
+          >Latitude<input
+            id="garden-latitude"
+            class="input"
+            name="latitude"
+            inputmode="decimal"
+            [ngModel]="latitude()"
+            (ngModelChange)="latitude.set($event)"
+            [disabled]="busy()" /></label
+        ><label for="garden-longitude"
+          >Longitude<input
+            id="garden-longitude"
+            class="input"
+            name="longitude"
+            inputmode="decimal"
+            [ngModel]="longitude()"
+            (ngModelChange)="longitude.set($event)"
+            [disabled]="busy()"
+        /></label>
+      </div>
+      <button class="btn device-button" type="button" (click)="device()" [disabled]="busy()">
+        Use device coordinates
+      </button>
+      <p class="field-hint">
+        Use this while at your garden. Location permission is requested only when you press this
+        button.
+      </p>
+    </fieldset>
+    <label class="knowledge-opt-in"
+      ><input
+        type="checkbox"
+        name="enabled"
+        [ngModel]="enabled()"
+        (ngModelChange)="enabled.set($event)"
+        [disabled]="busy()"
+      /><span
+        >Find regional plant guidance automatically<small
+          >Use registered public sources and the configured AI model. New plants are researched in
+          the background; source summaries remain advisory.</small
+        ></span
+      ></label
+    >
+    @if (error()) {
+      <p class="form-error" role="alert">{{ error() }}</p>
+    }
+    <div class="form-actions">
+      <button class="btn" type="button" [disabled]="busy()" (click)="entry.requestClose()">
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Saving…' : 'Save garden location' }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>

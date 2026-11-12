@@ -1,0 +1,38 @@
+# Today overview composition (T28): one bounded read for the dashboard.
+# Semantics: docs/plan/04-experience.md ("Today" screen); every page here is
+# fixed-size server-side so the initial load never fans out. No invented
+# activity: every field is a direct read of an existing frozen type.
+
+type TodayConditions {
+  """Most recently fetched snapshot across the workspace's locations."""
+  snapshot: WeatherSnapshot!
+  "Display name of the location the snapshot belongs to."
+  locationName: String!
+}
+
+type TodayOverview {
+  """
+  Due work from 30 days back through +7 days ahead, bounded to the 10
+  soonest (order identical to careAgenda). Overdue rows keep their
+  original dates.
+  """
+  dueTasks: CareOccurrenceConnection!
+  """
+  Journal timeline newest-first, bounded to the 6 most recent entries
+  (order identical to journal).
+  """
+  recentEntries: JournalConnection!
+  """
+  Null until a location is configured and at least one snapshot exists;
+  freshness bands (FRESH/STALE/UNAVAILABLE) are the frozen care semantics.
+  """
+  conditions: TodayConditions
+}
+
+extend type Query {
+  """
+  Bounded dashboard composition; page sizes are fixed server-side and
+  take no client arguments by design (initial-load budget).
+  """
+  todayOverview: TodayOverview!
+}

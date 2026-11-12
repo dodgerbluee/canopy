@@ -1,0 +1,9 @@
+# Merge into Hermes config.yaml. Export CANOPY_AGENT_TOKEN in the agent host.
+# Loopback works only when Hermes and Canopy run on the same machine.
+mcp_servers:
+  canopy:
+    url: "http://127.0.0.1:8080/mcp"
+    headers:
+      Authorization: "Bearer ${CANOPY_AGENT_TOKEN}"
+    tools:
+      include: [garden_overview, plants_list, plant_get, journal_list, calendar_events, garden_year, knowledge_get, care_agenda, photos_list, photo_get]

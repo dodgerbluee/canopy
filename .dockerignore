@@ -1,0 +1,13 @@
+.git
+.github
+.artifacts
+**/node_modules
+**/dist
+**/.angular
+**/.DS_Store
+**/*.log
+**/.env
+**/.env.*
+**/*.pem
+**/*.key
+server/testdata

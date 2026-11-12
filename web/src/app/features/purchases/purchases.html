@@ -1,0 +1,227 @@
+<header class="page-head">
+  <div>
+    <p class="eyebrow">The workspace ledger</p>
+    <h1 class="editorial">Purchases</h1>
+    <p class="caption">
+      One record per receipt, split across the plants it bought. Totals stay in
+      their own currency — never merged, never guessed.
+    </p>
+  </div>
+  <div class="row wrap head-actions">
+    <a class="btn btn-primary" routerLink="/purchases/new">New purchase</a>
+  </div>
+</header>
+
+<section class="card spend-card" aria-labelledby="sp-h">
+  <h2 id="sp-h">Spending</h2>
+  @if (spending(); as sp) { @if (sp.byCurrency.length) {
+  <dl class="spend-grid">
+    @for (c of sp.byCurrency; track c.currency) {
+    <div class="spend-item">
+      <dt class="caption">{{ c.currency }} total</dt>
+      <dd class="num">{{ fmt(c.total, c.currency) }}</dd>
+    </div>
+    }
+  </dl>
+  } @else {
+  <p class="caption" style="margin: 0">No priced purchases yet.</p>
+  }
+  <p class="caption spend-notes">
+    {{ sp.unknownCost }} acquisition{{ sp.unknownCost === 1 ? '' : 's' }} with
+    unknown cost · {{ sp.missingRecord }} plant{{ sp.missingRecord === 1 ? '' :
+    's' }} without an acquisition record
+  </p>
+  } @else {
+  <p class="caption" style="margin: 0">
+    Spending summary unavailable — the list below is unaffected.
+  </p>
+  }
+</section>
+
+<form class="toolbar" role="search" (ngSubmit)="search(qInput.value)">
+  <div class="tool-field">
+    <label class="field-label" for="pq">Seller</label>
+    <input
+      id="pq"
+      class="input"
+      name="q"
+      #qInput
+      [value]="q()"
+      placeholder="seller contains"
+    />
+  </div>
+  <div class="tool-field tool-field-narrow">
+    <label class="field-label" for="pc">Currency</label>
+    <input
+      id="pc"
+      class="input"
+      name="cur"
+      [value]="cur()"
+      placeholder="e.g. USD"
+      maxlength="3"
+      (change)="setParams({ cur: $any($event.target).value.trim().toUpperCase() || null })"
+    />
+  </div>
+  <div class="row wrap tool-actions">
+    <button type="submit" class="btn">Search</button>
+    @if (q() || cur()) {
+    <button type="button" class="btn" (click)="clearFilters()">Clear</button>
+    }
+    <button
+      type="button"
+      class="chip"
+      [attr.aria-pressed]="showVoided()"
+      (click)="setParams({ voided: showVoided() ? null : '1' })"
+    >
+      Show voided
+    </button>
+  </div>
+</form>
+
+@if (store.error()) {
+<section class="card" role="alert" aria-labelledby="perr-h">
+  <h2 id="perr-h">Purchases failed to load</h2>
+  <p class="caption">
+    {{ store.error() }} This is not an empty ledger — nothing was changed.
+  </p>
+  <div>
+    <button type="button" class="btn btn-primary" (click)="retry()">
+      Retry
+    </button>
+  </div>
+</section>
+} @else if (store.loading() && store.items().length === 0) {
+<div class="stack" aria-busy="true">
+  @for (i of [1, 2, 3]; track i) {
+  <ui-skeleton ar="auto" maxW="100%" />
+  }
+</div>
+} @else if (store.items().length === 0) {
+<section class="card">
+  @if (q() || cur() || showVoided()) {
+  <h2>No matching purchases</h2>
+  <p class="caption">Clear the filters to see the whole ledger.</p>
+  } @else {
+  <h2>No purchases yet</h2>
+  <p class="caption">
+    Record a receipt once and split it across the plants it bought — per-plant
+    totals come from the allocations, the workspace total stays one expense.
+  </p>
+  <div>
+    <a class="btn btn-primary" routerLink="/purchases/new"
+      >Add your first purchase</a
+    >
+  </div>
+  }
+</section>
+} @else {
+<table class="p-table" aria-label="Purchases">
+  <thead>
+    <tr>
+      <th scope="col">Purchased</th>
+      <th scope="col">Seller</th>
+      <th scope="col" class="num-h">Total</th>
+      <th scope="col">Lines</th>
+      <th scope="col">Receipt</th>
+      <th scope="col">Status</th>
+      <th scope="col">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (p of store.items(); track p.id) {
+    <tr>
+      <td data-label="Purchased">{{ p.purchasedOn ?? 'No date' }}</td>
+      <td data-label="Seller">{{ p.seller ?? '—' }}</td>
+      <td data-label="Total" class="num">
+        {{ fmt(p.totalMinor, p.currency) }}
+      </td>
+      <td data-label="Lines">{{ p.lines.items.length }}</td>
+      <td data-label="Receipt">
+        @if (receiptUrl(p); as url) {
+        <a [href]="url">Original</a>
+        } @else {
+        <span class="caption">None attached</span>
+        }
+      </td>
+      <td data-label="Status">
+        @if (p.voidedAt) {
+        <span class="badge">Voided</span>
+        } @else {
+        <span class="caption">Active</span>
+        }
+      </td>
+      <td data-label="Actions">
+        <div class="row wrap">
+          <a class="btn btn-primary" [routerLink]="['/purchases', p.id, 'edit']"
+            >Edit</a
+          >
+          @if (!p.voidedAt) {
+          <button type="button" class="btn" (click)="openVoid(p)">Void</button>
+          }
+        </div>
+      </td>
+    </tr>
+    }
+  </tbody>
+</table>
+<div class="row pag">
+  @if (hasNext()) {
+  <button
+    type="button"
+    class="btn"
+    [disabled]="store.loading()"
+    (click)="store.loadMore()"
+  >
+    {{ store.loading() ? 'Loading…' : 'Load more' }}
+  </button>
+  }
+  <span class="caption num">{{ store.items().length }} shown</span>
+</div>
+}
+
+<!-- Void confirmation: the shared compact entry dialog, same two-step
+     mutation and expected-revision check as the old inline swap. It stays
+     mounted while the mutation is in flight and closes only on an accepted
+     void; a failure or conflict keeps its message here. Voided purchases stay
+     on the ledger read-only — nothing is deleted. -->
+<ui-entry-dialog
+  #voidEntry
+  [open]="voiding() !== null"
+  title="Void this purchase?"
+  description="The record is kept and marked voided — nothing is deleted"
+  size="compact"
+  [busy]="voidBusy()"
+  (dismissed)="onVoidDismissed()"
+>
+  @if (voiding(); as p) {
+  <div class="entry-form">
+    <div class="form-section">
+      <p class="field-hint">
+        {{ p.seller ?? 'No seller' }} · {{ fmt(p.totalMinor, p.currency) }} · {{
+        p.lines.items.length }} line{{ p.lines.items.length === 1 ? '' : 's' }}
+      </p>
+      <p class="field-hint">
+        Any plant priced from this purchase reverts to cost unknown, and the
+        amounts stop counting in the spending totals. The purchase and its
+        receipt stay on the record.
+      </p>
+      @if (voidError()) {
+      <p role="status" class="field-error">{{ voidError() }}</p>
+      }
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="closeVoid()">Cancel</button>
+      <button
+        type="button"
+        class="btn btn-danger"
+        [disabled]="voidBusy()"
+        (click)="confirmVoid()"
+      >
+        {{ voidBusy() ? 'Voiding…' : 'Confirm void' }}
+      </button>
+    </div>
+  </div>
+  }
+</ui-entry-dialog>
+
+<router-outlet (deactivate)="onOutletDeactivate()" />

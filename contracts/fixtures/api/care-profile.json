@@ -1,0 +1,222 @@
+{
+  "note": "Reviewed knowledge profile fixture (T01.care): immutable REVIEWED version pinned with citations, draft fork for edits, all four supported recurrence forms, requiredFacts fail-closed, weather sensitivity advisory-only.",
+  "operation": "CareProfileDetail",
+  "variables": {
+    "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000d1"
+  },
+  "data": {
+    "careProfile": {
+      "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000d1",
+      "category": "CITRUS",
+      "species": "Citrus × meyeri",
+      "cultivar": null,
+      "status": "DRAFT",
+      "revision": 4,
+      "createdAt": "2026-10-05T14:00:00Z",
+      "updatedAt": "2026-10-28T16:30:00Z",
+      "versions": [
+        {
+          "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000e3",
+          "profileId": "5f0c1b6e-2222-4aaa-8bbb-0000000000d1",
+          "version": 3,
+          "status": "DRAFT",
+          "environment": {
+            "situations": ["OUTDOOR", "COVERED"],
+            "hemispheres": []
+          },
+          "rules": [
+            {
+              "ruleKey": "water-meyer-lemon",
+              "kind": "ACTION",
+              "activityKind": "WATER",
+              "recurrence": {
+                "__typename": "EveryNDaysRecurrence",
+                "days": 7,
+                "anchor": "LAST_QUALIFYING_COMPLETION"
+              },
+              "requiredFacts": ["PLACEMENT"],
+              "weatherSensitivity": "RAINFALL",
+              "guidanceText": "Water when the top 2-3 cm of medium is dry; skip the check after soaking rain on an uncovered plant.",
+              "sourceVersions": [
+                {
+                  "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000b1",
+                  "sourceId": "5f0c1b6e-2222-4aaa-8bbb-0000000000c1",
+                  "citation": "UC CEFAEN, Citrus Irrigation Guidance (2024)",
+                  "summary": "Container citrus: water when top 2-3 cm of medium is dry; reduce frequency in cool months.",
+                  "retrievedOn": "2026-10-01",
+                  "contentSha256": "3d4f5e6a7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f80",
+                  "createdAt": "2026-10-01T18:00:00Z"
+                }
+              ]
+            },
+            {
+              "ruleKey": "frost-watch-meyer",
+              "kind": "CHECK",
+              "activityKind": null,
+              "recurrence": {
+                "__typename": "AnnualWindowRecurrence",
+                "month": 11,
+                "day": 1,
+                "windowDays": 90,
+                "everyYears": 1
+              },
+              "requiredFacts": ["PLACEMENT", "REGION"],
+              "weatherSensitivity": "FROST",
+              "guidanceText": "During frost season, check forecasts below -2 C and protect or move covered containers.",
+              "sourceVersions": [
+                {
+                  "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000b2",
+                  "sourceId": "5f0c1b6e-2222-4aaa-8bbb-0000000000c2",
+                  "citation": "Owner note: Sunset Western Garden climate notes, zone 9b (2026-10-05)",
+                  "summary": "Local first-frost window typically mid-November through January.",
+                  "retrievedOn": "2026-10-05",
+                  "contentSha256": null,
+                  "createdAt": "2026-10-05T14:10:00Z"
+                }
+              ]
+            }
+          ],
+          "reviewerLabel": null,
+          "reviewedOn": null,
+          "publishedAt": null,
+          "retiredAt": null,
+          "createdAt": "2026-10-28T16:30:00Z"
+        },
+        {
+          "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000e2",
+          "profileId": "5f0c1b6e-2222-4aaa-8bbb-0000000000d1",
+          "version": 2,
+          "status": "REVIEWED",
+          "environment": {
+            "situations": [],
+            "hemispheres": []
+          },
+          "rules": [
+            {
+              "ruleKey": "water-meyer-lemon",
+              "kind": "ACTION",
+              "activityKind": "WATER",
+              "recurrence": {
+                "__typename": "EveryNDaysRecurrence",
+                "days": 7,
+                "anchor": "LAST_QUALIFYING_COMPLETION"
+              },
+              "requiredFacts": ["PLACEMENT"],
+              "weatherSensitivity": "RAINFALL",
+              "guidanceText": "Water when the top 2-3 cm of medium is dry.",
+              "sourceVersions": [
+                {
+                  "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000b1",
+                  "sourceId": "5f0c1b6e-2222-4aaa-8bbb-0000000000c1",
+                  "citation": "UC CEFAEN, Citrus Irrigation Guidance (2024)",
+                  "summary": "Container citrus: water when top 2-3 cm of medium is dry; reduce frequency in cool months.",
+                  "retrievedOn": "2026-10-01",
+                  "contentSha256": "3d4f5e6a7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f80",
+                  "createdAt": "2026-10-01T18:00:00Z"
+                }
+              ]
+            },
+            {
+              "ruleKey": "citrus-weekly-inspect",
+              "kind": "CHECK",
+              "activityKind": null,
+              "recurrence": {
+                "__typename": "WeeklyDaysRecurrence",
+                "weekdays": ["SATURDAY"]
+              },
+              "requiredFacts": [],
+              "weatherSensitivity": "NONE",
+              "guidanceText": "Look for scale, leaf curl and new growth each weekend.",
+              "sourceVersions": []
+            },
+            {
+              "ruleKey": "repot-check-meyer",
+              "kind": "CHECK",
+              "activityKind": null,
+              "recurrence": {
+                "__typename": "OneTimeRecurrence",
+                "date": "2027-02-15"
+              },
+              "requiredFacts": ["POT_VOLUME"],
+              "weatherSensitivity": "NONE",
+              "guidanceText": "One-time root-bound check before spring flush.",
+              "sourceVersions": []
+            }
+          ],
+          "reviewerLabel": "dodgerbluee",
+          "reviewedOn": "2026-10-12",
+          "publishedAt": "2026-10-12T19:00:00Z",
+          "retiredAt": null,
+          "createdAt": "2026-10-12T19:00:00Z"
+        }
+      ],
+      "currentVersion": {
+        "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000e2",
+        "profileId": "5f0c1b6e-2222-4aaa-8bbb-0000000000d1",
+        "version": 2,
+        "status": "REVIEWED",
+        "environment": {
+          "situations": [],
+          "hemispheres": []
+        },
+        "rules": [
+          {
+            "ruleKey": "water-meyer-lemon",
+            "kind": "ACTION",
+            "activityKind": "WATER",
+            "recurrence": {
+              "__typename": "EveryNDaysRecurrence",
+              "days": 7,
+              "anchor": "LAST_QUALIFYING_COMPLETION"
+            },
+            "requiredFacts": ["PLACEMENT"],
+            "weatherSensitivity": "RAINFALL",
+            "guidanceText": "Water when the top 2-3 cm of medium is dry.",
+            "sourceVersions": [
+              {
+                "id": "5f0c1b6e-2222-4aaa-8bbb-0000000000b1",
+                "sourceId": "5f0c1b6e-2222-4aaa-8bbb-0000000000c1",
+                "citation": "UC CEFAEN, Citrus Irrigation Guidance (2024)",
+                "summary": "Container citrus: water when top 2-3 cm of medium is dry; reduce frequency in cool months.",
+                "retrievedOn": "2026-10-01",
+                "contentSha256": "3d4f5e6a7b8c9d0e1f2a3b4c5d6e7f8091a2b3c4d5e6f708192a3b4c5d6e7f80",
+                "createdAt": "2026-10-01T18:00:00Z"
+              }
+            ]
+          },
+          {
+            "ruleKey": "citrus-weekly-inspect",
+            "kind": "CHECK",
+            "activityKind": null,
+            "recurrence": {
+              "__typename": "WeeklyDaysRecurrence",
+              "weekdays": ["SATURDAY"]
+            },
+            "requiredFacts": [],
+            "weatherSensitivity": "NONE",
+            "guidanceText": "Look for scale, leaf curl and new growth each weekend.",
+            "sourceVersions": []
+          },
+          {
+            "ruleKey": "repot-check-meyer",
+            "kind": "CHECK",
+            "activityKind": null,
+            "recurrence": {
+              "__typename": "OneTimeRecurrence",
+              "date": "2027-02-15"
+            },
+            "requiredFacts": ["POT_VOLUME"],
+            "weatherSensitivity": "NONE",
+            "guidanceText": "One-time root-bound check before spring flush.",
+            "sourceVersions": []
+          }
+        ],
+        "reviewerLabel": "dodgerbluee",
+        "reviewedOn": "2026-10-12",
+        "publishedAt": "2026-10-12T19:00:00Z",
+        "retiredAt": null,
+        "createdAt": "2026-10-12T19:00:00Z"
+      }
+    }
+  }
+}

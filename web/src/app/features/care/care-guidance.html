@@ -1,0 +1,93 @@
+<section class="seasonal-care" aria-labelledby="seasonal-care-heading">
+  <header>
+    <p class="eyebrow">PLAN AHEAD, CHECK CONDITIONS</p>
+    <h2 id="seasonal-care-heading">What to consider in {{ monthName() }}</h2>
+    <p class="caption">
+      Regional guidance across your garden. These are typical windows and checks, separate from
+      scheduled tasks.
+    </p>
+    <a class="btn" routerLink="/year">See the whole year <ui-icon name="arrow" [size]="16" /></a>
+  </header>
+  @if (error()) {
+    <p role="alert">{{ error() }} <button class="btn" (click)="load()">Retry guidance</button></p>
+  }
+  @if (loading()) {
+    <p class="caption" role="status">Reading your garden guidance…</p>
+  }
+  @if (garden(); as g) {
+    @if (!g.settings.enabled) {
+      <div class="card">
+        <h3>Regional guidance is off</h3>
+        <p class="caption">
+          Choose your garden location and enable guidance to bring seasonal context here.
+        </p>
+        <a class="btn" routerLink="/settings">Set up garden guidance</a>
+      </div>
+    } @else {
+      <div class="guidance-groups">
+        @for (group of groups(); track group.kind) {
+          <section class="card">
+            <h3 [class]="'kind-' + group.kind">
+              <ui-icon [name]="group.icon" [size]="19" />{{ group.label }}
+            </h3>
+            @for (window of group.windows; track window.plant.plantId + window.fact.id) {
+              <button class="guidance-note" (click)="selected.set(window)">
+                <strong>{{ window.plant.name }}</strong
+                ><span>{{ window.fact.label }}</span
+                ><ui-icon name="arrow-up-right" [size]="16" />
+              </button>
+            }
+          </section>
+        } @empty {
+          <p class="caption">
+            No dated care or harvest guidance for this month. Conditions and your own observations
+            still matter.
+          </p>
+        }
+      </div>
+      @if (checks().length) {
+        <h3 class="condition-heading">Checks that depend on conditions</h3>
+        <p class="caption">No fixed schedule: check the source and your plant before acting.</p>
+        <div class="condition-grid">
+          @for (window of checks(); track window.plant.plantId + window.fact.id) {
+            <button class="card condition-note" (click)="selected.set(window)">
+              <ui-icon [name]="icon(window.fact.kind)" [size]="20" /><span
+                ><strong>{{ window.plant.name }}</strong
+                ><small>{{ window.fact.label }}</small></span
+              ><ui-icon name="arrow-up-right" [size]="16" />
+            </button>
+          }
+        </div>
+      }
+    }
+  }
+</section>
+<ui-entry-dialog
+  [open]="!!selected()"
+  [title]="selected()?.fact?.label ?? 'Care guidance'"
+  description="Source guidance to consider. This is not a due task or a diagnosis."
+  size="wide"
+  [dirty]="false"
+  (dismissed)="selected.set(null)"
+>
+  @if (selected(); as window) {
+    <p>
+      <strong>{{ window.plant.name }}</strong>
+    </p>
+    <p class="guidance-summary">{{ window.fact.summary }}</p>
+    <p class="caption">{{ window.fact.scope }}</p>
+    <a [href]="window.fact.sourceUrl" target="_blank" rel="noopener noreferrer">{{
+      window.fact.sourceTitle
+    }}</a>
+    <p class="caption">{{ window.fact.publisher }}</p>
+    <div class="form-actions">
+      <a
+        class="btn"
+        [routerLink]="['/plants', window.plant.plantId]"
+        [queryParams]="{ tab: 'care' }"
+        >Open plant care</a
+      ><a class="btn" [routerLink]="['/rounds', window.plant.plantId]">Photo or water this plant</a
+      ><button class="btn btn-primary" (click)="selected.set(null)">Done</button>
+    </div>
+  }
+</ui-entry-dialog>

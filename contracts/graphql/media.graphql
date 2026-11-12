@@ -1,0 +1,96 @@
+# Media: assets, uploads, photos, receipts. Frozen by T01.r1.
+# Bytes flow over HTTP (03 "HTTP and upload protocol"), never GraphQL.
+
+enum AssetPurpose {
+  PHOTO
+  RECEIPT
+}
+
+enum AssetState {
+  RESERVED
+  UPLOADED
+  PROCESSING
+  READY
+  FAILED
+  DELETING
+}
+
+enum PhotoViewpoint {
+  WHOLE
+  LEAF
+  FRUIT
+  OTHER
+}
+
+enum PhotoDateSource {
+  "Explicit owner value wins."
+  USER
+  "EXIF timestamp plus known offset."
+  EXIF
+  "Upload instant, visibly labeled; never silent date invention."
+  UPLOAD_FALLBACK
+}
+
+type Asset {
+  id: ID!
+  purpose: AssetPurpose!
+  state: AssetState!
+  byteCount: Int!
+  "Sniffed MIME; extension never trusted."
+  mimeType: String
+  sha256: String!
+  "Safe display filename; storage keys stay opaque server-side."
+  displayName: String
+  errorCode: String
+  "Reservation expiry (24h unused)."
+  expiresAt: DateTime
+  "Deterministic ready derivatives produced by the processor."
+  variants: [MediaVariant!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"Fixed variant name; URL is /api/media/{assetID}/{variant}. Original is private download."
+type MediaVariant {
+  name: String!
+  widthPx: Int
+  heightPx: Int
+}
+
+type AssetConnection {
+  items: [Asset!]!
+  pageInfo: PageInfo!
+}
+
+type PlantPhoto {
+  id: ID!
+  plantId: ID!
+  asset: Asset!
+  "Null only transiently before owner resolves naive EXIF timezone; display falls back visibly."
+  takenAt: DateTime
+  dateSource: PhotoDateSource!
+  timezone: String
+  caption: String
+  viewpoint: PhotoViewpoint!
+  "At most one cover per plant (partial unique index)."
+  isCover: Boolean!
+  revision: Int!
+  deletedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type PurchaseReceipt {
+  id: ID!
+  purchaseId: ID!
+  "READY receipt asset only; attachment-only download."
+  asset: Asset!
+}
+
+input ReserveUploadInput {
+  purpose: AssetPurpose!
+  "Display filename only; never a path. Sanitized server-side."
+  filename: String!
+  "Claimed byte count; received size must match exactly."
+  claimedBytes: Int!
+}

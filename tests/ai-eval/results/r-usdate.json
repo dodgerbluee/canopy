@@ -1,0 +1,56 @@
+{
+  "caseId": "r-usdate",
+  "kind": "RECEIPT",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:38a0bac70e159038d4f95f6c5ea3ae517ddcfb303cfb3ce7be984fca2ec72bf6",
+  "snapshot": {
+    "kind": "RECEIPT_EXTRACTION",
+    "costs": [],
+    "plant": {
+      "id": "",
+      "name": "",
+      "status": "",
+      "revision": 0
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "ca768636-1597-4ef9-b2d1-3a7b261ae3a2",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "lines": [
+      {
+        "amountMinor": "4500",
+        "description": "Berry kit"
+      }
+    ],
+    "seller": "PLANT SHOPPE",
+    "currency": "USD",
+    "taxMinor": "",
+    "totalMinor": "4500",
+    "purchasedOn": "",
+    "shippingMinor": "",
+    "needsReconciliation": false
+  }
+}

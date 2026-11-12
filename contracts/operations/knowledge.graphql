@@ -1,0 +1,27 @@
+fragment SeasonalFactFields on SeasonalFact {
+ id kind label summary months timingBasis scope sourceTitle sourceUrl publisher sourceRegion retrievedAt contentSha256
+}
+fragment GardenSettingsFields on GardenKnowledgeSettings {
+ country region place latitude longitude timezone hardinessZone zoneSystem enabled revision
+}
+query GardenKnowledge($year:Int!) {
+ gardenKnowledge(year:$year) {
+  settings { ...GardenSettingsFields }
+  plants { plantId name cultivar category photoAssetId state message updatedAt facts { ...SeasonalFactFields } }
+  records { plantId month waterings photos harvests fertilizations }
+ }
+}
+query GardenPlaces($search:String!) {
+ gardenPlaces(search:$search) { name country region latitude longitude timezone }
+}
+mutation SaveGardenKnowledgeSettings($input:SaveGardenKnowledgeSettingsInput!,$clientMutationId:String) {
+ saveGardenKnowledgeSettings(input:$input,clientMutationId:$clientMutationId) {
+  settings { ...GardenSettingsFields } problems { code field message currentRevision } clientMutationId
+ }
+}
+mutation RefreshGardenKnowledge($plantId:ID,$clientMutationId:String) {
+ refreshGardenKnowledge(plantId:$plantId,clientMutationId:$clientMutationId) { queued problems { code field message currentRevision } clientMutationId }
+}
+mutation AskGarden($question:String!,$year:Int!) {
+ askGarden(question:$question,year:$year) { answer plantIds facts { ...SeasonalFactFields } }
+}

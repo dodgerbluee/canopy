@@ -1,0 +1,113 @@
+/* Insights tab (T34): keeps to the shared card/chip/row primitives; only
+   the capability list and findings need local layout. Entry dialogs use the
+   shared .entry-form/.form-section/.form-actions rhythm from styles/base.css. */
+
+.caplist {
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+}
+.caplist li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.caplist li > span:first-child {
+  font-weight: 600;
+}
+.caplist li .caption {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.findings {
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-3);
+}
+.findings p {
+  margin: 0;
+}
+
+.chip-warn {
+  border-color: var(--warn, #8a6d1a);
+  color: var(--warn, #8a6d1a);
+}
+
+.chip-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+
+/* the pair picker now lives inside the shared modal, so it follows the
+   .entry-form rhythm: 16px between fields, 24px between groups, 44px targets */
+fieldset {
+  border: 1px solid var(--line, #d8d2c8);
+  border-radius: var(--r-2, 8px);
+  padding: var(--sp-2) var(--sp-3);
+  margin: 0;
+  display: grid;
+  gap: var(--sp-4);
+}
+legend {
+  font-size: 0.85em;
+  padding: 0 var(--sp-1);
+}
+fieldset .chip-check {
+  min-height: var(--touch-min);
+}
+
+.sources li {
+  margin-bottom: var(--sp-1);
+}
+
+.suggestions-section {
+  margin-top: 32px;
+  padding: 24px;
+  border: 1px solid var(--border-decorative);
+  border-radius: var(--radius-card, 16px);
+  background: var(--surface-base);
+}
+.suggestions-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.suggestions-heading .eyebrow {
+  margin: 0 0 6px;
+}
+.suggestions-heading h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 550;
+}
+.suggestion-count {
+  flex: none;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.suggestions-intro {
+  margin: 12px 0 4px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.suggestions-list insight-suggestion-card:last-child {
+  --suggestion-border: transparent;
+}
+@media (max-width: 600px) {
+  .suggestions-section {
+    padding: 18px;
+    margin-top: 24px;
+  }
+  .suggestions-heading h2 {
+    font-size: 20px;
+  }
+}

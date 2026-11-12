@@ -1,0 +1,115 @@
+{
+  "caseId": "v-lighting",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:91c9f1505f69f407a949864e6a8547c9b986c9c2a6285b5b0b71a01cc0c7a16c",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "836733a6-4d4d-4e14-be41-585062216039",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "24074b84-12f5-4629-87de-1710e2abee39",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "d2b9437b-3adc-40f5-abf0-3c69e803da8c",
+        "takenAt": "2026-10-04T08:15:53Z"
+      },
+      {
+        "id": "6e796ffd-af01-427b-99e9-e7bdd65fba29",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "7f0ea3d5-229f-4181-a0f4-786f17ed0855",
+        "takenAt": "2026-11-03T08:15:53Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "e73e9de9-1320-4177-b8e9-3f44f39232cf",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The later image may show additional leaf-like structures that were not visible in the earlier image.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "24074b84-12f5-4629-87de-1710e2abee39",
+          "6e796ffd-af01-427b-99e9-e7bdd65fba29"
+        ]
+      },
+      {
+        "text": "The lighter green leaf-like shapes in the later image may represent newer foliage, but this cannot be confirmed from the images alone.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "6e796ffd-af01-427b-99e9-e7bdd65fba29"
+        ]
+      },
+      {
+        "text": "The apparent change between images could be due to a different view, added illustration elements, or actual plant change, but the available evidence is insufficient to distinguish these.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "24074b84-12f5-4629-87de-1710e2abee39",
+          "6e796ffd-af01-427b-99e9-e7bdd65fba29"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Capture photos from the same angle, distance, and lighting with a scale reference.",
+      "Record leaf count, leaf color, and any visible new growth.",
+      "Inspect the plant for pests, wilting, yellowing, spotting, or damage.",
+      "Review watering, light, and care history if available."
+    ],
+    "missingInformation": [
+      "The images do not provide a scale reference, so size or growth cannot be assessed.",
+      "It is not confirmed whether the two images show the same physical plant from the same angle and distance.",
+      "No measurements, care activities, weather data, coordinates, or approved care guidance are available for this plant.",
+      "Leaf condition details such as texture, pests, soil moisture, and lighting are not visible."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The earlier image shows a potted plant with a single upright stem and three dark green rounded leaf-like shapes above the pot.",
+        "evidenceIds": [
+          "24074b84-12f5-4629-87de-1710e2abee39"
+        ]
+      },
+      {
+        "text": "The later image shows a similar potted plant with the same pot, stem, and three dark green rounded leaf-like shapes, plus two lighter green rounded leaf-like shapes near the pot rim.",
+        "evidenceIds": [
+          "6e796ffd-af01-427b-99e9-e7bdd65fba29"
+        ]
+      },
+      {
+        "text": "No obvious wilting, yellowing, spotting, or physical damage is visible in either image.",
+        "evidenceIds": [
+          "24074b84-12f5-4629-87de-1710e2abee39",
+          "6e796ffd-af01-427b-99e9-e7bdd65fba29"
+        ]
+      }
+    ]
+  }
+}

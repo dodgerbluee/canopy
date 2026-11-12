@@ -1,0 +1,6 @@
+fragment AgentGrantFields on AgentGrant { id name scopes plantIds expiresAt revokedAt revision lastUsedAt lastTool createdAt }
+query AgentSettings { agentSettings { enabled endpoint scopeOptions grants {...AgentGrantFields} actions {id grantId grantName operationId tool input before state createdAt expiresAt} } }
+mutation SaveAgentGrant($input:SaveAgentGrantInput!){ saveAgentGrant(input:$input){grant{...AgentGrantFields} token problems{code field message currentRevision}} }
+mutation RotateAgentCredential($input:ChangeAgentCredentialInput!){rotateAgentCredential(input:$input){grant{...AgentGrantFields} token problems{code field message currentRevision}}}
+mutation RevokeAgentGrant($input:ChangeAgentCredentialInput!){revokeAgentGrant(input:$input){grant{...AgentGrantFields} problems{code field message currentRevision}}}
+mutation DecideAgentAction($input:DecideAgentActionInput!){decideAgentAction(input:$input){applied problems{code field message currentRevision}}}

@@ -1,0 +1,235 @@
+<form class="ql-form entry-form" #form (submit)="onSubmit($event, form)">
+  @if (!editEntry()) {
+  <div class="form-section">
+    <div class="row wrap" role="group" aria-label="What kind of entry">
+      <button
+        type="button"
+        class="chip"
+        [attr.aria-pressed]="mode() === 'activity'"
+        (click)="setMode('activity', form)"
+      >
+        Activity
+      </button>
+      <button
+        type="button"
+        class="chip"
+        [attr.aria-pressed]="mode() === 'measurement'"
+        (click)="setMode('measurement', form)"
+      >
+        Measurement
+      </button>
+    </div>
+  </div>
+  } @if (formError()) {
+  <p class="field-error" role="alert">{{ formError() }}</p>
+  } @if (plantPicker()) {
+  <div class="form-section">
+    <div class="ql-field">
+      <label class="field-label" for="ql-plant">Plant</label>
+      <select id="ql-plant" class="input" name="plantId" required>
+        <option value="">Choose a plant…</option>
+        @for (p of plants(); track p.id) {
+        <option [value]="p.id">{{ p.name }}</option>
+        }
+      </select>
+      @if (plants().length === 0) {
+      <p class="caption ql-sub">No plants yet — add one first.</p>
+      }
+    </div>
+  </div>
+  } @if (mode() === 'activity') {
+  <div class="form-section">
+    <div class="ql-field">
+      <label class="field-label" for="ql-kind">What happened</label>
+      <select
+        id="ql-kind"
+        class="input"
+        name="kind"
+        [disabled]="!!editEntry()"
+        (change)="kind.set($any($event.target).value)"
+      >
+        @for (k of activityKinds; track k.value) {
+        <option [value]="k.value" [selected]="k.value === kind()">
+          {{ k.label }}
+        </option>
+        }
+      </select>
+    </div>
+    <div class="form-grid">
+      <div class="ql-field">
+        <label class="field-label" for="ql-date">Date</label>
+        <input
+          id="ql-date"
+          class="input"
+          name="date"
+          type="date"
+          required
+          [value]="editEntry() ? localDateInput(aOccurred()) : today"
+        />
+      </div>
+      <div class="ql-field">
+        <label class="field-label" for="ql-time">Time (optional)</label>
+        <input
+          id="ql-time"
+          class="input"
+          name="time"
+          type="time"
+          [value]="editEntry() ? localTimeInput(aOccurred()) : ''"
+        />
+      </div>
+    </div>
+    @if (needsQuantity()) {
+    <div class="form-grid">
+      <div class="ql-field">
+        <label class="field-label" for="ql-qty">Quantity</label>
+        <input
+          id="ql-qty"
+          class="input"
+          name="quantity"
+          inputmode="decimal"
+          [value]="editEntry() ? (a().quantity ?? '') : ''"
+          placeholder="blank = not recorded"
+        />
+      </div>
+      <div class="ql-field">
+        <label class="field-label" for="ql-unit">Unit</label>
+        <select id="ql-unit" class="input" name="unit">
+          <option value="">—</option>
+          @for (u of quantityUnits(); track u) {
+          <option [value]="u" [selected]="u === a().unit">
+            {{ u.toLowerCase() }}
+          </option>
+          }
+        </select>
+      </div>
+    </div>
+    } @if (kind() === 'FERTILIZE') {
+    <div class="ql-field">
+      <label class="field-label" for="ql-product">Product</label>
+      <input
+        id="ql-product"
+        class="input"
+        name="product"
+        [value]="editEntry() ? (a().product ?? '') : ''"
+        placeholder="blank = not recorded"
+      />
+    </div>
+    }
+    <div class="ql-field">
+      <label class="field-label" for="ql-note">Note</label>
+      <textarea
+        id="ql-note"
+        class="input"
+        name="note"
+        rows="2"
+        [value]="editEntry() ? (a().note ?? '') : ''"
+        placeholder="optional"
+      ></textarea>
+    </div>
+  </div>
+  } @if (mode() === 'measurement') {
+  <div class="form-section">
+    <div class="form-grid">
+      <div class="ql-field">
+        <label class="field-label" for="ql-qk">Measure</label>
+        <select
+          id="ql-qk"
+          class="input"
+          name="quantityKind"
+          [disabled]="!!editEntry()"
+          (change)="pickQK($event)"
+        >
+          @for (q of measureKinds; track q.value) {
+          <option [value]="q.value" [selected]="q.value === qKind()">
+            {{ q.label }}
+          </option>
+          }
+        </select>
+      </div>
+      <div class="ql-field">
+        <label class="field-label" for="ql-munit">Unit</label>
+        <select
+          id="ql-munit"
+          class="input"
+          name="unit"
+          [disabled]="!!editEntry()"
+        >
+          @for (u of measureUnits(); track u) {
+          <option [value]="u" [selected]="u === mUnit()">
+            {{ u.toLowerCase() }}
+          </option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="ql-field">
+        <label class="field-label" for="ql-value">Value</label>
+        <input
+          id="ql-value"
+          class="input"
+          name="value"
+          inputmode="decimal"
+          required
+          [value]="editEntry() ? m().value : ''"
+        />
+      </div>
+      <div class="ql-field">
+        <label class="field-label" for="ql-unc">Uncertainty ± (optional)</label>
+        <input
+          id="ql-unc"
+          class="input"
+          name="uncertainty"
+          inputmode="decimal"
+          [value]="editEntry() ? (m().uncertainty ?? '') : ''"
+        />
+      </div>
+    </div>
+    <div class="form-grid">
+      <div class="ql-field">
+        <label class="field-label" for="ql-mdate">Observed on</label>
+        <input
+          id="ql-mdate"
+          class="input"
+          name="date"
+          type="date"
+          required
+          [value]="editEntry() ? localDateInput(mObserved()) : today"
+        />
+      </div>
+      <div class="ql-field">
+        <label class="field-label" for="ql-mtime">Time (optional)</label>
+        <input
+          id="ql-mtime"
+          class="input"
+          name="time"
+          type="time"
+          [value]="editEntry() ? localTimeInput(mObserved()) : ''"
+        />
+      </div>
+    </div>
+    <div class="ql-field">
+      <label class="field-label" for="ql-method">Method</label>
+      <select id="ql-method" class="input" name="method">
+        @for (mm of methods; track mm.value) {
+        <option
+          [value]="mm.value"
+          [selected]="mm.value === (editEntry() ? m().method : 'MANUAL')"
+        >
+          {{ mm.label }}
+        </option>
+        }
+      </select>
+    </div>
+  </div>
+  }
+
+  <div class="form-actions">
+    @if (editEntry()) {
+    <button type="button" class="btn" (click)="cancelEdit()">Cancel</button>
+    }
+    <button type="submit" class="btn btn-primary" [disabled]="busy()">
+      {{ busy() ? 'Saving…' : editEntry() ? 'Save changes' : 'Log it' }}
+    </button>
+  </div>
+</form>

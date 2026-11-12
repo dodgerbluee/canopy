@@ -1,0 +1,74 @@
+{
+  "monstera": {
+    "file": "monstera.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Blattadern-monstera-P7089761.jpg",
+    "title": "File:Blattadern-monstera-P7089761.jpg",
+    "license": "CC BY-SA 4.0",
+    "author": "ermell",
+    "bytes": 640082
+  },
+  "echeveria": {
+    "file": "echeveria.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Echeveria_Victor_Reiter.jpg",
+    "title": "File:Echeveria Victor Reiter.jpg",
+    "license": "CC BY 2.0",
+    "author": "Se\u00e1n A. O'Hara from Berkeley, CA, USA",
+    "bytes": 137998
+  },
+  "ficus": {
+    "file": "ficus.png",
+    "source": "https://commons.wikimedia.org/wiki/File:Fiddle_leaf_fig_plant_care_infographic_-_55197444440.png",
+    "title": "File:Fiddle leaf fig plant care infographic - 55197444440.png",
+    "license": "CC BY-SA 4.0",
+    "author": "Houseplants Nook",
+    "bytes": 409235
+  },
+  "pothos": {
+    "file": "pothos.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Epipremnum_aureum_(Golden_Pothos).jpg",
+    "title": "File:Epipremnum aureum (Golden Pothos).jpg",
+    "license": "CC BY-SA 4.0",
+    "author": "Slyronit",
+    "bytes": 251769
+  },
+  "calathea": {
+    "file": "calathea.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Calathea_orbifolia-1-my_chedi-foot_hill-yercaud-salem-India.jpg",
+    "title": "File:Calathea orbifolia-1-my chedi-foot hill-yercaud-salem-India.jpg",
+    "license": "CC BY-SA 4.0",
+    "author": "Yercaud-elango",
+    "bytes": 469364
+  },
+  "pilea": {
+    "file": "pilea.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:(MHNT)_Pilea_peperomioides_Foliage.jpg",
+    "title": "File:(MHNT) Pilea peperomioides Foliage.jpg",
+    "license": "CC BY-SA 4.0",
+    "author": "Didier Descouens",
+    "bytes": 424915
+  },
+  "fern": {
+    "file": "fern.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Starr_080103-1414_Nephrolepis_biserrata.jpg",
+    "title": "File:Starr 080103-1414 Nephrolepis biserrata.jpg",
+    "license": "CC BY 3.0",
+    "author": "Forest &amp; Kim Starr",
+    "bytes": 610878
+  },
+  "cactus": {
+    "file": "cactus.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:An_Echinocactus_grusonii.jpg",
+    "title": "File:An Echinocactus grusonii.jpg",
+    "license": "CC BY-SA 3.0",
+    "author": "Cl\u00e9ment Bardot",
+    "bytes": 432439
+  },
+  "monstera2": {
+    "file": "monstera2.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Blattadern-monstera-P7089761.jpg",
+    "title": "File:Blattadern-monstera-P7089761.jpg",
+    "license": "CC BY-SA 4.0",
+    "author": "ermell",
+    "bytes": 640082
+  }
+}

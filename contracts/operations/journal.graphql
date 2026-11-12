@@ -1,0 +1,195 @@
+fragment ActivityFields on Activity {
+  id
+  plantId
+  kind
+  occurredAt
+  timezone
+  note
+  quantity
+  unit
+  product
+  revision
+  voidedAt
+  createdAt
+  updatedAt
+}
+
+fragment MeasurementFields on Measurement {
+  id
+  plantId
+  quantityKind
+  value
+  unit
+  observedAt
+  method
+  uncertainty
+  activityId
+  revision
+  createdAt
+  updatedAt
+}
+
+query Journal($plantId: ID, $first: Int, $after: String, $filter: JournalFilter) {
+  journal(plantId: $plantId, first: $first, after: $after, filter: $filter) {
+    items {
+      __typename
+      ... on ActivityEntry {
+        id
+        plantId
+        occurredAt
+        createdAt
+        summary
+        tombstonedAt
+        activity {
+          ...ActivityFields
+        }
+      }
+      ... on PhotoEntry {
+        id
+        plantId
+        occurredAt
+        createdAt
+        summary
+        tombstonedAt
+        photo {
+          ...PhotoFields
+        }
+      }
+      ... on PurchaseEntry {
+        id
+        plantId
+        occurredAt
+        createdAt
+        summary
+        tombstonedAt
+        allocation {
+          ...AllocationFields
+        }
+      }
+      ... on MeasurementEntry {
+        id
+        plantId
+        occurredAt
+        createdAt
+        summary
+        tombstonedAt
+        measurement {
+          ...MeasurementFields
+        }
+      }
+      ... on CareEntry {
+        id
+        plantId
+        occurredAt
+        createdAt
+        summary
+        tombstonedAt
+        occurrenceId
+        kind
+        activityKind
+      }
+      ... on InsightEntry {
+        id
+        plantId
+        occurredAt
+        createdAt
+        summary
+        tombstonedAt
+        runId
+        analysisKind: kind
+      }
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
+    }
+  }
+}
+
+mutation RecordActivity($input: RecordActivityInput!, $clientMutationId: String) {
+  recordActivity(input: $input, clientMutationId: $clientMutationId) {
+    activity {
+      ...ActivityFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdateActivity($input: UpdateActivityInput!, $clientMutationId: String) {
+  updateActivity(input: $input, clientMutationId: $clientMutationId) {
+    activity {
+      ...ActivityFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation VoidActivity($input: VoidActivityInput!, $clientMutationId: String) {
+  voidActivity(input: $input, clientMutationId: $clientMutationId) {
+    activity {
+      ...ActivityFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation RecordMeasurement($input: RecordMeasurementInput!, $clientMutationId: String) {
+  recordMeasurement(input: $input, clientMutationId: $clientMutationId) {
+    measurement {
+      ...MeasurementFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation UpdateMeasurement($input: UpdateMeasurementInput!, $clientMutationId: String) {
+  updateMeasurement(input: $input, clientMutationId: $clientMutationId) {
+    measurement {
+      ...MeasurementFields
+    }
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}
+
+mutation DeleteMeasurement($input: DeleteMeasurementInput!, $clientMutationId: String) {
+  deleteMeasurement(input: $input, clientMutationId: $clientMutationId) {
+    deletedMeasurementId
+    problems {
+      code
+      field
+      message
+      currentRevision
+    }
+    clientMutationId
+  }
+}

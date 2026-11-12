@@ -1,0 +1,94 @@
+{
+  "caseId": "t-pest-uncertain",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:c613429c5623a537e621d162b269d7250fd75c9600f978f520bbfb381e96b5e0",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "82e69ede-6422-4372-af7a-8b0614b7b24b",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "b14eed4a-283f-47a0-a97a-44d1af1877a3",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "9b9bac49-137c-4384-818c-38759b07f0de",
+        "kind": "NOTE",
+        "note": "I found tiny pale bugs under two leaves but I cannot tell what they are",
+        "occurredAt": "2026-11-02T08:25:00Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The note may indicate a possible pest presence on two leaves, but the type of bug is unknown.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "9b9bac49-137c-4384-818c-38759b07f0de"
+        ]
+      },
+      {
+        "text": "Tiny pale bugs under leaves are consistent with pests that hide on leaf undersides, though this cannot be confirmed without visual evidence.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "9b9bac49-137c-4384-818c-38759b07f0de"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Within 24-48 hours, take close-up photos of the bugs and both leaf undersides in good light.",
+      "Inspect the undersides of several leaves with a magnifying lens for eggs, webbing, sticky residue, or cast skins.",
+      "Check new growth and leaf surfaces for discoloration, stippling, curling, or wilting.",
+      "Isolate the plant from other plants until the bugs are identified.",
+      "Record any changes in bug number, leaf condition, or plant vigor over the next week."
+    ],
+    "missingInformation": [
+      "No photos of the bugs or leaves are available for identification.",
+      "No measurements or environmental readings are recorded for the plant.",
+      "No approved care guidance is available for this workspace.",
+      "No weather snapshot or location coordinates are available.",
+      "No details are recorded about leaf damage, residue, webbing, or plant symptoms.",
+      "No treatment history or pest management actions are recorded."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The record contains one note dated 2026-11-02 stating the owner found tiny pale bugs under two leaves but could not identify them.",
+        "evidenceIds": [
+          "9b9bac49-137c-4384-818c-38759b07f0de"
+        ]
+      },
+      {
+        "text": "No photos, measurements, weather data, or approved guidance are present in the snapshot.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

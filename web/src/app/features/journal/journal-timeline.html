@@ -1,0 +1,308 @@
+<ng-template #journeyTools>
+  <div class="timeline-tools">
+    <button
+      type="button"
+      class="icon-button"
+      [attr.aria-label]="
+        'Filter entries' + (filterCount() ? ', ' + filterCount() + ' active filters' : '')
+      "
+      title="Filter entries"
+      aria-haspopup="dialog"
+      (click)="openFilters()"
+    >
+      <ui-icon name="filter" [size]="18" />
+      @if (filterCount()) {
+        <span class="filter-count" aria-hidden="true">{{ filterCount() }}</span>
+      }
+    </button>
+    <button
+      type="button"
+      class="icon-button"
+      aria-label="Quick log"
+      title="Quick log"
+      (click)="startLog()"
+    >
+      <ui-icon name="plus" [size]="18" />
+    </button>
+  </div>
+</ng-template>
+<ui-entry-dialog
+  [open]="filtersOpen()"
+  title="Filter entries"
+  description="Choose what you want to revisit."
+  [dirty]="false"
+  (dismissed)="filtersOpen.set(false)"
+>
+  <div class="journey-filter-form">
+    <fieldset>
+      <legend>Entry type</legend>
+      <div class="entry-type-choices">
+        @for (filter of filters; track filter.label) {
+          <button
+            type="button"
+            class="entry-type-choice"
+            [attr.aria-pressed]="draftType() === filter.value"
+            (click)="draftType.set(filter.value)"
+          >
+            {{ filter.label }}
+          </button>
+        }
+      </div>
+    </fieldset>
+    <div class="form-grid">
+      <label for="journey-from"
+        >From<input
+          id="journey-from"
+          class="input"
+          type="datetime-local"
+          [value]="draftFrom()"
+          (input)="draftFrom.set($any($event.target).value)"
+      /></label>
+      <label for="journey-until"
+        >Until<input
+          id="journey-until"
+          class="input"
+          type="datetime-local"
+          [value]="draftUntil()"
+          (input)="draftUntil.set($any($event.target).value)"
+      /></label>
+    </div>
+    <p class="caption">
+      Dates and times use your device’s timezone. Leave either end open for a wider range.
+    </p>
+    <label class="include-voided"
+      ><input
+        type="checkbox"
+        [checked]="draftVoided()"
+        (change)="draftVoided.set($any($event.target).checked)"
+      />Include voided or removed entries</label
+    >
+    @if (filterError()) {
+      <p role="alert">{{ filterError() }}</p>
+    }
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="resetFilterDraft()">Reset all</button
+      ><button type="button" class="btn" (click)="filtersOpen.set(false)">Cancel</button
+      ><button type="button" class="btn btn-primary" (click)="saveFilters()">Apply filters</button>
+    </div>
+  </div>
+</ui-entry-dialog>
+
+<!-- Quick log and record correction share one shared entry dialog; the
+     existing QuickLog component is projected into it, never re-inlined. -->
+<ui-entry-dialog
+  #entry
+  [open]="entryOpen()"
+  [title]="entryTitle()"
+  [description]="entryDescription()"
+  [busy]="entryBusy()"
+  (dismissed)="onEntryDismissed()"
+>
+  @if (entryOpen()) {
+    <quick-log
+      [plantId]="plantId()"
+      [editing]="editing()"
+      (saved)="editing() ? onEdited() : onCreated()"
+      (cancelled)="onEntryCancelled()"
+      (busyChange)="onBusyChange($event)"
+      (conflict)="onEditConflict()"
+    />
+  }
+</ui-entry-dialog>
+
+<!-- Void/delete: the same compact shared confirmation, same two-step
+     explicit action/cancel semantics, and it stays mounted while the
+     mutation is in flight. -->
+<ui-entry-dialog
+  #confirm
+  [open]="!!confirmEntry()"
+  [title]="confirmTitle()"
+  [description]="confirmDescription()"
+  size="compact"
+  [busy]="confirmBusy()"
+  (dismissed)="onConfirmDismissed()"
+>
+  @if (confirmEntry(); as e) {
+    <div class="form-section">
+      <p class="caption">{{ confirmBody() }}</p>
+      <div class="form-actions">
+        <button type="button" class="btn" (click)="confirm.requestClose()">Cancel</button>
+        @if (voiding()) {
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="confirmBusy()"
+            (click)="confirmVoid()"
+          >
+            {{ confirmBusy() ? 'Voiding…' : 'Void activity' }}
+          </button>
+        } @else if (deleting()) {
+          <button
+            type="button"
+            class="btn btn-primary"
+            [disabled]="confirmBusy()"
+            (click)="confirmDelete()"
+          >
+            {{ confirmBusy() ? 'Deleting…' : 'Delete measurement' }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+</ui-entry-dialog>
+
+@if (store.error() || groups().length === 0) {
+  <div class="journey-tools-fallback"><ng-container [ngTemplateOutlet]="journeyTools" /></div>
+}
+@if (store.error()) {
+  <section class="card" role="alert" aria-labelledby="jl-err">
+    <h2 id="jl-err">Journal failed to load</h2>
+    <p class="caption">{{ store.error() }} This is not an empty timeline — nothing was changed.</p>
+    <div>
+      <button type="button" class="btn btn-primary" (click)="retry()">Retry</button>
+    </div>
+  </section>
+} @else if (store.loading() && store.items().length === 0) {
+  <div class="stack" aria-busy="true">
+    @for (i of [1, 2, 3]; track i) {
+      <ui-skeleton ar="auto" maxW="100%" />
+    }
+  </div>
+} @else if (store.items().length === 0) {
+  <section class="card">
+    @if (filterCount()) {
+      <h2>No matching entries</h2>
+      <p class="caption">Clear the filters to see the full journey.</p>
+      <div>
+        <button type="button" class="btn" (click)="clearAllFilters()">Show all</button>
+      </div>
+    } @else {
+      <h2>No journal yet</h2>
+      <p class="caption">
+        {{
+          plantId()
+            ? 'Log your first note, activity or measurement to start this
+    plant’s timeline.'
+            : 'Entries appear here as you log care, measurements and
+    photos across the workspace.'
+        }}
+      </p>
+    }
+  </section>
+} @else {
+  @for (g of groups(); track g.key; let first = $first) {
+    <section [attr.aria-label]="'Events in ' + g.label">
+      <div class="journey-month-heading" [class.first-month]="first">
+        <div>
+          <h2 class="month-head editorial">{{ g.label }}</h2>
+          @if (first && filterCount()) {
+            <p class="journey-filter-summary">{{ filterLabel() }}</p>
+          }
+        </div>
+        @if (first) {
+          <ng-container [ngTemplateOutlet]="journeyTools" />
+        }
+      </div>
+      <ul class="journey-list">
+        @for (e of g.items; track e.id) {
+          <li class="card card-raised journey-entry" [class.is-tombstoned]="!!e.tombstonedAt">
+            <div class="entry-date num">
+              <strong>{{ dayNumber(e.occurredAt) }}</strong>
+              <span>{{ monthShort(e.occurredAt) }}</span>
+              <span>{{ timeLabel(e.occurredAt) }} UTC</span>
+            </div>
+            <div class="entry-body">
+              <div class="entry-head">
+                <strong class="entry-title">{{ e.summary }}</strong>
+                <span class="entry-kind">
+                  <ui-icon [name]="kindIcon(e)" [label]="entryTypeLabel(e)" />
+                  {{ entryTypeLabel(e) }}
+                </span>
+              </div>
+              <div class="entry-meta">
+                @if (e.__typename === 'ActivityEntry') {
+                  <span class="badge">{{ e.activity.kind.toLowerCase() }}</span>
+                  @if (e.activity.quantity !== null && e.activity.unit !== null) {
+                    <span class="badge num"
+                      >{{ e.activity.quantity }} {{ e.activity.unit.toLowerCase() }}</span
+                    >
+                  }
+                  @if (e.activity.product) {
+                    <span class="badge">{{ e.activity.product }}</span>
+                  }
+                }
+                @if (e.__typename === 'MeasurementEntry') {
+                  <span class="badge num"
+                    >{{ e.measurement.value }} {{ e.measurement.unit.toLowerCase() }}</span
+                  >
+                  <span class="badge">{{ e.measurement.quantityKind.toLowerCase() }}</span>
+                  @if (e.measurement.uncertainty !== null) {
+                    <span class="badge num">± {{ e.measurement.uncertainty }}</span>
+                  }
+                  @if (e.measurement.method !== 'MANUAL') {
+                    <span class="badge">{{ methodLabel(e.measurement.method) }}</span>
+                  }
+                }
+                @if (e.__typename === 'PhotoEntry') {
+                  @if (e.photo.takenAt === null) {
+                    <span class="badge">Date unknown</span>
+                  } @else {
+                    <span class="badge">{{ dateSourceLabel(e.photo.dateSource) }}</span>
+                  }
+                }
+                @if (e.tombstonedAt) {
+                  <span class="badge">Voided</span>
+                }
+              </div>
+              @if (e.__typename === 'PhotoEntry') {
+                <!-- The event's own photo, never the plant's cover. -->
+                <figure class="entry-photo">
+                  <ui-photo
+                    [src]="photoUrl(e)"
+                    [expandable]="true"
+                    [previewSrc]="'/api/media/' + e.photo.asset.id + '/display'"
+                    [originalSrc]="'/api/media/' + e.photo.asset.id + '/original'"
+                    [alt]="'Journal photo of ' + dayLabel(e.occurredAt)"
+                    [compact]="true"
+                    framing="full"
+                  />
+                  @if (e.photo.caption; as cap) {
+                    @if (cap !== e.summary) {
+                      <figcaption class="caption">{{ cap }}</figcaption>
+                    }
+                  }
+                </figure>
+              }
+              @if (detail(e); as det) {
+                @if (e.__typename !== 'PhotoEntry' && det !== e.summary) {
+                  <p class="caption entry-note">{{ det }}</p>
+                }
+              }
+              <div class="entry-actions">
+                @if (!plantId()) {
+                  <a class="btn" [routerLink]="['/plants', e.plantId]">Plant</a>
+                }
+                @if (!e.tombstonedAt && editableEntry(e)) {
+                  <button type="button" class="btn" (click)="startEdit(e)">Edit</button>
+                  @if (e.__typename === 'ActivityEntry') {
+                    <button type="button" class="btn" (click)="askVoid(e)">Void</button>
+                  } @else if (e.__typename === 'MeasurementEntry') {
+                    <button type="button" class="btn" (click)="askDelete(e)">Delete</button>
+                  }
+                }
+              </div>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+  <div class="timeline-foot">
+    @if (hasNext()) {
+      <button type="button" class="btn" [disabled]="store.loading()" (click)="store.loadMore()">
+        {{ store.loading() ? 'Loading…' : 'Load earlier' }}
+      </button>
+    }
+    <span class="caption num">{{ store.items().length }} shown</span>
+  </div>
+}

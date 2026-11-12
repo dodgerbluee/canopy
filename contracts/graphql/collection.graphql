@@ -1,0 +1,152 @@
+# Collection domain: locations, plants, contexts, tags, acquisition provenance.
+# Frozen by T01.r1.
+
+enum PlantType {
+  INDIVIDUAL
+  GROUP
+}
+
+enum PlantCategory {
+  CITRUS
+  FIG
+  STRAWBERRY
+  BLACKBERRY
+  OTHER
+}
+
+enum PlantStatus {
+  ACTIVE
+  ARCHIVED
+  DEAD
+}
+
+enum ContextPlacement {
+  CONTAINER
+  GROUND
+}
+
+"Exactly one situation applies per location (DB check constraint)."
+enum LocationSituation {
+  INDOOR
+  OUTDOOR
+  COVERED
+}
+
+type Location {
+  id: ID!
+  name: String!
+  "Null = top level. Cycles and depth > 5 rejected with VALIDATION."
+  parent: Location
+  situation: LocationSituation!
+  "Optional coordinate override, private and user-entered."
+  latitude: Decimal
+  longitude: Decimal
+  label: String
+  revision: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type LocationConnection {
+  items: [Location!]!
+  pageInfo: PageInfo!
+}
+
+type Plant {
+  id: ID!
+  name: String!
+  scientificName: String
+  cultivar: String
+  rootstock: String
+  type: PlantType!
+  "Positive; null means count unknown (permitted for berry groups)."
+  count: Int
+  category: PlantCategory!
+  "Read projection of acquisition.acquiredOn; never edited independently. Null = not recorded or unknown."
+  acquiredOn: LocalDate
+  plantedOn: LocalDate
+  estimatedAgeYears: Decimal
+  status: PlantStatus!
+  revision: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  "Latest context entry with effectiveFrom <= now. Null when no context recorded."
+  currentContext: PlantContext
+  "Null means provenance not yet recorded, distinct from explicitly unknown price."
+  acquisition: Acquisition
+  coverPhoto: PlantPhoto
+  tags: [Tag!]!
+  photoCount: Int!
+}
+
+type PlantConnection {
+  items: [Plant!]!
+  pageInfo: PageInfo!
+}
+
+"Immutable versioned context transition. Current context derives from latest effectiveFrom <= now."
+type PlantContext {
+  id: ID!
+  effectiveFrom: DateTime!
+  location: Location
+  placement: ContextPlacement!
+  "Liters; null when unknown or ground."
+  potVolumeLiters: Decimal
+  mediumNote: String
+  lightNote: String
+  createdAt: DateTime!
+}
+
+enum PricingState {
+  UNKNOWN
+  KNOWN
+}
+
+type Acquisition {
+  id: ID!
+  seller: String
+  acquiredOn: LocalDate
+  pricingState: PricingState!
+  "Set exactly when pricingState = KNOWN via initial linkage."
+  initialPurchaseAllocation: PurchaseAllocation
+  revision: Int!
+}
+
+type Tag {
+  id: ID!
+  label: String!
+  "Archived tags stay on existing links but cannot be newly assigned."
+  archivedAt: DateTime
+  revision: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type TagConnection {
+  items: [Tag!]!
+  pageInfo: PageInfo!
+}
+
+input TagFilter {
+  "Trimmed substring against normalized label; max 200 chars."
+  query: String
+  "Default false: archived excluded unless true."
+  includeArchived: Boolean
+}
+
+enum PlantOrder {
+  NAME_ASC
+  NAME_DESC
+  ACQUIRED_ON_DESC
+  CREATED_DESC
+}
+
+input PlantFilter {
+  "Free-text over name/scientificName/cultivar; max 200 chars."
+  query: String
+  category: PlantCategory
+  "Default ACTIVE + DEAD visible; ARCHIVED only when explicitly requested."
+  status: [PlantStatus!]
+  tagIds: [ID!]
+  locationId: ID
+}

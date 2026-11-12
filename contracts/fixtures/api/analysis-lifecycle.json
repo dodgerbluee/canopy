@@ -1,0 +1,142 @@
+{
+  "note": "Analysis lifecycle fixtures required by T01.ai acceptance: a SUCCEEDED TEXT run with validated result + evidence + one PROPOSED suggestion, and a QUEUED RECEIPT_EXTRACTION run whose draft needs reconciliation (never a confirmed purchase).",
+  "cases": [
+    {
+      "case": "RUN_SUCCEEDED_TEXT_WITH_SUGGESTION",
+      "operation": "AnalysisRunStatus",
+      "variables": { "runId": "5f0c1b6e-3333-4aaa-8bbb-000000000001" },
+      "data": {
+        "analysisRun": {
+          "id": "5f0c1b6e-3333-4aaa-8bbb-000000000001",
+          "revision": 3,
+          "kind": "TEXT",
+          "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+          "receiptAssetId": null,
+          "state": "SUCCEEDED",
+          "attempts": 1,
+          "requestedAt": "2026-10-29T14:00:00Z",
+          "startedAt": "2026-10-29T14:00:02Z",
+          "finishedAt": "2026-10-29T14:00:31Z",
+          "failureCode": null,
+          "failureMessage": null,
+          "provider": "configured-text-provider",
+          "model": "example-text-model-2026",
+          "promptVersion": "p7",
+          "resultSchemaVersion": "r2",
+          "costReservedMicroUsd": "4000",
+          "costActualMicroUsd": "2310",
+          "evidence": {
+            "activityIds": ["a-0001", "a-0002", "a-0003"],
+            "measurementIds": ["m-0001"],
+            "photoIds": [],
+            "sourceVersionIds": ["sv-0001"],
+            "weatherSnapshotIds": ["ws-0001"],
+            "missingFacts": ["location situation for the current context"],
+            "inputHash": "sha256:6d3f0c9b8a5e4c1f9a7b2d0e8c5f3a1b6d9e2c4f7a0b8d1e3c5f7a9b1d3e5f7c"
+          },
+          "result": {
+            "__typename": "ObservationAnalysisResult",
+            "visibleObservations": [
+              {
+                "text": "Two dry periods of 9 and 11 days between waterings in the last 8 weeks.",
+                "evidenceIds": ["a-0001", "a-0002"]
+              }
+            ],
+            "hypotheses": [
+              {
+                "text": "Lower leaf yellowing is consistent with irregular deep watering rather than feeding.",
+                "confidence": "MEDIUM",
+                "evidenceIds": ["a-0003", "sv-0001"]
+              }
+            ],
+            "missingInformation": ["pot volume", "current light note"],
+            "followUpChecks": ["feel the top 5 cm of the medium before the next soak"],
+            "citations": [
+              {
+                "sourceId": "s-0001",
+                "sourceVersionId": "sv-0001",
+                "title": "Watering practice for citrus in containers",
+                "publisher": "Example Extension",
+                "retrievedOn": "2026-08-14",
+                "region": "temperate coastal",
+                "license": "CC BY-NC 4.0"
+              }
+            ]
+          },
+          "suggestions": [
+            {
+              "id": "sg-0001",
+              "revision": 1,
+              "plantId": "5f0c1b6e-1111-4aaa-8bbb-000000000001",
+              "runId": "5f0c1b6e-3333-4aaa-8bbb-000000000001",
+              "kind": "CARE",
+              "severity": "MEDIUM",
+              "status": "PROPOSED",
+              "observation": "Two dry periods of 9 and 11 days between waterings.",
+              "hypothesis": "Irregular deep watering likely drives the lower-leaf yellowing.",
+              "action": "Soak deeply on a steady weekly rhythm for the next month and watch new growth.",
+              "evidenceIds": ["a-0001", "a-0002", "sv-0001"],
+              "missingFacts": ["pot volume"],
+              "createdAt": "2026-10-29T14:00:31Z",
+              "expiresAt": "2026-11-26T14:00:31Z",
+              "needsReview": false,
+              "acceptedTaskId": null,
+              "dismissReason": null
+            }
+          ]
+        }
+      }
+    },
+    {
+      "case": "RUN_QUEUED_RECEIPT_DRAFT_UNRECONCILED",
+      "operation": "AnalysisRunStatus",
+      "variables": { "runId": "5f0c1b6e-3333-4aaa-8bbb-000000000002" },
+      "data": {
+        "analysisRun": {
+          "id": "5f0c1b6e-3333-4aaa-8bbb-000000000002",
+          "revision": 1,
+          "kind": "RECEIPT_EXTRACTION",
+          "plantId": null,
+          "receiptAssetId": "as-0002",
+          "state": "SUCCEEDED",
+          "attempts": 1,
+          "requestedAt": "2026-10-31T09:10:00Z",
+          "startedAt": "2026-10-31T09:10:01Z",
+          "finishedAt": "2026-10-31T09:10:20Z",
+          "failureCode": null,
+          "failureMessage": null,
+          "provider": "local-ocr",
+          "model": "tesseract-5",
+          "promptVersion": null,
+          "resultSchemaVersion": "r2",
+          "costReservedMicroUsd": "0",
+          "costActualMicroUsd": "0",
+          "evidence": {
+            "activityIds": [],
+            "measurementIds": [],
+            "photoIds": [],
+            "sourceVersionIds": [],
+            "weatherSnapshotIds": [],
+            "missingFacts": [],
+            "inputHash": "sha256:11aa22bb33cc44dd55ee66ff77aa88bb99cc00dd11ee22ff33aa44bb55cc66dd"
+          },
+          "result": {
+            "__typename": "ReceiptExtractionResult",
+            "currency": "USD",
+            "lines": [
+              { "description": "Meyer lemon tree 5gal", "amountMinor": "3900" },
+              { "description": "Citrus food 1lb", "amountMinor": null }
+            ],
+            "totalMinor": "4500",
+            "shippingMinor": "0",
+            "taxMinor": "361",
+            "purchasedOn": "2026-10-30",
+            "seller": "Example Nursery",
+            "needsReconciliation": true
+          },
+          "suggestions": []
+        }
+      }
+    }
+  ]
+}

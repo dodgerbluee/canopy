@@ -1,0 +1,122 @@
+<header class="assistant-heading">
+  <p class="eyebrow">A LITTLE MORE PERSPECTIVE</p>
+  <h1 class="editorial">Your garden, understood.</h1>
+  <p class="caption">Ask questions, compare growth, and review what the evidence supports.</p>
+  <a class="btn" routerLink="/settings" fragment="ai"
+    >AI connections <ui-icon name="settings" [size]="16"
+  /></a>
+</header>
+@if (error()) {
+  <div class="card" role="alert">
+    {{ error() }} <button class="btn" (click)="load()">Retry guidance</button>
+  </div>
+}
+<div class="assistant-actions">
+  <section class="card assistant-feature">
+    <ui-icon name="sparkles" [size]="28" />
+    <h2>Ask your garden</h2>
+    <p>
+      Seasonal care, harvest windows and your recorded garden history, with sources you can inspect.
+    </p>
+    <p class="caption">
+      {{ ready() }} plants with regional guidance. Answers distinguish typical seasons from what you
+      have actually recorded.
+    </p>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="loading() || !garden()?.settings?.enabled"
+      (click)="chatOpen.set(true)"
+    >
+      Start a conversation
+    </button>
+    @if (garden() && !garden()?.settings?.enabled) {
+      <a routerLink="/settings">Set your garden location and enable guidance</a>
+    }
+  </section>
+  <section class="card assistant-feature">
+    <ui-icon name="camera" [size]="28" />
+    <h2>A second look at growth</h2>
+    <p>
+      Choose a plant below to compare two photos. AI observations stay separate from diagnoses and
+      never change your care plan automatically.
+    </p>
+    <p class="caption">
+      @if (capabilities(); as c) {
+        Photo analysis: {{ c.vision.available ? 'configured' : 'unavailable' }}
+        @if (c.vision.model) {
+          · {{ c.vision.model }}
+        }
+      } @else {
+        Connection status is available in Settings.
+      }
+    </p>
+    <a class="btn" routerLink="/rounds">Add photos in rounds</a>
+  </section>
+</div>
+<section class="assistant-section">
+  <div class="section-heading">
+    <h2>Choose a plant</h2>
+    <p class="caption">Compare photos or open its existing insights.</p>
+  </div>
+  @if (plantError()) {
+    <p role="alert">
+      {{ plantError() }} <button class="btn" (click)="load()">Retry plants</button>
+    </p>
+  }
+  <div class="assistant-plants">
+    @for (plant of plants(); track plant.id) {
+      <a
+        class="card assistant-plant"
+        [routerLink]="['/plants', plant.id]"
+        [queryParams]="
+          plant.photoCount >= 2 ? { tab: 'insights' } : { tab: 'details', dialog: 'photos' }
+        "
+        ><span class="plant-glyph"
+          ><ui-icon [name]="plant.photoCount >= 2 ? 'image' : 'camera'" [size]="22" /></span
+        ><span
+          ><strong>{{ plant.name }}</strong
+          ><small
+            >{{ plant.photoCount }} photos ·
+            {{ plant.photoCount >= 2 ? 'Open AI comparison' : 'Add photos to compare' }}</small
+          ></span
+        ><ui-icon name="arrow-up-right" [size]="17"
+      /></a>
+    } @empty {
+      @if (!loading() && !plantError()) {
+        <p class="caption">Add your first plant to start documenting its growth.</p>
+      }
+    }
+  </div>
+</section>
+<section class="assistant-section">
+  <div class="section-heading">
+    <h2>Waiting for your review</h2>
+    <p class="caption">
+      AI suggestions need your explicit acceptance. Nothing is applied automatically.
+    </p>
+  </div>
+  @if (suggestionsError()) {
+    <p role="alert">
+      {{ suggestionsError() }}
+      <button class="btn" (click)="loadSuggestions()">Retry suggestions</button>
+    </p>
+  }
+  <div class="suggestion-list">
+    @for (s of suggestions(); track s.id) {
+      <insight-suggestion-card [suggestion]="s" [plantLink]="true" (changed)="loadSuggestions()" />
+    } @empty {
+      @if (!suggestionsBusy() && !suggestionsError()) {
+        <p class="caption">
+          No pending suggestions. Ask a garden question or compare a plant’s photos to get started.
+        </p>
+      }
+    }
+  </div>
+  @if (more()) {
+    <button class="btn" [disabled]="suggestionsBusy()" (click)="loadSuggestions(true)">
+      Load more suggestions
+    </button>
+  }
+</section>
+<garden-chat-dialog [open]="chatOpen()" [year]="year" (dismissed)="chatOpen.set(false)" />

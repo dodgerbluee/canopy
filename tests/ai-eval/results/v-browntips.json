@@ -1,0 +1,136 @@
+{
+  "caseId": "v-browntips",
+  "kind": "VISION",
+  "state": "SUCCEEDED",
+  "provider": "openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "canopy-eval/v1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:637d7ca505c20053551d4b65ea5fc5cac040aa94bbbc8e1e2cae1da0e6edac9e",
+  "snapshot": {
+    "kind": "VISION",
+    "costs": [],
+    "plant": {
+      "id": "db95a31a-cb1a-4932-a6a3-1ccb4881893f",
+      "name": "Monstera",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [
+      {
+        "id": "4cf42461-7e85-4540-bc64-58591d81284f",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "a1e9844a-37ce-41e8-a352-12ab6e8c4f06",
+        "takenAt": "2026-10-04T08:17:23Z"
+      },
+      {
+        "id": "3cd1a5e3-c7e8-43aa-a962-a8f5be8c0775",
+        "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "assetId": "77d0ad66-9c69-4457-83cd-ad60522ed877",
+        "takenAt": "2026-11-03T08:17:23Z"
+      }
+    ],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "0409795c-86e9-4f09-af77-adb06823a173",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant",
+      "no care activities recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The later image may show additional leaf-like structures or a change in leaf coloration compared with the earlier image.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "4cf42461-7e85-4540-bc64-58591d81284f",
+          "3cd1a5e3-c7e8-43aa-a962-a8f5be8c0775"
+        ]
+      },
+      {
+        "text": "The brown marks visible in the later image may indicate physical damage, pest feeding, discoloration, or an illustration artifact.",
+        "confidence": "LOW",
+        "evidenceIds": [
+          "3cd1a5e3-c7e8-43aa-a962-a8f5be8c0775"
+        ]
+      },
+      {
+        "text": "The plant may be in a terracotta-colored pot without a visible saucer or drainage tray.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "4cf42461-7e85-4540-bc64-58591d81284f",
+          "3cd1a5e3-c7e8-43aa-a962-a8f5be8c0775"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Inspect the brown marks closely to determine whether they are damage, pests, disease, or illustration artifacts.",
+      "Check the leaves for pests, webbing, sticky residue, or discoloration.",
+      "Check soil moisture and drainage before watering.",
+      "Record plant height, leaf count, and leaf dimensions using a consistent method.",
+      "Take follow-up photos from the same angle, distance, and lighting conditions.",
+      "Add care guidance and location information to the workspace if available.",
+      "Log any watering, fertilizing, repotting, pruning, or pest-control activities."
+    ],
+    "missingInformation": [
+      "No measurements are recorded for this plant.",
+      "No care activities are recorded for this plant.",
+      "No approved care guidance is published for this workspace.",
+      "No fresh weather snapshot exists for this location.",
+      "The workspace has no location coordinates.",
+      "The photos provide no scale reference, so size or growth rate cannot be assessed.",
+      "The photos do not show close-up leaf texture, soil surface, drainage holes, or potting medium.",
+      "There is no confirmation that the two images are of the exact same plant from the same angle and lighting conditions.",
+      "There is no information about light exposure, watering, soil moisture, pests, or recent handling."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The earlier photo shows a potted plant with a single upright stem and three broad green leaf-like shapes arranged around the stem.",
+        "evidenceIds": [
+          "4cf42461-7e85-4540-bc64-58591d81284f"
+        ]
+      },
+      {
+        "text": "The later photo shows a similar potted plant with a single upright stem, three darker green leaf-like shapes, and two additional lighter green leaf-like shapes lower near the pot rim.",
+        "evidenceIds": [
+          "3cd1a5e3-c7e8-43aa-a962-a8f5be8c0775"
+        ]
+      },
+      {
+        "text": "The later photo shows small brown oval marks on several leaf-like shapes, while the earlier photo does not show these marks.",
+        "evidenceIds": [
+          "3cd1a5e3-c7e8-43aa-a962-a8f5be8c0775"
+        ]
+      },
+      {
+        "text": "Both photos show the plant in a terracotta-colored pot against a plain light background, with no scale reference or close-up detail.",
+        "evidenceIds": [
+          "4cf42461-7e85-4540-bc64-58591d81284f",
+          "3cd1a5e3-c7e8-43aa-a962-a8f5be8c0775"
+        ]
+      },
+      {
+        "text": "The images appear to be simplified illustrations rather than detailed photographs, so leaf texture, damage detail, and potting medium are not visible.",
+        "evidenceIds": [
+          "4cf42461-7e85-4540-bc64-58591d81284f",
+          "3cd1a5e3-c7e8-43aa-a962-a8f5be8c0775"
+        ]
+      }
+    ]
+  }
+}

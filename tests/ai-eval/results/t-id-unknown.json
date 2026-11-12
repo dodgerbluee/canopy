@@ -1,0 +1,107 @@
+{
+  "caseId": "t-id-unknown",
+  "kind": "SYNTHESIS",
+  "state": "SUCCEEDED",
+  "provider": "strata-openai-compatible",
+  "model": "qwen3.8-flash-next-iq3_s",
+  "promptVersion": "p1",
+  "costReservedMicroUsd": 4000,
+  "costActualMicroUsd": null,
+  "inputHash": "sha256:cc56e1aeb5481c7230198c01d02862069182495fda07338086bef6de845ba03e",
+  "snapshot": {
+    "kind": "SYNTHESIS",
+    "costs": [],
+    "plant": {
+      "id": "8dc8387c-b887-417e-b3ae-1bc96cf2419f",
+      "name": "Unknown plant",
+      "status": "ACTIVE",
+      "revision": 1
+    },
+    "photos": [],
+    "schema": "canopy-snap/3",
+    "weather": [],
+    "guidance": [],
+    "workspace": {
+      "id": "51379d11-523b-4575-b55d-e3d409948cfe",
+      "revision": 1,
+      "timezone": "UTC",
+      "hasCoordinates": false
+    },
+    "activities": [
+      {
+        "id": "3c16d32d-ebaf-4933-898b-8296f8c9b986",
+        "kind": "NOTE",
+        "note": "I do not know what this plant is; the label was lost",
+        "occurredAt": "2026-11-01T08:25:31Z"
+      }
+    ],
+    "costTotals": [],
+    "measurements": [],
+    "missingFacts": [
+      "no purchases with costs allocated to this plant are recorded",
+      "no approved care guidance is published for this workspace",
+      "no fresh weather snapshot exists for this location",
+      "workspace has no location coordinates",
+      "no measurements recorded for this plant"
+    ]
+  },
+  "result": {
+    "citations": [],
+    "hypotheses": [
+      {
+        "text": "The plant's identity is uncertain, so its care requirements may be difficult to assess.",
+        "confidence": "HIGH",
+        "evidenceIds": [
+          "3c16d32d-ebaf-4933-898b-8296f8c9b986"
+        ]
+      },
+      {
+        "text": "The plant may have originally had a label that is no longer available.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "3c16d32d-ebaf-4933-898b-8296f8c9b986"
+        ]
+      },
+      {
+        "text": "The plant may be receiving care that is not aligned with its species' needs if its identity is unknown.",
+        "confidence": "MEDIUM",
+        "evidenceIds": [
+          "3c16d32d-ebaf-4933-898b-8296f8c9b986"
+        ]
+      }
+    ],
+    "followUpChecks": [
+      "Within a few days, take clear photos of the whole plant, leaves, stem, pot, and any flowers or fruit.",
+      "Record approximate plant height, pot diameter, and number of leaves or stems.",
+      "Note the plant's location, light exposure, temperature range, and watering frequency.",
+      "Check the soil surface and pot drainage for moisture, waterlogging, or pests.",
+      "Look for any remaining label, receipt, or purchase information that could identify the plant.",
+      "If identification remains unclear, compare photos with plant identification resources or ask a local extension service."
+    ],
+    "missingInformation": [
+      "Species or cultivar identification is missing.",
+      "The record lacks enough information to assess the plant's condition.",
+      "No photos are available to assess leaf shape, growth habit, flowers, fruit, or visible damage.",
+      "No measurements such as plant height, pot size, soil moisture, or leaf count are recorded.",
+      "No location coordinates or weather snapshot are available to infer indoor or outdoor conditions.",
+      "No purchase, cost, or provenance records are available.",
+      "No approved care guidance is published for this workspace."
+    ],
+    "visibleObservations": [
+      {
+        "text": "The snapshot lists the plant as 'Unknown plant' with status ACTIVE.",
+        "evidenceIds": []
+      },
+      {
+        "text": "The record contains a note: 'I do not know what this plant is; the label was lost.'",
+        "evidenceIds": [
+          "3c16d32d-ebaf-4933-898b-8296f8c9b986"
+        ]
+      },
+      {
+        "text": "The snapshot contains no photos, measurements, weather data, or guidance entries.",
+        "evidenceIds": []
+      }
+    ]
+  }
+}

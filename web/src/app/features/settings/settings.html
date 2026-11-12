@@ -1,0 +1,102 @@
+<section class="page-head">
+  <div class="page-head-main">
+    <p class="eyebrow">Your garden, your preferences</p>
+    <h1 class="editorial">Settings</h1>
+    <p class="caption">
+      Theme is stored on this device. Workspace values are read from the server; the app never
+      guesses.
+    </p>
+  </div>
+</section>
+
+<section class="card section" aria-labelledby="theme-h">
+  <div class="section-head">
+    <h2 id="theme-h">Appearance</h2>
+    <p class="caption">Only the chosen preference is stored; "system" follows the OS.</p>
+  </div>
+  <fieldset class="theme-set">
+    <legend class="field-label">Theme</legend>
+    @for (opt of themeOptions; track opt) {
+      <label class="theme-option">
+        <input
+          type="radio"
+          name="theme"
+          [value]="opt"
+          [checked]="isSelected(opt)"
+          (change)="theme.set(opt)"
+        />
+        {{ opt }}
+      </label>
+    }
+  </fieldset>
+</section>
+
+<section class="card section" aria-labelledby="ws-h">
+  <div class="section-head">
+    <h2 id="ws-h">Workspace</h2>
+  </div>
+  <dl class="kv">
+    <dt>Name</dt>
+    <dd>
+      @if (workspace(); as ws) {
+        {{ ws.displayName }}
+      } @else {
+        <span class="badge">Loading…</span>
+      }
+    </dd>
+    <dt>Workspace id</dt>
+    <dd>{{ shortWorkspace() }}</dd>
+    <dt>Timezone</dt>
+    <dd>
+      @if (workspace(); as ws) {
+        {{ ws.timezone }}
+      } @else {
+        <span class="badge">Unknown — not set</span>
+      }
+    </dd>
+    <dt>Currency</dt>
+    <dd>
+      @if (workspace(); as ws) {
+        {{ ws.defaultCurrency }}
+      } @else {
+        <span class="badge">Unknown — not set</span>
+      }
+    </dd>
+    <dt>Location</dt>
+    <dd>
+      @if (workspace()?.location; as loc) {
+        {{ loc.label || 'Unlabelled' }} · {{ loc.latitude }}, {{ loc.longitude }}
+      } @else {
+        <span class="badge">Unknown — not set</span>
+      }
+    </dd>
+  </dl>
+  <p class="field-hint">
+    Values come from the workspace over the GraphQL transport; the app never guesses. Editing opens
+    with workspace settings sync.
+  </p>
+</section>
+
+<section class="card section">
+  <div class="section-head">
+    <h2>Regional plant knowledge</h2>
+    <p class="caption">Set your garden location and opt in to background plant guidance.</p>
+  </div>
+  <garden-knowledge-settings (saved)="reloadWorkspace()" />
+</section>
+
+<ai-connection-status />
+<agent-connections />
+
+<section class="card section" aria-labelledby="sess-h">
+  <div class="section-head">
+    <h2 id="sess-h">Session</h2>
+  </div>
+  <dl class="kv">
+    <dt>Expires</dt>
+    <dd>{{ expiresLabel() }}</dd>
+  </dl>
+  <div class="save-row">
+    <button type="button" class="btn" (click)="signOut()">Sign out</button>
+  </div>
+</section>

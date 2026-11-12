@@ -870,7 +870,7 @@ Verify: Workflow lint and release metadata tests; actual image builds and isolat
 
 Depends: DEP01.
 
-Own: `server/internal/identity/password.go` (comment only), `.github/workflows/`, `.gitignore`, `scripts/release/`, `docs/deployment.md`, `.artifacts/agents/PUB01/`, `docs/plan/tasks/PUB01.md`. Integrator owns graph and ledger. Publishing uses an isolated clean source checkout; original local history and imported data remain local.
+Own: `web/src/app/features/today/today.spec.ts`, `server/internal/identity/password.go` (comment only), `.github/workflows/`, `.gitignore`, `scripts/release/`, `docs/deployment.md`, `.artifacts/agents/PUB01/`, `docs/plan/tasks/PUB01.md`. Integrator owns graph and ledger. Publishing uses an isolated clean source checkout; original local history and imported data remain local.
 
 Acceptance: Create private dodgerbluee/canopy repository, publish credential/data-free source snapshot, tag v1.0.0 and verify GitHub release build. Investigate and fix workflow failures as needed; preserve live local garden.
 

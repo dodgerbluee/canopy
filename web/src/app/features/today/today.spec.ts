@@ -533,7 +533,9 @@ describe('TodayPage', () => {
     fixture.detectChanges();
     expect(textOf(fixture)).toContain('1 open');
     expect(textOf(fixture)).toContain('Check the leaf tips again in 7 days.');
-    // no run context on this page: evidence chips stay honest generic records
-    expect(textOf(fixture)).toContain('evidence: record');
+    // No run manifest here: summarize the actual record count without guessing its type.
+    expect(textOf(fixture)).toContain('1 record');
+    expect(textOf(fixture)).not.toContain('evidence: record');
+    expect(fixture.nativeElement.querySelector('details')?.open).toBe(false);
   });
 });

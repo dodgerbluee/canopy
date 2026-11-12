@@ -88,3 +88,75 @@ The release smoke test uses only a disposable two-service stack. It verifies
 initial setup, login, SPA routes, MCP authentication, queued original-photo
 processing, capture date, private previews and recovery from a worker exit.
 No live development garden is used.
+
+## First-time setup and users
+
+Leave `CANOPY_INITIAL_PASSWORD` empty to create your first account in the browser.
+An empty installation opens the setup screen: choose your username,
+password (at least 10 characters), garden name, timezone and currency. Setup
+creates one administrator and closes automatically. Local public registration
+is unavailable afterward; administrators add users in Settings → Account & sign-in.
+
+Upgrades retain the existing garden owner, password, garden IDs and data. The
+original account starts with username `owner`; password-only API clients keep
+working. Administrators can change usernames, roles and passwords or disable
+accounts. Members can view/edit the shared garden but cannot administer users,
+AI connection settings or agent credentials. Disabling an account or resetting
+its password revokes its sessions. The final active administrator cannot be
+disabled or demoted. The existing `admin owner recover` CLI restores the original
+owner's local access, including administrator status, if needed.
+
+### OIDC sign-in
+
+Set `CANOPY_PUBLIC_URL` to the HTTPS address users visit (localhost HTTP works
+for development). In Settings → Account & sign-in → Connect OIDC, register the
+shown callback URL with your provider, then enter its exact issuer URL, client
+ID and client secret. Use a confidential authorization-code web client with
+PKCE S256 and `openid profile email` scopes. No extra container is required.
+Authentik, Authelia, Keycloak and other standards-compatible providers can use
+this generic connection; provider-specific live credentials are not included.
+
+Test discovery to verify provider metadata. Then use “Connect” on your own
+account to verify the client credentials and complete callback. Discovery alone
+does not prove client authentication. Enabling the connection shows its button
+on the login page. Password login remains available.
+
+Existing users must explicitly connect SSO while signed in; matching an email
+never links an account. Optional auto-join gives new SSO identities Member access
+only. Enabling it admits everyone authorized for this client by your provider,
+so restrict the application's audience there. An SSO-only member needs a local
+password set by an administrator before disconnecting SSO.
+
+Client secrets are encrypted using `keys/oidc.key` in the application storage
+volume. Preserve that file alongside your database and media when migrating.
+The operator backup includes user records, encrypted connection settings and
+identity links; login sessions and pending SSO attempts are excluded. Restore
+disables SSO until the public URL/key are verified and an administrator enables
+it again. Re-enter the client secret if the encryption key was not transferred.
+
+### Re-register an existing garden after migration
+
+An operator can prepare a one-time registration handover without moving or
+recreating the garden's records:
+
+```sh
+admin owner handover --url https://your-canopy-host --output /private/registration.url
+```
+
+Run this against the migrated installation after making a consistent database
+and complete storage backup. The private output file contains a one-use link,
+valid for 24 hours. Open it locally for the owner; never place it in a public
+log or shared source repository. The link uses a URL fragment and exchanges for
+an HttpOnly SameSite cookie, then clears the fragment before registration.
+
+Preparing handover disables existing browser accounts, revokes sessions and
+turns off previous OIDC sign-in. The registration keeps the existing primary
+account, garden owner/workspace IDs and all related items; it changes the login
+credentials to the username/password the owner chooses. Existing garden name,
+timezone and currency remain unchanged. The old primary SSO link is removed;
+the owner can reconnect OIDC afterward. The capability is consumed atomically.
+No public signup or unprotected claim is opened on an existing installation.
+
+Operator `admin owner recover` cancels pending handover links and restores local
+owner access if the handover needs to be abandoned. Preserve the original
+installation and verified backup until migration and owner access are confirmed.

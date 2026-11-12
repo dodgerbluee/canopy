@@ -810,3 +810,50 @@ func shaHex(b []byte) string {
 	s := sha256.Sum256(b)
 	return hex.EncodeToString(s[:])
 }
+
+func TestBackupRestoresUsersAndDisablesSSOUntilReviewed(t *testing.T) {
+	e := newEnv(t)
+	var owner pgtype.UUID
+	if err := e.pool.QueryRow(e.ctx, "SELECT owner_id FROM workspace WHERE id=$1", e.ws).Scan(&owner); err != nil {
+		t.Fatal(err)
+	}
+	member := platform.UUIDv4{}.New()
+	if _, err := e.pool.Exec(e.ctx, "UPDATE auth_users SET username='renamed-owner',display_name='Gardener' WHERE id=$1", owner); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.pool.Exec(e.ctx, "INSERT INTO auth_users(id,owner_id,username,display_name,role,disabled,password_hash) VALUES($1,$2,'helper','Helper','MEMBER',true,'fixture-hash')", member, owner); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.pool.Exec(e.ctx, "INSERT INTO oidc_connections(owner_id,display_name,issuer,client_id,secret,enabled) VALUES($1,'Garden SSO','https://auth.example.com','canopy',$2,true)", owner, []byte{1, 2, 3}); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.pool.Exec(e.ctx, "INSERT INTO oidc_identities(issuer,subject,user_id) VALUES('https://auth.example.com','helper-subject',$1)", member); err != nil {
+		t.Fatal(err)
+	}
+	sum, err := e.svc.Backup(e.ctx, BackupOptions{Dest: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	b := blankEnv(t)
+	if _, err = b.svc.Restore(b.ctx, RestoreOptions{Archive: sum.Archive, Ledger: sum.Ledger}); err != nil {
+		t.Fatal(err)
+	}
+	var name string
+	if err = b.pool.QueryRow(b.ctx, "SELECT username FROM auth_users WHERE id=$1", owner).Scan(&name); err != nil || name != "renamed-owner" {
+		t.Fatalf("primary identity lost: %v", err)
+	}
+	var role, hash string
+	var disabled bool
+	if err = b.pool.QueryRow(b.ctx, "SELECT role,disabled,password_hash FROM auth_users WHERE id=$1", member).Scan(&role, &disabled, &hash); err != nil || role != "MEMBER" || !disabled || hash != "fixture-hash" {
+		t.Fatal("member credentials or role changed on restore", err)
+	}
+	var enabled bool
+	var revision int
+	if err = b.pool.QueryRow(b.ctx, "SELECT enabled,revision FROM oidc_connections WHERE owner_id=$1", owner).Scan(&enabled, &revision); err != nil || enabled || revision != 2 {
+		t.Fatal("SSO was not disabled for hostname/key review", err)
+	}
+	var linked pgtype.UUID
+	if err = b.pool.QueryRow(b.ctx, "SELECT user_id FROM oidc_identities WHERE subject='helper-subject'").Scan(&linked); err != nil || linked != member {
+		t.Fatal("SSO identity relationship lost", err)
+	}
+}

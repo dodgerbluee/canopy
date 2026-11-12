@@ -6,6 +6,7 @@ import { GraphQLClient } from '../../core/graphql/client';
 import { UiTheme } from '../../ui/theme';
 import { AiStatusPanel } from './ai-status';
 import { AgentConnections } from './agents/agents';
+import { AccountSettings } from './accounts';
 import { GardenSettings } from '../seasons/garden-settings';
 
 type WorkspaceView = SessionQuery['session']['workspace'];
@@ -18,7 +19,7 @@ type WorkspaceView = SessionQuery['session']['workspace'];
  */
 @Component({
   selector: 'settings-page',
-  imports: [GardenSettings, AiStatusPanel, AgentConnections],
+  imports: [GardenSettings, AiStatusPanel, AgentConnections, AccountSettings],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './settings.html',
   styleUrl: './settings.css',
@@ -34,6 +35,10 @@ export class SettingsPage {
 
   constructor() {
     this.reloadWorkspace();
+  }
+
+  protected isAdmin(): boolean {
+    return this.session.info()?.user?.role === 'ADMIN';
   }
 
   protected reloadWorkspace(): void {

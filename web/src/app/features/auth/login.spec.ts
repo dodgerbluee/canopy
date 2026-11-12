@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { SessionService } from '../../core/auth/session';
+import { AccountsClient } from '../../core/auth/accounts';
 import { LoginPage } from './login';
 
 /** The unit-test environment lacks matchMedia; UiTheme needs it. */
@@ -20,7 +21,10 @@ function stubMatchMedia(): void {
 stubMatchMedia();
 
 function jsonResponse(status: number, body: unknown): Response {
-  return new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { 'Content-Type': 'application/json' },
+  });
 }
 
 describe('LoginPage', () => {
@@ -34,6 +38,10 @@ describe('LoginPage', () => {
     TestBed.configureTestingModule({
       providers: [
         provideRouter([]),
+        {
+          provide: AccountsClient,
+          useValue: { request: vi.fn().mockResolvedValue({ setupRequired: false, oidcName: '' }) },
+        },
         { provide: Router, useValue: { navigateByUrl: navigate, createUrlTree: vi.fn() } },
         {
           provide: ActivatedRoute,
@@ -94,6 +102,29 @@ describe('LoginPage', () => {
     input.dispatchEvent(new Event('input'));
     el.querySelector('form')!.dispatchEvent(new Event('submit'));
     await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith('/settings'));
+  });
+
+  it('sends a fresh installation to setup', async () => {
+    vi.mocked(TestBed.inject(AccountsClient).request).mockResolvedValue({
+      setupRequired: true,
+      oidcName: '',
+    });
+    render();
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalledWith('/setup'));
+  });
+
+  it('offers the configured SSO provider', async () => {
+    vi.mocked(TestBed.inject(AccountsClient).request).mockResolvedValue({
+      setupRequired: false,
+      oidcName: 'My identity provider',
+    });
+    const fixture = render();
+    await vi.waitFor(() => {
+      fixture.detectChanges();
+      expect(
+        fixture.nativeElement.querySelector('a[href="/api/auth/oidc/start"]')?.textContent,
+      ).toContain('My identity provider');
+    });
   });
 
   it('explains an expired session when the guard sent us here', async () => {

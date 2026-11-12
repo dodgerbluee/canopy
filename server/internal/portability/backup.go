@@ -21,7 +21,7 @@ import (
 // invalidated on restore and export archives are not part of a backup
 // set (re-request after restore).
 var dumpTables = []string{
-	"owner", "workspace", "agent_grants", "agent_credentials", "agent_operations", "agent_actions", "locations", "tags", "plants", "plant_contexts",
+	"owner", "auth_users", "oidc_connections", "oidc_identities", "workspace", "agent_grants", "agent_credentials", "agent_operations", "agent_actions", "locations", "tags", "plants", "plant_contexts",
 	"ai_connections", "ai_feature_bindings", "garden_knowledge_settings", "knowledge_profiles", "rain_events", "plant_tags", "activities", "measurements", "purchases", "purchase_lines",
 	"purchase_allocations", "acquisitions", "assets", "asset_variants",
 	"plant_photos", "purchase_receipts", "journal_entries", "audit_revisions",

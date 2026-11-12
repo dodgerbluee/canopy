@@ -2,10 +2,7 @@
   <div class="page-head-main">
     <p class="eyebrow">Your garden, your preferences</p>
     <h1 class="editorial">Settings</h1>
-    <p class="caption">
-      Theme is stored on this device. Workspace values are read from the server; the app never
-      guesses.
-    </p>
+    <p class="caption">Make this garden yours. Manage your preferences, people and connections.</p>
   </div>
 </section>
 
@@ -30,6 +27,8 @@
     }
   </fieldset>
 </section>
+
+<account-settings />
 
 <section class="card section" aria-labelledby="ws-h">
   <div class="section-head">
@@ -71,10 +70,7 @@
       }
     </dd>
   </dl>
-  <p class="field-hint">
-    Values come from the workspace over the GraphQL transport; the app never guesses. Editing opens
-    with workspace settings sync.
-  </p>
+  <p class="field-hint">Timezone and currency apply across this garden.</p>
 </section>
 
 <section class="card section">
@@ -85,8 +81,10 @@
   <garden-knowledge-settings (saved)="reloadWorkspace()" />
 </section>
 
-<ai-connection-status />
-<agent-connections />
+@if (isAdmin()) {
+  <ai-connection-status />
+  <agent-connections />
+}
 
 <section class="card section" aria-labelledby="sess-h">
   <div class="section-head">

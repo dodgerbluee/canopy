@@ -885,3 +885,73 @@ Own: `README.md`, `Dockerfile`, `docker/`, `deploy/`, `scripts/release/`, `.gith
 Acceptance: Package the existing frontend/API/worker/migration/codec tools in one application image, with a two-service Compose using PostgreSQL. Preserve current local app behavior and existing Docker-based codec isolation. No application/authentication/kernel sandbox redesign. Publish and verify the bundled image for Portainer.
 
 Verify: Actual bundled startup/migrations/login/queued photo/receipt processing; supervised child failure/shutdown; Compose validation; release workflow lint and publication.
+
+### AUTH01 — First-run registration, users and OIDC
+
+Depends: DEP02.
+
+Own: `server/internal/identity/`, `server/internal/transport/http/`, `server/internal/transport/graphql/`, `server/internal/platform/`, `server/cmd/api/main.go`, `server/db/migrations/00017_users_oidc.sql`, `server/db/queries/sessions.sql`, `server/db/queries/owner.sql`, `server/internal/portability/`, `server/db/generated/` (generator only), `server/go.mod`, `server/go.sum`, `web/src/app/core/auth/`, `web/src/app/features/auth/`, `web/src/app/features/settings/`, `web/src/app/app.routes.ts`, `web/e2e/`, `web/playwright.accounts.config.ts`, `docs/deployment.md`, `docs/plan/03-contracts.md`, `docs/plan/tasks/AUTH01.md`, `.artifacts/agents/AUTH01/`. Integrator owns graph and ledger.
+
+Acceptance: Browser first-run setup creates one administrator atomically; preserve migrated owner and garden. Admins manage shared-garden users (create, role, disable, password reset) without disabling/demoting the final active administrator. Generic OIDC settings support discovery, encrypted client secret, connection test and explicit account linking; optional new SSO users receive member role only. State, nonce, PKCE, issuer/audience/signature/expiry and one-time callback binding enforced. Disabled users lose sessions. Members cannot manage authentication, AI/provider credentials or agent access. Existing local recovery remains available. Consistent modal settings forms.
+
+Verify: Disposable PostgreSQL integration including setup race, migration compatibility, role/session boundaries, signed local OIDC provider with negative callbacks; Angular tests/build and browser walkthrough. No live data replacement or remote deployment implied.
+
+### AUTH02 — First-run setup spacing refinement
+
+Depends: AUTH01.
+
+Own: `web/src/app/features/auth/setup.html`, `web/src/app/features/auth/setup.ts`, `web/src/app/features/auth/setup.css`, `web/src/app/features/auth/login.css`, `docs/plan/tasks/AUTH02.md`, `.artifacts/agents/AUTH02/`. Integrator owns graph and ledger.
+
+Acceptance: Consistent label/input/help spacing and intentional header, introduction, section and footer spacing on desktop/mobile. Preserve form behavior and preview garden data. Refresh local Docker preview.
+
+Verify: Production image build; read-only Playwright layout/accessibility/screenshots across desktop/mobile widths.
+
+### AUTH03 — Browser theme defaults across entry routes
+
+Depends: AUTH02.
+
+Own: `web/src/app/ui/theme.ts`, `web/src/app/ui/theme.spec.ts`, `web/src/app/app.config.ts`, `web/src/index.html`, `web/src/app/features/auth/setup.css`, `web/src/app/features/auth/setup.html`, `web/src/app/features/auth/login.css`, `web/src/app/features/auth/login.html`, `docs/plan/tasks/AUTH03.md`, `.artifacts/agents/AUTH03/`. Integrator owns graph and ledger.
+
+Acceptance: Browser color preference is the default on setup, login and app routes, including first paint and live preference changes. Explicit saved preferences remain respected; no default is persisted. Verify served spacing and refresh the Docker preview without changing garden data.
+
+Verify: Theme regression tests, production build and real-browser light/dark/system-change/override checks, plus entry-page layout inspection.
+
+### AUTH04 — Modern single-column registration
+
+Depends: AUTH03.
+
+Own: `web/src/app/features/auth/setup.html`, `web/src/app/features/auth/setup.css`, `web/src/app/features/auth/setup.ts`, `web/src/app/features/auth/setup.spec.ts`, `web/e2e/accounts.spec.ts`, `docs/plan/tasks/AUTH04.md`, `.artifacts/agents/AUTH04/`. Integrator owns graph and ledger.
+
+Acceptance: Traditional modern registration card with one column of account fields. Garden preferences use existing valid defaults and remain available in a collapsed section. Retain browser theme behavior and existing setup API. Serve locally without resetting records.
+
+Verify: Focused setup tests, production image build and read-only desktop/mobile/browser-theme/accessibility checks; preserve registration submission behavior.
+
+### AUTH05 — Registration name and password policy
+
+Depends: AUTH04.
+
+Own: `web/src/app/features/auth/setup.html`, `web/src/app/features/auth/setup.ts`, `web/src/app/features/auth/setup.spec.ts`, `web/src/app/core/auth/accounts.ts`, `web/src/app/core/auth/password.ts`, `web/src/app/features/settings/accounts.ts`, `web/src/app/features/settings/accounts.html`, `web/e2e/accounts.spec.ts`, `server/internal/identity/users.go`, `server/internal/identity/users_test.go`, `docs/deployment.md`, `docs/plan/tasks/AUTH05.md`, `.artifacts/agents/AUTH05/`. Integrator owns graph and ledger.
+
+Acceptance: Remove Your name from registration; backend defaults display name to username when absent. Ten-character minimum for browser-created/changed account passwords, consistent across frontend and backend. Retain existing credentials and serve updated local Docker preview without resetting data.
+
+Verify: Backend password boundary and setup tests; Angular tests/build; browser form inspection and actual queued-job compatibility on the rebuilt API/worker image.
+
+### MIG01 — Local production migration and registration handover
+
+Depends: AUTH05.
+
+Own: `server/internal/identity/`, `server/internal/transport/http/`, `server/cmd/admin/main.go`, `server/db/migrations/00018_registration_handover.sql`, `server/db/queries/owner.sql`, `server/db/generated/` (generator only), `web/src/app/features/auth/`, `web/src/app/core/auth/accounts.ts`, `web/src/app/app.routes.ts`, `docs/deployment.md`, `docs/plan/tasks/MIG01.md`, `.artifacts/agents/MIG01/`, `.artifacts/dev/migration/`. Integrator owns graph/ledger. Operator scope: privately back up the current 4311 database/storage/config, stop its old API/worker/UI after verification, deploy combined app with a dedicated PostgreSQL instance at the same local ports, preserve rollback assets and the original checkout/data. No source changes to the original checkout.
+
+Acceptance: One-time, expiring operator-prepared registration handover keeps the existing garden owner/workspace/entity IDs and settings, replaces primary credentials with user-chosen registration and revokes old sessions. No unauthenticated open claim. Migration preserves all garden records, original media and encryption keys/provider configuration. User completes registration; agent does not choose their production password. Preserve rollback and verify actual worker processing.
+
+Verify: Handover/token/concurrency/recovery tests, frontend tests/build, restored data and file manifests, counts/IDs/financial totals, private media, AI connection decryption, queued-job completion and actual local browser registration availability.
+
+### PUB02 — Publish registration/OIDC v1.1.0
+
+Depends: MIG01.
+
+Own: `.gitignore`, `.dockerignore`, `deploy/compose.yaml`, `scripts/release/`, `.github/workflows/`, `docs/deployment.md`, `docs/plan/tasks/PUB02.md`, `docs/plan/tasks/MIG01.md`, `.artifacts/agents/PUB02/`, `.artifacts/agents/MIG01/EVIDENCE.md`. Integrator owns graph/ledger. Release integration includes the already accepted AUTH01–AUTH05/MIG01 source changes and bounded fixes required by actual release checks. No production data, configuration, credentials or original development Git history may be published.
+
+Acceptance: Verify owner registration complete and existing garden retained. Push credential/data-free source to dodgerbluee/canopy, publish stable v1.1.0 combined AMD64/ARM64 image, verify release assets and promote exactly that digest to latest. Preserve the running production garden.
+
+Verify: Known-private-value scan, plan/boundary/generation/release-tool checks, full GitHub CI and image smoke, published manifest/checksums, latest promotion digest equality.

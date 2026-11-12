@@ -18,6 +18,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"canopy/server/internal/transport/graphql/gql"
+	httpx "canopy/server/internal/transport/http"
 )
 
 // Handler is the POST /api/graphql endpoint. Auth (cookie + CSRF + Origin)
@@ -97,6 +98,19 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Parse field names so aliases/fragments cannot bypass credential permissions.
+	if p, ok := httpx.PrincipalFrom(r.Context()); ok && p.Role == "MEMBER" {
+		for _, op := range doc.Operations {
+			if req.OperationName == "" || op.Name == req.OperationName {
+				if containsAdminField(op.SelectionSet) {
+					e := gqlerror.Errorf("Administrator access required.")
+					setCode(e, "FORBIDDEN")
+					h.writeErrors(w, http.StatusForbidden, e)
+					return
+				}
+			}
+		}
+	}
 	// quiesce gate: mutations and uploads are refused while a backup
 	// runs; queries keep working so status pages and reads survive
 	if h.Maintenance != nil && h.Maintenance(r.Context()) {
@@ -178,4 +192,28 @@ func setCode(e *gqlerror.Error, code string) {
 func (h *Handler) writeErrors(w http.ResponseWriter, status int, errs ...*gqlerror.Error) {
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(map[string]any{"errors": errs})
+}
+
+func containsAdminField(set ast.SelectionSet) bool {
+	for _, selection := range set {
+		switch n := selection.(type) {
+		case *ast.Field:
+			switch n.Name {
+			case "aiConnections", "saveAIConnection", "saveAIFeatureBindings", "deleteAIConnection", "testAIConnection", "agentSettings", "saveAgentGrant", "rotateAgentCredential", "revokeAgentGrant", "decideAgentAction":
+				return true
+			}
+			if containsAdminField(n.SelectionSet) {
+				return true
+			}
+		case *ast.InlineFragment:
+			if containsAdminField(n.SelectionSet) {
+				return true
+			}
+		case *ast.FragmentSpread:
+			if n.Definition != nil && containsAdminField(n.Definition.SelectionSet) {
+				return true
+			}
+		}
+	}
+	return false
 }

@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import type { GardenUser } from './accounts';
 
 export type SessionState = 'unknown' | 'anon' | 'authed';
 
@@ -6,6 +7,7 @@ export type SessionState = 'unknown' | 'anon' | 'authed';
 export type SessionEnd = 'logout' | 'expired' | null;
 
 export interface SessionInfo {
+  user?: GardenUser;
   workspaceId: string;
   expiresAt: string;
   /** Held in memory only. Never written to localStorage/sessionStorage. */
@@ -13,8 +15,7 @@ export interface SessionInfo {
 }
 
 export type LoginResult =
-  | { ok: true }
-  | { ok: false; code: 'INVALID_CREDENTIALS' | 'RATE_LIMITED' | 'NETWORK' };
+  { ok: true } | { ok: false; code: 'INVALID_CREDENTIALS' | 'RATE_LIMITED' | 'NETWORK' };
 
 /**
  * Client-side view of the server session (T06 transport: /api/auth/*).
@@ -27,14 +28,14 @@ export class SessionService {
   readonly info = signal<SessionInfo | null>(null);
   readonly ended = signal<SessionEnd>(null);
 
-  async login(password: string): Promise<LoginResult> {
+  async login(password: string, username?: string): Promise<LoginResult> {
     let res: Response;
     try {
       res = await fetch('/api/auth/login', {
         method: 'POST',
         credentials: 'same-origin',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ password, ...(username === undefined ? {} : { username }) }),
       });
     } catch {
       return { ok: false, code: 'NETWORK' };
@@ -101,7 +102,17 @@ export class SessionService {
     this.ended.set(end);
   }
 
-  private readInfo(data: { workspaceId: string; expiresAt: string; csrfToken: string }): SessionInfo {
-    return { workspaceId: data.workspaceId, expiresAt: data.expiresAt, csrfToken: data.csrfToken };
+  private readInfo(data: {
+    workspaceId: string;
+    expiresAt: string;
+    csrfToken: string;
+    user?: GardenUser;
+  }): SessionInfo {
+    return {
+      workspaceId: data.workspaceId,
+      expiresAt: data.expiresAt,
+      csrfToken: data.csrfToken,
+      ...(data.user ? { user: data.user } : {}),
+    };
   }
 }

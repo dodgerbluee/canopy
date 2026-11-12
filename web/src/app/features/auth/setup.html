@@ -1,0 +1,128 @@
+<div class="registration-page">
+  <main class="setup-card" aria-labelledby="registration-title">
+    <div class="registration-brand">
+      <span class="brand-mark" aria-hidden="true"><ui-icon name="sprout" [size]="22" /></span
+      ><span>Canopy</span>
+    </div>
+    <header class="registration-heading">
+      <h1 id="registration-title">Create your account</h1>
+      <p>
+        {{
+          claimExisting() ? 'Create a login for your existing garden.' : 'Your garden starts here.'
+        }}
+      </p>
+    </header>
+    @if (available()) {
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="account-fields">
+          <div class="setup-field">
+            <label for="setupUsername">Username</label>
+            <input
+              id="setupUsername"
+              class="input"
+              formControlName="username"
+              autocomplete="username"
+              autocapitalize="none"
+              spellcheck="false"
+              aria-describedby="username-help"
+              required
+            />
+            <p id="username-help" class="field-hint">
+              Lowercase letters, numbers, dots, dashes or underscores.
+            </p>
+          </div>
+          <div class="setup-field">
+            <label for="setupPassword">Password</label>
+            <input
+              id="setupPassword"
+              class="input"
+              type="password"
+              formControlName="password"
+              autocomplete="new-password"
+              aria-describedby="password-help"
+              required
+            />
+            <p id="password-help" class="field-hint">At least 10 characters.</p>
+          </div>
+          <div class="setup-field">
+            <label for="confirm">Confirm password</label>
+            <input
+              id="confirm"
+              class="input"
+              type="password"
+              formControlName="confirm"
+              autocomplete="new-password"
+              required
+            />
+          </div>
+        </div>
+        @if (!claimExisting()) {
+          <details
+            class="garden-preferences"
+            [open]="preferencesOpen()"
+            (toggle)="preferencesToggled($event)"
+          >
+            <summary>
+              <span
+                >Garden preferences<span class="preferences-note"
+                  >Optional · defaults are ready</span
+                ></span
+              ><span class="disclosure-arrow" aria-hidden="true"></span>
+            </summary>
+            <div class="preferences-fields">
+              <div class="setup-field">
+                <label for="gardenName">Garden name</label
+                ><input id="gardenName" class="input" formControlName="workspaceName" required />
+              </div>
+              <div class="setup-field">
+                <label for="timezone">Timezone</label
+                ><input
+                  id="timezone"
+                  class="input"
+                  formControlName="timezone"
+                  aria-describedby="timezone-help"
+                  required
+                />
+                <p id="timezone-help" class="field-hint">Suggested from this browser.</p>
+              </div>
+              <div class="setup-field">
+                <label for="currency">Currency</label
+                ><input
+                  id="currency"
+                  class="input"
+                  formControlName="currency"
+                  maxlength="3"
+                  required
+                />
+              </div>
+            </div>
+          </details>
+        } @else {
+          <p class="field-hint">
+            Your existing plants, photos, purchases and history will stay in this garden.
+          </p>
+        }
+        @if (error()) {
+          <p class="field-error" role="alert">{{ error() }}</p>
+        }
+        <button class="btn btn-primary create-account" type="submit" [disabled]="busy()">
+          {{ busy() ? 'Creating your account…' : 'Create account'
+          }}<ui-icon name="arrow" [size]="17" />
+        </button>
+      </form>
+    } @else {
+      @if (error()) {
+        <p class="field-error" role="alert">{{ error() }}</p>
+      }
+      <p class="caption" role="status">Checking this installation…</p>
+    }
+    <p class="registration-footer">Already have an account? <a routerLink="/login">Sign in</a></p>
+  </main>
+  <footer class="registration-note">
+    {{
+      claimExisting()
+        ? 'This account will manage your existing garden.'
+        : 'The first account becomes this garden’s administrator.'
+    }}
+  </footer>
+</div>

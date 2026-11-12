@@ -26,6 +26,9 @@ class ArtifactTest(unittest.TestCase):
                 self.assertEqual(checksum,hashlib.sha256((work/'release'/name).read_bytes()).hexdigest())
             with tarfile.open(work/'release/canopy-1.2.3-deploy.tar.gz') as archive:
                 self.assertEqual(set(archive.getnames()),{'compose.yaml','.env.example','README.md','images.json'})
+                compose=archive.extractfile('compose.yaml').read().decode()
+                self.assertIn('${CANOPY_IMAGE_PREFIX:-ghcr.io/owner/repo}:${CANOPY_VERSION:-1.2.3}',compose)
+                self.assertNotIn('build:',compose)
                 template=archive.extractfile('.env.example').read().decode()
                 self.assertIn('CANOPY_VERSION=1.2.3',template)
                 self.assertIn('POSTGRES_PASSWORD=\n',template)

@@ -5,6 +5,15 @@ import { STORIES_ROUTES } from './stories/routes';
 
 export const routes: Routes = [
   {
+    path: 'setup/claim',
+    loadComponent: () => import('./features/auth/setup').then((m) => m.SetupPage),
+  },
+  {
+    path: 'setup',
+    canActivate: [anonGuard],
+    loadComponent: () => import('./features/auth/setup').then((m) => m.SetupPage),
+  },
+  {
     path: 'login',
     canActivate: [anonGuard],
     loadComponent: () => import('./features/auth/login').then((m) => m.LoginPage),

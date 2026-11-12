@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 
 	"canopy/server/internal/agentaccess"
@@ -51,6 +52,17 @@ func main() {
 	owners := identity.NewOwnerService(q, sessions, identity.NewPasswordHasher(identity.ProductionParams), ids, log)
 	auth := httpx.NewAuth(owners, sessions, identity.NewLoginLimiter(int(cfg.LoginLimit)), sessCfg, log)
 	auth.Register(mux)
+	users := identity.NewUsers(pool, sessions)
+	publicURL := os.Getenv("CANOPY_PUBLIC_URL")
+	if publicURL == "" {
+		publicURL = "http://localhost:8080"
+	}
+	oidcAuth, err := identity.NewOIDC(users, filepath.Join(cfg.StorageRoot, "keys", "oidc.key"), publicURL)
+	if err != nil {
+		log.Error("sign-in configuration unavailable")
+		os.Exit(1)
+	}
+	auth.EnableUsers(mux, users, oidcAuth)
 
 	// Upload lifecycle (T13): private ObjectStore + transactional queue
 	// link. The API only inserts jobs; the worker process executes them.

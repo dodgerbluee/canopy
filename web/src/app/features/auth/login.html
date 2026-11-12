@@ -19,7 +19,25 @@
       <p class="notice" role="status">Your session ended. Sign in again to continue.</p>
     }
 
+    @if (optionsError()) {
+      <p class="field-error" role="alert">{{ optionsError() }}</p>
+      <button class="btn" type="button" (click)="loadOptions()">Retry</button>
+    }
+    @if (options()?.oidcName; as name) {
+      <a class="btn btn-primary sso-button" href="/api/auth/oidc/start">Continue with {{ name }}</a>
+      <p class="auth-divider">or use your Canopy account</p>
+    }
     <form [formGroup]="form" (ngSubmit)="submit()">
+      <label class="field-label" for="username">Username</label>
+      <input
+        id="username"
+        class="input"
+        type="text"
+        formControlName="username"
+        autocomplete="username"
+        autocapitalize="none"
+        spellcheck="false"
+      />
       <label class="field-label" for="password">Password</label>
       <input
         id="password"

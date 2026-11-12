@@ -512,7 +512,14 @@
         "M12",
         "UI28",
         "UI29",
-        "DEP02"
+        "DEP02",
+        "AUTH01",
+        "AUTH02",
+        "AUTH03",
+        "AUTH04",
+        "AUTH05",
+        "MIG01",
+        "PUB02"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -914,6 +921,62 @@
         "PUB01"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "AUTH01": {
+      "title": "First-run registration, users and OIDC",
+      "dependsOn": [
+        "DEP02"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "AUTH02": {
+      "title": "First-run setup spacing refinement",
+      "dependsOn": [
+        "AUTH01"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "AUTH03": {
+      "title": "Browser theme defaults across all entry routes",
+      "dependsOn": [
+        "AUTH02"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "AUTH04": {
+      "title": "Modern single-column registration page",
+      "dependsOn": [
+        "AUTH03"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "AUTH05": {
+      "title": "Ten-character passwords and username-only registration",
+      "dependsOn": [
+        "AUTH04"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "MIG01": {
+      "title": "Migrate local production garden and registration handover",
+      "dependsOn": [
+        "AUTH05"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PUB02": {
+      "title": "Publish registration and OIDC v1.1.0",
+      "dependsOn": [
+        "MIG01"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

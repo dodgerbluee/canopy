@@ -1566,6 +1566,18 @@ type AuditRevision struct {
 	AgentOperationID  pgtype.Text
 }
 
+type AuthUser struct {
+	ID           pgtype.UUID
+	OwnerID      pgtype.UUID
+	Username     string
+	DisplayName  string
+	Role         string
+	Disabled     bool
+	IsPrimary    bool
+	PasswordHash string
+	CreatedAt    pgtype.Timestamptz
+}
+
 type CareOccurrence struct {
 	ID                  pgtype.UUID
 	WorkspaceID         pgtype.UUID
@@ -1804,6 +1816,35 @@ type Notification struct {
 	DeliveredAt pgtype.Timestamptz
 }
 
+type OidcAttempt struct {
+	StateHash   string
+	BrowserHash string
+	OwnerID     pgtype.UUID
+	UserID      pgtype.UUID
+	SessionID   pgtype.UUID
+	Nonce       string
+	Verifier    string
+	Revision    int32
+	ExpiresAt   pgtype.Timestamptz
+}
+
+type OidcConnection struct {
+	OwnerID     pgtype.UUID
+	DisplayName string
+	Issuer      string
+	ClientID    string
+	Secret      []byte
+	Enabled     bool
+	AutoJoin    bool
+	Revision    int32
+}
+
+type OidcIdentity struct {
+	Issuer  string
+	Subject string
+	UserID  pgtype.UUID
+}
+
 type Owner struct {
 	ID           pgtype.UUID
 	PasswordHash string
@@ -1936,6 +1977,14 @@ type RainEvent struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
+type RegistrationHandover struct {
+	OwnerID    pgtype.UUID
+	TokenHash  string
+	ExpiresAt  pgtype.Timestamptz
+	ConsumedAt pgtype.Timestamptz
+	CreatedAt  pgtype.Timestamptz
+}
+
 type Session struct {
 	ID         pgtype.UUID
 	OwnerID    pgtype.UUID
@@ -1945,6 +1994,7 @@ type Session struct {
 	RevokedAt  pgtype.Timestamptz
 	LastSeenAt pgtype.Timestamptz
 	CreatedAt  pgtype.Timestamptz
+	UserID     pgtype.UUID
 }
 
 type Source struct {

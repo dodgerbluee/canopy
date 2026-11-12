@@ -1,0 +1,357 @@
+<section class="card account-section" aria-labelledby="account-heading">
+  <header>
+    <p class="eyebrow">Your access</p>
+    <h2 id="account-heading">Account &amp; sign-in</h2>
+    <p class="caption">Your identity, the people in your garden, and how they sign in.</p>
+  </header>
+  @if (error()) {
+    <p class="field-error" role="alert">
+      {{ error() }} <button type="button" class="btn" (click)="load()">Retry</button>
+    </p>
+  }
+  @if (notice()) {
+    <p class="notice" role="status">{{ notice() }}</p>
+  }
+  @if (loading()) {
+    <p class="caption">Loading account…</p>
+  }
+  @if (me(); as user) {
+    <div class="account-summary">
+      <div class="avatar" aria-hidden="true">{{ user.displayName.slice(0, 1).toUpperCase() }}</div>
+      <div>
+        <h3>{{ user.displayName }}</h3>
+        <p class="caption">
+          {{ user.username }} · {{ user.role === 'ADMIN' ? 'Administrator' : 'Member' }}
+        </p>
+      </div>
+    </div>
+    <div class="account-actions">
+      @if (user.hasPassword) {
+        <button class="btn" (click)="editPassword()">Change password</button>
+      }
+      @if (user.oidcLinked) {
+        <span class="badge">SSO connected</span
+        ><button class="btn" (click)="disconnect()" [disabled]="busy() || !user.hasPassword">
+          Disconnect SSO
+        </button>
+      } @else if (ssoName()) {
+        <button class="btn" (click)="connect()" [disabled]="busy()">Connect {{ ssoName() }}</button>
+      }
+    </div>
+    @if (!user.hasPassword) {
+      <p class="field-hint">
+        You sign in through SSO. An administrator can set a local password if you need one.
+      </p>
+    }
+    @if (user.role === 'ADMIN') {
+      <div class="subsection">
+        <div class="section-title">
+          <div>
+            <h3>People in your garden</h3>
+            <p class="caption">
+              Members can view and edit the garden. Administrators also manage accounts and
+              connections.
+            </p>
+          </div>
+          <button class="btn btn-primary" (click)="editUser()">Add user</button>
+        </div>
+        <div class="people-list">
+          @for (person of users(); track person.id) {
+            <div class="person-row">
+              <div class="person-info">
+                <strong
+                  >{{ person.displayName }}
+                  @if (person.id === user.id) {
+                    <span class="caption">(you)</span>
+                  }</strong
+                ><span class="caption"
+                  >{{ person.username }} · {{ person.role === 'ADMIN' ? 'Administrator' : 'Member'
+                  }}{{ person.oidcLinked ? ' · SSO' : '' }}</span
+                >
+              </div>
+              <span class="badge">{{ person.disabled ? 'Disabled' : 'Active' }}</span
+              ><button
+                class="icon-button"
+                [attr.aria-label]="'Edit ' + person.displayName"
+                (click)="editUser(person)"
+              >
+                <ui-icon name="pencil" [size]="17" />
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+      <div class="subsection">
+        <div class="section-title">
+          <div>
+            <h3>Single sign-on</h3>
+            <p class="caption">Connect an OIDC provider such as Authentik, Authelia or Keycloak.</p>
+          </div>
+          <button class="btn" (click)="editOIDC()">
+            {{ connection()?.revision ? 'Edit connection' : 'Connect OIDC' }}
+          </button>
+        </div>
+        @if (connection()?.revision) {
+          <div class="connection-summary">
+            <span class="badge">{{ connection()?.enabled ? 'Enabled' : 'Disabled' }}</span
+            ><strong>{{ connection()?.displayName }}</strong
+            ><span class="caption">{{ connection()?.issuer }}</span>
+          </div>
+          <div class="callback">
+            <span class="field-label">Callback URL</span
+            ><code>{{ connection()?.callbackUrl }}</code>
+          </div>
+          <button class="btn" (click)="testOIDC()" [disabled]="busy()">
+            {{ busy() ? 'Working…' : 'Test discovery' }}
+          </button>
+        }
+      </div>
+    }
+  }
+</section>
+
+<ui-entry-dialog
+  #userEntry
+  [open]="userOpen()"
+  [title]="editing ? 'Edit account' : 'Add a garden member'"
+  description="Manage access to this garden."
+  [busy]="busy()"
+  (dismissed)="userOpen.set(false); userDraft.password = ''"
+>
+  <form (ngSubmit)="saveUser()">
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label" for="userDisplay">Name</label
+        ><input
+          class="input"
+          id="userDisplay"
+          name="displayName"
+          [(ngModel)]="userDraft.displayName"
+          maxlength="160"
+          required
+        />
+      </div>
+      <div class="field">
+        <label class="field-label" for="userName">Username</label
+        ><input
+          class="input"
+          id="userName"
+          name="username"
+          [(ngModel)]="userDraft.username"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+          required
+        />
+      </div>
+    </div>
+    <fieldset class="role-set">
+      <legend class="field-label">Role</legend>
+      <label
+        ><input type="radio" name="role" value="MEMBER" [(ngModel)]="userDraft.role" />Member</label
+      ><label
+        ><input
+          type="radio"
+          name="role"
+          value="ADMIN"
+          [(ngModel)]="userDraft.role"
+        />Administrator</label
+      >
+    </fieldset>
+    <div class="field">
+      <label class="field-label" for="userPassword">{{
+        editing ? 'Reset password (optional)' : 'Initial password'
+      }}</label
+      ><input
+        class="input"
+        id="userPassword"
+        name="password"
+        type="password"
+        [(ngModel)]="userDraft.password"
+        autocomplete="new-password"
+        [required]="!editing"
+      />
+      <p class="field-hint">
+        At least 10 characters.
+        {{
+          editing
+            ? 'Leave blank to keep the existing password. A reset signs this user out everywhere.'
+            : 'Share it securely with this person.'
+        }}
+      </p>
+    </div>
+    @if (editing) {
+      <label class="check-row"
+        ><input type="checkbox" name="disabled" [(ngModel)]="userDraft.disabled" />Disable this
+        account</label
+      >
+      <p class="field-hint">
+        Disabling immediately ends access. The final active administrator is always protected.
+      </p>
+    }
+    @if (formError()) {
+      <p class="field-error" role="alert">{{ formError() }}</p>
+    }
+    <div class="form-actions">
+      <button class="btn" type="button" (click)="userEntry.requestClose()" [disabled]="busy()">
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Saving…' : 'Save account' }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>
+
+<ui-entry-dialog
+  #oidcEntry
+  [open]="oidcOpen()"
+  title="OIDC connection"
+  description="Register Canopy as a confidential web client with your identity provider."
+  [busy]="busy()"
+  (dismissed)="oidcOpen.set(false); oidcDraft.clientSecret = ''"
+>
+  <form (ngSubmit)="saveOIDC()">
+    <div class="callback">
+      <span class="field-label">Register this callback URL</span
+      ><code>{{ connection()?.callbackUrl }}</code>
+    </div>
+    <div class="field">
+      <label class="field-label" for="oidcName">Button label</label
+      ><input
+        class="input"
+        id="oidcName"
+        name="oidcName"
+        [(ngModel)]="oidcDraft.displayName"
+        maxlength="80"
+        required
+      />
+    </div>
+    <div class="field">
+      <label class="field-label" for="issuer">Issuer URL</label
+      ><input
+        class="input"
+        type="url"
+        id="issuer"
+        name="issuer"
+        [(ngModel)]="oidcDraft.issuer"
+        placeholder="https://auth.example.com/application/o/canopy/"
+        required
+      />
+      <p class="field-hint">
+        The issuer advertised by your provider. Do not include /.well-known/openid-configuration.
+      </p>
+    </div>
+    <div class="field">
+      <label class="field-label" for="clientId">Client ID</label
+      ><input
+        class="input"
+        id="clientId"
+        name="clientId"
+        [(ngModel)]="oidcDraft.clientId"
+        autocomplete="off"
+        required
+      />
+    </div>
+    <div class="field">
+      <label class="field-label" for="clientSecret">Client secret</label
+      ><input
+        class="input"
+        type="password"
+        id="clientSecret"
+        name="clientSecret"
+        [(ngModel)]="oidcDraft.clientSecret"
+        autocomplete="new-password"
+        [placeholder]="connection()?.hasSecret ? 'Saved — leave blank to retain' : ''"
+      />
+      <p class="field-hint">
+        Encrypted on the server. Enter again if you change issuer or client ID.
+      </p>
+    </div>
+    <label class="check-row"
+      ><input type="checkbox" name="enabled" [(ngModel)]="oidcDraft.enabled" />Show SSO on the
+      sign-in page</label
+    >
+    <label class="check-row"
+      ><input type="checkbox" name="autoJoin" [(ngModel)]="oidcDraft.autoJoin" />Allow new SSO
+      identities to join this garden</label
+    >
+    <p class="field-hint">
+      New accounts receive Member access. Leave off to require existing users to connect SSO
+      themselves. Restrict this application’s users at your identity provider.
+    </p>
+    <p class="field-hint">
+      Canopy needs an HTTPS public URL for SSO (localhost HTTP is supported for development).
+    </p>
+    @if (formError()) {
+      <p class="field-error" role="alert">{{ formError() }}</p>
+    }
+    <div class="form-actions">
+      <button class="btn" type="button" (click)="oidcEntry.requestClose()" [disabled]="busy()">
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Saving…' : 'Save connection' }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>
+
+<ui-entry-dialog
+  #passwordEntry
+  [open]="passwordOpen()"
+  title="Change your password"
+  description="Your other sessions will be signed out."
+  [busy]="busy()"
+  (dismissed)="
+    passwordOpen.set(false); passwords = { currentPassword: '', newPassword: '', confirm: '' }
+  "
+>
+  <form (ngSubmit)="changePassword()">
+    <div class="field">
+      <label class="field-label" for="currentPassword">Current password</label
+      ><input
+        class="input"
+        type="password"
+        id="currentPassword"
+        name="currentPassword"
+        [(ngModel)]="passwords.currentPassword"
+        autocomplete="current-password"
+        required
+      />
+    </div>
+    <div class="field">
+      <label class="field-label" for="newPassword">New password</label
+      ><input
+        class="input"
+        type="password"
+        id="newPassword"
+        name="newPassword"
+        [(ngModel)]="passwords.newPassword"
+        autocomplete="new-password"
+        minlength="10"
+        required
+      />
+    </div>
+    <div class="field">
+      <label class="field-label" for="confirmPassword">Confirm password</label
+      ><input
+        class="input"
+        type="password"
+        id="confirmPassword"
+        name="confirmPassword"
+        [(ngModel)]="passwords.confirm"
+        autocomplete="new-password"
+        required
+      />
+    </div>
+    @if (formError()) {
+      <p class="field-error" role="alert">{{ formError() }}</p>
+    }
+    <div class="form-actions">
+      <button class="btn" type="button" (click)="passwordEntry.requestClose()" [disabled]="busy()">
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="busy()">
+        {{ busy() ? 'Saving…' : 'Change password' }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>

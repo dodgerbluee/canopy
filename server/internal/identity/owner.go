@@ -23,6 +23,7 @@ var (
 // OwnerStore is the narrow port over the generated owner/workspace queries.
 type OwnerStore interface {
 	CountOwners(ctx context.Context) (int64, error)
+	RecoverPrimaryUser(ctx context.Context, ownerID pgtype.UUID) error
 	GetOwner(ctx context.Context) (dbgen.Owner, error)
 	GetOwnerByID(ctx context.Context, id pgtype.UUID) (dbgen.Owner, error)
 	InsertOwner(ctx context.Context, arg dbgen.InsertOwnerParams) (dbgen.Owner, error)
@@ -51,8 +52,9 @@ type BootstrapInput struct {
 	Currency      string
 }
 
-// Bootstrap is the only way an owner comes to exist: there is no signup
-// endpoint and no default password. A second bootstrap is refused.
+// Bootstrap is the operator CLI path, also retained for deployment bootstrap.
+// Browser first-run setup uses Users.Setup to commit owner, user and garden
+// atomically. Neither path supplies a default password.
 func (s *OwnerService) Bootstrap(ctx context.Context, in BootstrapInput) (dbgen.Owner, dbgen.Workspace, error) {
 	n, err := s.store.CountOwners(ctx)
 	if err != nil {
@@ -178,6 +180,9 @@ func (s *OwnerService) Recover(ctx context.Context, password string) (dbgen.Owne
 			return dbgen.Owner{}, err
 		}
 	} else if !errors.Is(err, pgx.ErrNoRows) {
+		return dbgen.Owner{}, err
+	}
+	if err := s.store.RecoverPrimaryUser(ctx, owner.ID); err != nil {
 		return dbgen.Owner{}, err
 	}
 	s.log.Info("auth.owner_recovery", "owner_id", uuidString(owner.ID))

@@ -146,3 +146,15 @@ as passing).
 | 2026-11-11 | PUB01 | ACCEPTED | Private dodgerbluee/canopy created from clean source; no private development history. Zero-leak scan, clean generation, 477 frontend/all Go tests, and complete GitHub v1.0.0 CI/smoke/AMD64+ARM64 publication succeed. Deployment bundle checksums verified; latest not promoted. Evidence: `.artifacts/agents/PUB01/`. |
 
 | 2026-11-12 | DEP02 | ACCEPTED | Published combined app image v1.0.1 for AMD64/ARM64 with two-service Compose. Local queued photo/restart/receipt checks and GitHub full CI/smoke/publication pass; downloaded release checksums, revision and app digest verified. Evidence: `.artifacts/agents/DEP02/`. |
+
+| 2026-11-12 | AUTH01 | ACCEPTED | Browser first-user setup, shared-garden users/roles and generic OIDC implemented. Backend integrations, signed OIDC negative cases, v16 migration, backup/restore, 485 Angular tests, production build, Playwright desktop/mobile/accessibility and combined-image queued-photo/restart smoke pass. Separate empty preview on 7081; live garden and published release unchanged. Evidence: `.artifacts/agents/AUTH01/`. |
+
+| 2026-11-12 | AUTH02 | ACCEPTED | Refined first-run setup spacing and header flow; production image build and read-only Playwright checks pass at four widths with zero axe violations. Docker preview refreshed on 7081 with existing data preserved. Evidence: `.artifacts/agents/AUTH02/`. |
+
+| 2026-11-12 | AUTH03 | ACCEPTED | Fixed setup theme initialization globally and before first paint; browser preference is the default and explicit overrides remain respected. Tightened mobile intro. 490 Angular tests, image build and browser theme/layout/accessibility checks pass. Preview refreshed on 7081 without data reset. Evidence: `.artifacts/agents/AUTH03/`. |
+
+| 2026-11-12 | AUTH04 | ACCEPTED | Redesigned setup as a modern single-column registration card with optional garden preferences. Five focused setup tests, production image build and desktop/mobile/theme/accessibility checks pass. Preview refreshed on 7081 without resetting data. Evidence: `.artifacts/agents/AUTH04/`. |
+
+| 2026-11-12 | AUTH05 | ACCEPTED | Removed registration name field; default display name is username. Ten-character account password policy synchronized across backend and frontend. Backend suites, 493 Angular tests, image build, browser checks and queued-photo/restart smoke pass. Preview refreshed on 7081. Evidence: `.artifacts/agents/AUTH05/`. |
+
+| 2026-11-12 | MIG01 | ACCEPTED | Migrated the actual 4311 garden to combined app + dedicated PostgreSQL; verified 23 table fingerprints, 408 original files and backup checksums. Restored-copy handover/private-photo/live-AI/export rehearsal and production worker jobs pass. Protected one-use registration opened for owner-chosen credentials; original runtime/data retained for rollback. Evidence: `.artifacts/agents/MIG01/`. |

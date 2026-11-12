@@ -11,3 +11,7 @@
 **/*.pem
 **/*.key
 server/testdata
+
+**/test-results
+**/.pw-output
+**/.pw-output-e2e

@@ -1,11 +1,13 @@
 -- name: InsertSession :one
-INSERT INTO sessions (id, owner_id, token_hash, csrf_token, expires_at)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO sessions (id, owner_id, token_hash, csrf_token, expires_at, user_id)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING *;
 
 -- name: GetSessionByTokenHash :one
-SELECT * FROM sessions
-WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > now();
+SELECT s.* FROM sessions s
+WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > now()
+AND NOT EXISTS (SELECT 1 FROM auth_users u
+  WHERE u.id=coalesce(s.user_id,s.owner_id) AND u.disabled);
 
 -- name: TouchSession :exec
 UPDATE sessions SET last_seen_at = now() WHERE id = $1;

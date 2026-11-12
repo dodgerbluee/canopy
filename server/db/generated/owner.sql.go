@@ -80,6 +80,16 @@ func (q *Queries) InsertOwner(ctx context.Context, arg InsertOwnerParams) (Owner
 	return i, err
 }
 
+const recoverPrimaryUser = `-- name: RecoverPrimaryUser :exec
+WITH closed AS (UPDATE registration_handover SET consumed_at=now() WHERE registration_handover.owner_id=$1 AND consumed_at IS NULL)
+UPDATE auth_users SET disabled=false,role='ADMIN' WHERE auth_users.owner_id=$1 AND is_primary
+`
+
+func (q *Queries) RecoverPrimaryUser(ctx context.Context, ownerID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, recoverPrimaryUser, ownerID)
+	return err
+}
+
 const updateOwnerPassword = `-- name: UpdateOwnerPassword :one
 UPDATE owner SET password_hash = $1
 WHERE id = $2

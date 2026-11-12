@@ -20,6 +20,8 @@ manifest = {'version': version, 'revision': os.environ['GITHUB_SHA'], 'images': 
 (out/'images.json').write_text(json.dumps(manifest, indent=2)+'\n')
 with tarfile.open(out/f'canopy-{version}-deploy.tar.gz', 'w:gz') as archive:
     compose = (root/'deploy/compose.yaml').read_text()
+    compose = re.sub(r'(\$\{CANOPY_IMAGE_PREFIX:-)[^}]+(\})', lambda m: m[1]+prefix+m[2], compose)
+    compose = re.sub(r'(\$\{CANOPY_VERSION:-)[^}]+(\})', lambda m: m[1]+version+m[2], compose)
     data = compose.encode()
     info = tarfile.TarInfo('compose.yaml'); info.size = len(data); info.mode = 0o644
     archive.addfile(info, io.BytesIO(data))

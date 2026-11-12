@@ -12,8 +12,10 @@ import (
 )
 
 const getSessionByTokenHash = `-- name: GetSessionByTokenHash :one
-SELECT id, owner_id, token_hash, csrf_token, expires_at, revoked_at, last_seen_at, created_at FROM sessions
+SELECT s.id, s.owner_id, s.token_hash, s.csrf_token, s.expires_at, s.revoked_at, s.last_seen_at, s.created_at, s.user_id FROM sessions s
 WHERE token_hash = $1 AND revoked_at IS NULL AND expires_at > now()
+AND NOT EXISTS (SELECT 1 FROM auth_users u
+  WHERE u.id=coalesce(s.user_id,s.owner_id) AND u.disabled)
 `
 
 func (q *Queries) GetSessionByTokenHash(ctx context.Context, tokenHash string) (Session, error) {
@@ -28,14 +30,15 @@ func (q *Queries) GetSessionByTokenHash(ctx context.Context, tokenHash string) (
 		&i.RevokedAt,
 		&i.LastSeenAt,
 		&i.CreatedAt,
+		&i.UserID,
 	)
 	return i, err
 }
 
 const insertSession = `-- name: InsertSession :one
-INSERT INTO sessions (id, owner_id, token_hash, csrf_token, expires_at)
-VALUES ($1, $2, $3, $4, $5)
-RETURNING id, owner_id, token_hash, csrf_token, expires_at, revoked_at, last_seen_at, created_at
+INSERT INTO sessions (id, owner_id, token_hash, csrf_token, expires_at, user_id)
+VALUES ($1, $2, $3, $4, $5, $6)
+RETURNING id, owner_id, token_hash, csrf_token, expires_at, revoked_at, last_seen_at, created_at, user_id
 `
 
 type InsertSessionParams struct {
@@ -44,6 +47,7 @@ type InsertSessionParams struct {
 	TokenHash string
 	CsrfToken string
 	ExpiresAt pgtype.Timestamptz
+	UserID    pgtype.UUID
 }
 
 func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) (Session, error) {
@@ -53,6 +57,7 @@ func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) (S
 		arg.TokenHash,
 		arg.CsrfToken,
 		arg.ExpiresAt,
+		arg.UserID,
 	)
 	var i Session
 	err := row.Scan(
@@ -64,6 +69,7 @@ func (q *Queries) InsertSession(ctx context.Context, arg InsertSessionParams) (S
 		&i.RevokedAt,
 		&i.LastSeenAt,
 		&i.CreatedAt,
+		&i.UserID,
 	)
 	return i, err
 }
@@ -81,7 +87,7 @@ func (q *Queries) RevokeAllSessions(ctx context.Context, ownerID pgtype.UUID) er
 const revokeSession = `-- name: RevokeSession :one
 UPDATE sessions SET revoked_at = now()
 WHERE id = $1 AND owner_id = $2 AND revoked_at IS NULL
-RETURNING id, owner_id, token_hash, csrf_token, expires_at, revoked_at, last_seen_at, created_at
+RETURNING id, owner_id, token_hash, csrf_token, expires_at, revoked_at, last_seen_at, created_at, user_id
 `
 
 type RevokeSessionParams struct {
@@ -101,6 +107,7 @@ func (q *Queries) RevokeSession(ctx context.Context, arg RevokeSessionParams) (S
 		&i.RevokedAt,
 		&i.LastSeenAt,
 		&i.CreatedAt,
+		&i.UserID,
 	)
 	return i, err
 }

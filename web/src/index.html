@@ -1,14 +1,31 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>Canopy</title>
-  <base href="/">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/svg+xml" href="canopy-icon.svg">
-  <link rel="icon" href="canopy-icon.ico" sizes="any">
-</head>
-<body>
-  <app-root></app-root>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>Canopy</title>
+    <script>
+      // Apply the browser/explicit preference before styles paint, including setup.
+      (() => {
+        let saved;
+        try {
+          saved = localStorage.getItem('canopy-theme');
+        } catch {}
+        const theme =
+          saved === 'light' || saved === 'dark'
+            ? saved
+            : matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+      })();
+    </script>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="canopy-icon.svg" />
+    <link rel="icon" href="canopy-icon.ico" sizes="any" />
+  </head>
+  <body>
+    <app-root></app-root>
+  </body>
 </html>

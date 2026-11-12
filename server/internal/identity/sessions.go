@@ -78,6 +78,11 @@ func NewSessionManager(store SessionStore, ids platform.IDs, clock platform.Cloc
 // New issues a fresh session. Every login creates a new row (rotation):
 // tokens are never reused across logins.
 func (m *SessionManager) New(ctx context.Context, ownerID pgtype.UUID) (IssuedSession, error) {
+	return m.NewForUser(ctx, ownerID, pgtype.UUID{})
+}
+
+// NewForUser retains garden scoping while identifying the human using it.
+func (m *SessionManager) NewForUser(ctx context.Context, ownerID, userID pgtype.UUID) (IssuedSession, error) {
 	token, err := randomToken(m.rnd)
 	if err != nil {
 		return IssuedSession{}, err
@@ -89,6 +94,7 @@ func (m *SessionManager) New(ctx context.Context, ownerID pgtype.UUID) (IssuedSe
 	s, err := m.store.InsertSession(ctx, dbgen.InsertSessionParams{
 		ID:        m.ids.New(),
 		OwnerID:   ownerID,
+		UserID:    userID,
 		TokenHash: HashToken(token),
 		CsrfToken: csrf,
 		ExpiresAt: pgtype.Timestamptz{Time: m.clock.Now().Add(m.cfg.AbsoluteTimeout), Valid: true},

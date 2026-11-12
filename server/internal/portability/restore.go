@@ -195,6 +195,12 @@ func (s *Service) Restore(ctx context.Context, opt RestoreOptions) (RestoreSumma
 	tablesLoaded := 0
 	for _, name := range dumpTables {
 		blob := findEntry(entries, "db/"+name+".jsonl")
+		// Owner triggers bootstrap legacy archives; new archives restore exact users.
+		if name == "auth_users" && blob != nil {
+			if _, err := tx.Exec(ctx, "DELETE FROM auth_users"); err != nil {
+				return RestoreSummary{}, err
+			}
+		}
 		n, err := insertJSONL(ctx, tx, name, blob)
 		if err != nil {
 			return RestoreSummary{}, fmt.Errorf("restore %s: %w", name, err)
@@ -212,6 +218,10 @@ func (s *Service) Restore(ctx context.Context, opt RestoreOptions) (RestoreSumma
 			`UPDATE river_job SET state = 'available' WHERE state = 'running'`); err != nil {
 			return RestoreSummary{}, fmt.Errorf("reset running jobs: %w", err)
 		}
+	}
+	// Verify the restored hostname and encryption key before enabling SSO.
+	if _, err := tx.Exec(ctx, "UPDATE oidc_connections SET enabled=false,revision=revision+1"); err != nil {
+		return RestoreSummary{}, err
 	}
 	// Restored installations never reactivate copied agent bearer credentials.
 	if _, err := tx.Exec(ctx, `UPDATE agent_grants SET revoked_at=COALESCE(revoked_at,now()); UPDATE agent_credentials SET revoked_at=COALESCE(revoked_at,now()); UPDATE agent_actions SET state='REVOKED' WHERE state='PENDING'`); err != nil {

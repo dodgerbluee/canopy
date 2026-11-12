@@ -13,6 +13,7 @@ import (
 	"flag"
 	"fmt"
 	"log/slog"
+	"net/url"
 	"os"
 	"strings"
 
@@ -29,6 +30,7 @@ import (
 const usage = `usage:
   admin owner create  [--workspace NAME] [--timezone TZ] [--currency CUR] [--password-file PATH]
   admin owner recover [--password-file PATH]
+  admin owner handover --url ORIGIN --output PRIVATE_FILE
   admin backup   [--dest DIR] [--key-file PATH]
   admin restore  --archive PATH [--ledger PATH] [--key-file PATH]
 
@@ -57,7 +59,7 @@ func main() {
 }
 
 func runOwner(args []string) {
-	if len(args) < 1 || (args[0] != "create" && args[0] != "recover") {
+	if len(args) < 1 || (args[0] != "create" && args[0] != "recover" && args[0] != "handover") {
 		fmt.Fprintln(os.Stderr, usage)
 		os.Exit(2)
 	}
@@ -68,6 +70,8 @@ func runOwner(args []string) {
 	workspace := fs.String("workspace", "My garden", "workspace display name (create)")
 	timezone := fs.String("timezone", "UTC", "workspace timezone (create)")
 	currency := fs.String("currency", "USD", "workspace default currency (create)")
+	output := fs.String("output", "", "private output file for a one-use registration link")
+	publicURL := fs.String("url", os.Getenv("CANOPY_PUBLIC_URL"), "public app origin for registration handover")
 	if err := fs.Parse(args[1:]); err != nil {
 		os.Exit(2)
 	}
@@ -83,6 +87,35 @@ func runOwner(args []string) {
 
 	ctx := context.Background()
 	switch verb {
+	case "handover":
+		origin := strings.TrimSuffix(*publicURL, "/")
+		u, err := url.Parse(origin)
+		if err != nil || u.Hostname() == "" || u.User != nil || u.Path != "" || u.RawQuery != "" || u.Fragment != "" || (u.Scheme != "http" && u.Scheme != "https") || *output == "" {
+			fmt.Fprintln(os.Stderr, "handover requires --url ORIGIN and --output PRIVATE_FILE")
+			os.Exit(2)
+		}
+		file, err := os.OpenFile(*output, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0600)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "could not create private link file")
+			os.Exit(1)
+		}
+		users := identity.NewUsers(pool, sessions)
+		token, err := users.PrepareHandover(ctx)
+		if err == nil {
+			_, err = file.WriteString(origin + "/setup/claim#" + token + "\n")
+		}
+		if err == nil {
+			err = file.Sync()
+		}
+		closeErr := file.Close()
+		if err == nil {
+			err = closeErr
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "handover failed; use owner recover if local access needs restoring")
+			os.Exit(1)
+		}
+		fmt.Println("One-use registration link written to the private output file; expires in 24 hours. Existing sessions were revoked.")
 	case "create":
 		pw, err := readPassword(*passwordFile, "Owner password: ")
 		if err != nil {

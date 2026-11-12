@@ -1,0 +1,153 @@
+:host {
+  display: block;
+  margin-bottom: var(--sp-4);
+}
+.account-section {
+  max-width: 900px;
+  display: grid;
+  gap: var(--sp-6);
+}
+header h2,
+h3,
+p {
+  margin: 0;
+}
+header,
+.section-title > div,
+.person-info {
+  display: grid;
+  gap: var(--sp-1);
+}
+.account-summary,
+.account-actions,
+.section-title,
+.connection-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+}
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-fg);
+  display: grid;
+  place-items: center;
+  font-weight: 650;
+}
+.account-summary h3 {
+  margin-bottom: var(--sp-1);
+}
+.subsection {
+  border-top: 1px solid var(--border-decorative);
+  padding-top: var(--sp-6);
+  display: grid;
+  gap: var(--sp-4);
+}
+.section-title {
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.section-title > div {
+  flex: 1;
+  min-width: 200px;
+}
+.section-title .btn {
+  flex-shrink: 0;
+}
+.people-list {
+  display: grid;
+}
+.person-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding-block: var(--sp-3);
+  border-bottom: 1px solid var(--border-decorative);
+}
+.person-info {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.callback {
+  display: grid;
+  gap: var(--sp-2);
+  background: var(--surface-base);
+  border: 1px solid var(--border-decorative);
+  border-radius: var(--radius-field);
+  padding: var(--sp-3);
+}
+.callback code,
+.connection-summary .caption {
+  overflow-wrap: anywhere;
+}
+form {
+  display: grid;
+  gap: var(--sp-4);
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-4);
+}
+.field {
+  display: grid;
+  gap: var(--sp-2);
+}
+.role-set {
+  display: flex;
+  gap: var(--sp-2);
+  border: 0;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+}
+.role-set legend {
+  margin-bottom: var(--sp-2);
+}
+.role-set label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-field);
+  min-height: 44px;
+  cursor: pointer;
+}
+.role-set label:has(input:checked) {
+  background: var(--surface-base);
+  border-color: var(--accent);
+}
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+}
+input[type='checkbox'],
+input[type='radio'] {
+  accent-color: var(--accent);
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.notice {
+  border-left: 3px solid var(--accent);
+  padding: var(--sp-3);
+  background: var(--surface-base);
+}
+@media (max-width: 540px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .person-row {
+    gap: var(--sp-2);
+  }
+  .person-info {
+    font-size: var(--fs-small);
+  }
+}

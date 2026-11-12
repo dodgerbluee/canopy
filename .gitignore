@@ -18,3 +18,8 @@ __pycache__/
 /release/
 /digests/
 /candidate/
+
+# Disposable browser output, never source release content.
+/web/test-results/
+/web/.pw-output/
+/web/.pw-output-e2e/

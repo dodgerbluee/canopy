@@ -29,14 +29,16 @@ type Auth struct {
 	limiter  *identity.Limiter
 	cfg      identity.SessionConfig
 	log      *slog.Logger
+	users    *identity.Users
+	oidc     *identity.OIDC
 }
 
 func NewAuth(owners *identity.OwnerService, sessions *identity.SessionManager, limiter *identity.Limiter, cfg identity.SessionConfig, log *slog.Logger) *Auth {
 	return &Auth{owners: owners, sessions: sessions, limiter: limiter, cfg: cfg, log: log}
 }
 
-// Register mounts the auth surface plus the private-content guards. There
-// is deliberately no signup or public reset route. The media/export
+// Register mounts password/session endpoints and private-content guards.
+// EnableUsers adds first-run setup, administration and OIDC. The media/export
 // handlers are guards only: later tasks attach byte handlers behind the
 // same RequirePrincipal, and 501 is honest PENDING semantics, never a
 // success stub.
@@ -58,6 +60,8 @@ type Principal struct {
 	WorkspaceID pgtype.UUID
 	SessionID   pgtype.UUID
 	CSRFToken   string
+	UserID      pgtype.UUID
+	Role        string
 }
 
 type principalKey struct{}
@@ -83,7 +87,18 @@ func (a *Auth) RequirePrincipal(next http.HandlerFunc) http.HandlerFunc {
 			platform.WriteProblem(w, r, a.log, http.StatusInternalServerError, "INTERNAL", "Internal server error")
 			return
 		}
+		userID, role := sess.OwnerID, "ADMIN"
+		if a.users != nil {
+			u, err := a.users.ForSession(r.Context(), sess)
+			if err != nil || u.Disabled {
+				platform.WriteProblem(w, r, a.log, 401, "UNAUTHENTICATED", "Not authenticated")
+				return
+			}
+			userID = pgtype.UUID{Bytes: uuid.MustParse(u.ID), Valid: true}
+			role = u.Role
+		}
 		ctx := context.WithValue(r.Context(), principalKey{}, Principal{
+			UserID: userID, Role: role,
 			OwnerID:     sess.OwnerID,
 			WorkspaceID: ws.ID,
 			SessionID:   sess.ID,
@@ -116,12 +131,21 @@ func (a *Auth) handleLogin(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, 1<<16)
 	var body struct {
 		Password string `json:"password"`
+		Username string `json:"username"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil && !errors.Is(err, io.EOF) {
 		platform.WriteProblem(w, r, a.log, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
 		return
 	}
-	owner, sess, err := a.owners.Login(r.Context(), body.Password)
+	var sess identity.IssuedSession
+	var owner dbgen.Owner
+	var err error
+	if a.users != nil {
+		_, sess, err = a.users.Login(r.Context(), body.Username, body.Password)
+		owner.ID = sess.Session.OwnerID
+	} else {
+		owner, sess, err = a.owners.Login(r.Context(), body.Password)
+	}
 	if errors.Is(err, identity.ErrInvalidCredential) {
 		// generic for unknown owner AND wrong password; no enumeration
 		a.owners.LogLoginFailure(source)
@@ -138,7 +162,7 @@ func (a *Auth) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.setCookie(w, sess.Token)
-	a.writeSession(w, sess.Session, sess.CSRFToken, ws.ID)
+	a.writeSession(r.Context(), w, sess.Session, sess.CSRFToken, ws.ID)
 }
 
 func (a *Auth) handleSession(w http.ResponseWriter, r *http.Request) {
@@ -153,7 +177,7 @@ func (a *Auth) handleSession(w http.ResponseWriter, r *http.Request) {
 	}
 	// the CSRF synchronizer token is returned only after authentication
 	// and must remain retrievable after a page reload (03-contracts)
-	a.writeSession(w, sess, sess.CsrfToken, ws.ID)
+	a.writeSession(r.Context(), w, sess, sess.CsrfToken, ws.ID)
 }
 
 func (a *Auth) handleLogout(w http.ResponseWriter, r *http.Request) {
@@ -179,12 +203,18 @@ func (a *Auth) handlePassword(w http.ResponseWriter, r *http.Request) {
 		platform.WriteProblem(w, r, a.log, http.StatusBadRequest, "INVALID_REQUEST", "Invalid request body")
 		return
 	}
-	_, sess, err := a.owners.ChangePassword(r.Context(), p.OwnerID, body.CurrentPassword, body.NewPassword)
+	var sess identity.IssuedSession
+	var err error
+	if a.users != nil {
+		sess, err = a.users.ChangePassword(r.Context(), p.OwnerID, p.UserID, body.CurrentPassword, body.NewPassword)
+	} else {
+		_, sess, err = a.owners.ChangePassword(r.Context(), p.OwnerID, body.CurrentPassword, body.NewPassword)
+	}
 	switch {
 	case errors.Is(err, identity.ErrInvalidCredential):
 		platform.WriteProblem(w, r, a.log, http.StatusUnauthorized, "INVALID_CREDENTIALS", "Invalid credentials")
 		return
-	case errors.Is(err, identity.ErrInvalidPassword):
+	case errors.Is(err, identity.ErrInvalidPassword), errors.Is(err, identity.ErrInput):
 		// generic rejection; the attempted password never reaches client or log
 		platform.WriteProblem(w, r, a.log, http.StatusBadRequest, "INVALID_REQUEST", "Password rejected")
 		return
@@ -193,7 +223,7 @@ func (a *Auth) handlePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	a.setCookie(w, sess.Token)
-	a.writeSession(w, sess.Session, sess.CSRFToken, p.WorkspaceID)
+	a.writeSession(r.Context(), w, sess.Session, sess.CSRFToken, p.WorkspaceID)
 }
 
 func (a *Auth) notImplemented(w http.ResponseWriter, r *http.Request) {
@@ -247,18 +277,29 @@ func (a *Auth) originOK(r *http.Request) bool {
 }
 
 type sessionResponse struct {
-	Authenticated bool   `json:"authenticated"`
-	CSRFToken     string `json:"csrfToken,omitempty"`
-	ExpiresAt     string `json:"expiresAt,omitempty"`
-	WorkspaceID   string `json:"workspaceId,omitempty"`
+	Authenticated bool           `json:"authenticated"`
+	CSRFToken     string         `json:"csrfToken,omitempty"`
+	ExpiresAt     string         `json:"expiresAt,omitempty"`
+	WorkspaceID   string         `json:"workspaceId,omitempty"`
+	User          *identity.User `json:"user,omitempty"`
 }
 
-func (a *Auth) writeSession(w http.ResponseWriter, s dbgen.Session, csrf string, workspaceID pgtype.UUID) {
+func (a *Auth) writeSession(ctx context.Context, w http.ResponseWriter, s dbgen.Session, csrf string, workspaceID pgtype.UUID) {
 	expires := ""
 	if s.ExpiresAt.Valid {
 		expires = s.ExpiresAt.Time.UTC().Format(time.RFC3339)
 	}
+	var user *identity.User
+	if a.users != nil {
+		u, err := a.users.ForSession(ctx, s)
+		if err != nil {
+			w.WriteHeader(500)
+			return
+		}
+		user = &u
+	}
 	writeJSON(w, http.StatusOK, sessionResponse{
+		User:          user,
 		Authenticated: true,
 		CSRFToken:     csrf,
 		ExpiresAt:     expires,
@@ -292,6 +333,7 @@ func (a *Auth) clearCookie(w http.ResponseWriter) {
 }
 
 func writeJSON(w http.ResponseWriter, status int, v any) {
+	w.Header().Set("Cache-Control", "no-store")
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(v)

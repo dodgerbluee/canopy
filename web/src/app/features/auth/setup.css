@@ -1,0 +1,158 @@
+:host {
+  display: block;
+}
+.registration-page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-8) var(--sp-4);
+  gap: var(--sp-4);
+}
+.setup-card {
+  width: min(440px, 100%);
+  padding: var(--sp-8);
+  background: var(--surface-base);
+  border: 1px solid var(--border-decorative);
+  border-radius: var(--radius-hero);
+  box-shadow: var(--shadow);
+}
+.registration-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  justify-content: center;
+  font-size: var(--fs-body);
+  font-weight: 750;
+  letter-spacing: -0.03em;
+  margin-bottom: var(--sp-6);
+}
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-field);
+  background: var(--accent);
+  color: var(--accent-fg);
+}
+.registration-heading {
+  text-align: center;
+  margin-bottom: var(--sp-6);
+}
+.registration-heading h1 {
+  margin: 0 0 var(--sp-2);
+  font-family: var(--font-ui);
+  font-size: var(--fs-h2);
+  font-weight: 650;
+  letter-spacing: -0.04em;
+  line-height: var(--lh-h2);
+}
+.registration-heading p {
+  margin: 0;
+  line-height: var(--lh-small);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+}
+form {
+  display: grid;
+  gap: var(--sp-6);
+}
+.account-fields,
+.preferences-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-4);
+}
+.setup-field {
+  display: grid;
+  min-width: 0;
+  gap: var(--sp-2);
+}
+.setup-field label {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  line-height: var(--lh-small);
+}
+.setup-field .field-hint {
+  margin: calc(-1 * var(--sp-1)) 0 0;
+}
+.garden-preferences {
+  border-block: 1px solid var(--border-decorative);
+}
+.garden-preferences summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding-block: var(--sp-3);
+  min-height: 44px;
+  font-size: var(--fs-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+.garden-preferences summary::-webkit-details-marker {
+  display: none;
+}
+.preferences-note {
+  display: block;
+  line-height: var(--lh-caption);
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  margin-top: var(--sp-1);
+}
+.disclosure-arrow {
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  margin-right: var(--sp-1);
+}
+details[open] .disclosure-arrow {
+  transform: rotate(225deg);
+}
+.preferences-fields {
+  padding-block: var(--sp-2) var(--sp-4);
+}
+.create-account {
+  width: 100%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+}
+.field-error {
+  margin: 0;
+}
+.registration-footer {
+  text-align: center;
+  margin: var(--sp-6) 0 0;
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+.registration-footer a {
+  font-weight: 650;
+  margin-left: var(--sp-1);
+}
+.registration-note {
+  margin: 0;
+  line-height: var(--lh-caption);
+  max-width: 36ch;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+}
+@media (max-width: 540px) {
+  .registration-page {
+    justify-content: flex-start;
+    padding-block: var(--sp-6);
+  }
+  .setup-card {
+    padding: var(--sp-6);
+  }
+}

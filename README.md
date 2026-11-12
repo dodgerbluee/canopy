@@ -180,8 +180,7 @@ Authenticated byte routes are `PUT /agent/uploads/{assetID}` and `GET /agent/exp
 
 ## Publishing and self-hosted deployment
 
-GitHub Actions now support Docked-style development images, versioned releases
-and manual promotion of an existing stable image set to `latest`. The published
-server image contains matching API/worker/operator binaries; separate web and
-media images complete the stack. See [publishing and deployment](docs/deployment.md)
-for GHCR setup, the Compose bundle, first-owner setup, remote MCP and upgrades.
+The combined `ghcr.io/dodgerbluee/canopy` image includes the frontend, API,
+worker, migrations and photo/receipt tools. Deployment is two Compose services:
+Canopy and PostgreSQL. See [deployment](docs/deployment.md) for Portainer,
+initial-password setup and the existing sandbox mounts.

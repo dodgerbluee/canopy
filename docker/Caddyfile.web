@@ -1,12 +1,15 @@
 {
 	admin off
+	servers {
+		trusted_proxies static private_ranges
+	}
 }
 
 {$CANOPY_SITE:localhost} {
 	encode zstd gzip
 	@api path /api/* /mcp /agent/* /healthz /readyz
 	handle @api {
-		reverse_proxy {$CANOPY_API_UPSTREAM:api:8080} {
+		reverse_proxy {$CANOPY_API_UPSTREAM:127.0.0.1:8080} {
 			flush_interval -1
 		}
 	}

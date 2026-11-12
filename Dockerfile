@@ -1,4 +1,3 @@
-# syntax=docker/dockerfile:1
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS go-build
 WORKDIR /src/server
 COPY server/go.mod server/go.sum ./
@@ -20,17 +19,54 @@ COPY web/ ./
 COPY contracts/generated/ /src/contracts/generated/
 RUN npm run build -- --output-path=/out
 
-# API and worker deliberately share one release artifact, including matching
-# migration/admin binaries. Docker CLI is used only by the isolated codec seam.
-FROM alpine:3.22 AS server
-RUN apk add --no-cache ca-certificates tzdata docker-cli postgresql17-client \
-    && addgroup -g 10001 canopy && adduser -D -H -u 10001 -G canopy canopy
-COPY --from=go-build /out/ /usr/local/bin/
-USER 10001:10001
-WORKDIR /var/lib/canopy
-EXPOSE 8080
-ENTRYPOINT ["/usr/local/bin/api"]
+FROM caddy:2-alpine AS caddy
+FROM docker:cli AS dockercli
 
-FROM caddy:2-alpine AS web
+# Codec packages match docker/media.Dockerfile. Tests keep that image;
+# this deployment image carries the same tools so the existing sandbox
+# can run them by replacing CMD. There is intentionally no ENTRYPOINT.
+FROM ubuntu:24.04@sha256:fe81560990fae86dc4743202b2cb4d3df98d0bcf949173cecef15ce1127ef852
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      libvips-tools \
+      libheif1 \
+      libheif-plugin-libde265 \
+      tesseract-ocr \
+      poppler-utils \
+      ca-certificates \
+      tzdata \
+      wget \
+ && wget -q -O /usr/share/keyrings/postgresql.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc \
+ && echo 'deb [signed-by=/usr/share/keyrings/postgresql.asc] https://apt.postgresql.org/pub/repos/apt noble-pgdg main' > /etc/apt/sources.list.d/postgresql.list \
+ && apt-get update && apt-get install -y --no-install-recommends postgresql-client-17 \
+ && rm -rf /var/lib/apt/lists/* \
+ && groupadd --gid 10001 canopy \
+ && useradd --uid 10001 --gid canopy --home-dir /var/lib/canopy --no-create-home --shell /usr/sbin/nologin canopy \
+ && install -d -o 10001 -g 10001 /var/lib/canopy /work
+
+COPY --from=go-build /out/ /usr/local/bin/
+COPY --from=caddy /usr/bin/caddy /usr/local/bin/caddy
+COPY --from=dockercli /usr/local/bin/docker /usr/local/bin/docker
+COPY docker/canopy-run /usr/local/bin/canopy-run
 COPY --from=web-build /out/browser/ /srv/
 COPY docker/Caddyfile.web /etc/caddy/Caddyfile
+RUN chmod 755 /usr/local/bin/canopy-run /usr/local/bin/caddy /usr/local/bin/docker \
+ && caddy version \
+ && docker --version \
+ && setpriv --reuid=10001 --regid=10001 --groups 10001,0 true
+
+ENV CANOPY_ENV=dev \
+    CANOPY_SITE=http://:80 \
+    CANOPY_STORAGE_ROOT=/var/lib/canopy \
+    CANOPY_TRUST_PROXY=1 \
+    CANOPY_MCP_ENABLED=true \
+    TMPDIR=/srv/canopy/work \
+    XDG_CONFIG_HOME=/config \
+    XDG_DATA_HOME=/data \
+    CANOPY_API_UPSTREAM=127.0.0.1:8080
+WORKDIR /work
+EXPOSE 80 443
+HEALTHCHECK --start-period=30s --interval=10s --timeout=5s --retries=18 CMD wget -q -O /dev/null http://127.0.0.1/readyz || exit 1
+CMD ["/usr/local/bin/canopy-run"]

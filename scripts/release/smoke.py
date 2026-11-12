@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Exercise the actual release images in disposable volumes/project/storage.
-Requires local canopy-release-test-{server,web,media}:smoke images.
+"""Exercise the release image in disposable volumes/project/storage.
+Requires the local canopy-release-test:smoke image.
 Never connects to the development database or reuses its credentials.
 """
 import http.cookiejar
@@ -33,20 +33,20 @@ def port():
 
 http_port, https_port = port(), port()
 socket_path=os.environ.get('DOCKER_SOCKET','/var/run/docker.sock')
-socket_group=subprocess.check_output(['docker','run','--rm','-v',socket_path+':/socket','--entrypoint','stat','canopy-release-test-server:smoke','-c','%g','/socket'],text=True).strip()
-base = f'https://localhost:{https_port}'
+socket_group=subprocess.check_output(['docker','run','--rm','-v',socket_path+':/socket','--entrypoint','stat','canopy-release-test:smoke','-c','%g','/socket'],text=True).strip()
+base = f'http://localhost:{http_port}'
 config = temp/'.env'
 config.write_text(f'''CANOPY_IMAGE_PREFIX=canopy-release-test
 CANOPY_VERSION=smoke
-CANOPY_SITE=localhost
+CANOPY_PORT={http_port}
+CANOPY_INITIAL_PASSWORD={password}
+CANOPY_PUBLIC_URL={base}
 CANOPY_WORK_DIR={work}
 POSTGRES_PASSWORD={database_password}
 DOCKER_GID={socket_group}
 DOCKER_SOCKET={os.environ.get('DOCKER_SOCKET','/var/run/docker.sock')}
 HTTP_PORT={http_port}
 HTTPS_PORT={https_port}
-CANOPY_MCP_PUBLIC_URL={base}/mcp
-CANOPY_MCP_ALLOWED_HOSTS=localhost:{https_port}
 ''')
 os.chmod(config,0o600)
 compose = ['docker','compose','-p',project,'--env-file',str(config),'-f',str(root/'deploy/compose.yaml')]
@@ -59,9 +59,7 @@ def dc(*args):
     return result.stdout
 
 cookies = http.cookiejar.CookieJar()
-# Only this disposable localhost certificate is untrusted. Production uses
-# Caddy's ACME TLS and PostgreSQL verify-full; no deploy setting is weakened.
-client = urllib.request.build_opener(urllib.request.HTTPSHandler(context=ssl._create_unverified_context()), urllib.request.HTTPCookieProcessor(cookies))
+client = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cookies))
 csrf = ''
 
 def request(path, data=None, method=None, content_type='application/json'):
@@ -83,8 +81,8 @@ def gql(query,variables=None,field=None):
 
 try:
     dc('config','-q')
+    assert set(json.loads(dc('config','--format','json'))['services']) == {'canopy','postgres'}
     dc('up','-d','--wait','--wait-timeout','180')
-    dc('run','--rm','-T','--user','0:0','-v',str(temp/'owner-password')+':/run/password:ro','admin','owner','create','--workspace','Release smoke','--timezone','America/Chicago','--password-file','/run/password')
     # Anonymous session errors must be API JSON/status, not the SPA fallback.
     session=json.loads(request('/api/auth/login',{'password':password}))
     csrf=session['csrfToken']
@@ -113,8 +111,22 @@ try:
     assert photo['dateSource']=='EXIF' and photo['takenAt']
     preview=request('/api/media/'+asset+'/thumb')
     assert preview.startswith(b'\xff\xd8')
-    result={'compose':True,'productionConfig':True,'databaseTLS':'verify-full','ownerLogin':True,'spaDeepLink':True,'mcpRequiresCredential':True,'queuedPhotoProcessed':True,'originalCaptureDate':True,'privateDerivative':True}
-    report=Path(os.environ.get('CANOPY_RELEASE_SMOKE_REPORT',str(root/'.artifacts/agents/DEP01/smoke.json')))
+    container_id=dc('ps','-q','canopy').decode().strip()
+    dc('exec','-T','canopy','/bin/bash','-ec', 'for file in /proc/[0-9]*/comm; do read -r name < "$file" || continue; if [ "$name" = worker ]; then pid=${file%/comm}; kill -TERM "${pid##*/}"; break; fi; done')
+    deadline=time.monotonic()+90
+    while True:
+        count=int(subprocess.check_output(['docker','inspect','--format','{{.RestartCount}}',container_id]))
+        if count>0:
+            try:
+                request('/readyz')
+                break
+            except Exception:pass
+        if time.monotonic()>deadline:raise RuntimeError('Bundled worker failure was not recovered')
+        time.sleep(1)
+    session=json.loads(request('/api/auth/login',{'password':password}));csrf=session['csrfToken']
+    assert request('/api/media/'+asset+'/thumb').startswith(b'\xff\xd8')
+    result={'compose':True,'twoServices':True,'bundledFrontendAPIWorker':True,'ownerLogin':True,'spaDeepLink':True,'mcpRequiresCredential':True,'queuedPhotoProcessed':True,'originalCaptureDate':True,'privateDerivative':True,'supervisedRestart':True,'bootstrapSurvivesRestart':True}
+    report=Path(os.environ.get('CANOPY_RELEASE_SMOKE_REPORT',str(root/'.artifacts/agents/DEP02/smoke.json')))
     report.parent.mkdir(parents=True,exist_ok=True);report.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))
 finally:
@@ -122,5 +134,5 @@ finally:
     finally:
         # The UID-10001 worker owns its temp directory. Clear only this
         # generated smoke bind mount before removing its enclosing temp dir.
-        subprocess.run(['docker','run','--rm','--user','0:0','-v',str(work)+':/work','--entrypoint','/bin/sh','canopy-release-test-server:smoke','-ec','find /work -mindepth 1 -delete'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+        subprocess.run(['docker','run','--rm','--user','0:0','-v',str(work)+':/work','--entrypoint','/bin/sh','canopy-release-test:smoke','-ec','find /work -mindepth 1 -delete'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
         shutil.rmtree(temp)

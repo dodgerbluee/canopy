@@ -33,53 +33,23 @@ jobs:
   smoke:
     needs: [prepare, check]
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v6
       - uses: docker/setup-buildx-action@v4
       - uses: docker/build-push-action@v7
         with:
           context: .
-          target: server
           load: true
-          tags: canopy-release-test-server:smoke
-          cache-from: type=gha,scope=server
-          cache-to: type=gha,scope=server,mode=max
-      - uses: docker/build-push-action@v7
-        with:
-          context: .
-          target: web
-          load: true
-          tags: canopy-release-test-web:smoke
-          cache-from: type=gha,scope=web
-          cache-to: type=gha,scope=web,mode=max
-      - uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: docker/media.Dockerfile
-          load: true
-          tags: canopy-release-test-media:smoke
-          cache-from: type=gha,scope=media
-          cache-to: type=gha,scope=media,mode=max
+          tags: canopy-release-test:smoke
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,scope=app,mode=max
       - name: Verify actual deployment and queued photo processing
         run: python3 scripts/release/smoke.py
   images:
     needs: [prepare, smoke]
     runs-on: ubuntu-latest
-    timeout-minutes: 45
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - component: server
-            file: Dockerfile
-            target: server
-          - component: web
-            file: Dockerfile
-            target: web
-          - component: media
-            file: docker/media.Dockerfile
-            target: ""
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v6
       - uses: docker/setup-qemu-action@v4
@@ -92,10 +62,9 @@ jobs:
       - name: Refuse to overwrite an existing version
         env:
           PREFIX: ${{ needs.prepare.outputs.prefix }}
-          COMPONENT: ${{ matrix.component }}
           VERSION: ${{ needs.prepare.outputs.version }}
         run: |
-          if docker buildx imagetools inspect "$PREFIX-$COMPONENT:$VERSION" >/dev/null 2>&1; then
+          if docker buildx imagetools inspect "$PREFIX:$VERSION" >/dev/null 2>&1; then
             echo "Version already exists; use a new version or rerun only failed jobs."
             exit 1
           fi
@@ -104,28 +73,25 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           context: .
-          file: ${{ matrix.file }}
-          target: ${{ matrix.target }}
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ needs.prepare.outputs.prefix }}-${{ matrix.component }}:${{ needs.prepare.outputs.version }}
+          tags: ${{ needs.prepare.outputs.prefix }}:${{ needs.prepare.outputs.version }}
           labels: |
             org.opencontainers.image.source=https://github.com/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
             org.opencontainers.image.version=${{ needs.prepare.outputs.version }}
           provenance: mode=max
           sbom: true
-          cache-from: type=gha,scope=${{ matrix.component }}
-          cache-to: type=gha,scope=${{ matrix.component }},mode=max
+          cache-from: type=gha,scope=app
+          cache-to: type=gha,scope=app,mode=max
       - name: Record digest
         env:
           DIGEST: ${{ steps.build.outputs.digest }}
-          COMPONENT: ${{ matrix.component }}
-        run: printf '%s\n' "$DIGEST" > "$COMPONENT.digest"
+        run: printf '%s\n' "$DIGEST" > app.digest
       - uses: actions/upload-artifact@v4
         with:
-          name: image-${{ matrix.component }}
-          path: ${{ matrix.component }}.digest
+          name: image-app
+          path: app.digest
   bundle:
     needs: [prepare, images]
     runs-on: ubuntu-latest
@@ -151,10 +117,8 @@ jobs:
       - name: Advance dev only after the whole image set succeeds
         if: inputs.channel == 'dev'
         run: |
-          for component in server web media; do
-            digest=$(cat "digests/$component.digest")
-            docker buildx imagetools create --tag "$PREFIX-$component:dev" "$PREFIX-$component@$digest"
-          done
+          digest=$(cat digests/app.digest)
+          docker buildx imagetools create --tag "$PREFIX:dev" "$PREFIX@$digest"
       - uses: actions/upload-artifact@v4
         with:
           name: canopy-release

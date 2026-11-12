@@ -875,3 +875,13 @@ Own: `web/src/app/features/today/today.spec.ts`, `server/internal/identity/passw
 Acceptance: Create private dodgerbluee/canopy repository, publish credential/data-free source snapshot, tag v1.0.0 and verify GitHub release build. Investigate and fix workflow failures as needed; preserve live local garden.
 
 Verify: Secret scan, reproducible generation, plan/boundary, build/test gates and actual GitHub Actions result/artifacts.
+
+### DEP02 — Bundle existing local app into one deployment image
+
+Depends: PUB01.
+
+Own: `README.md`, `Dockerfile`, `docker/`, `deploy/`, `scripts/release/`, `.github/workflows/`, `docs/deployment.md`, `docs/plan/tasks/DEP02.md`, `.artifacts/agents/DEP02/`. Integrator owns graph and ledger.
+
+Acceptance: Package the existing frontend/API/worker/migration/codec tools in one application image, with a two-service Compose using PostgreSQL. Preserve current local app behavior and existing Docker-based codec isolation. No application/authentication/kernel sandbox redesign. Publish and verify the bundled image for Portainer.
+
+Verify: Actual bundled startup/migrations/login/queued photo/receipt processing; supervised child failure/shutdown; Compose validation; release workflow lint and publication.

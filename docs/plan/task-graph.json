@@ -512,7 +512,7 @@
         "M12",
         "UI28",
         "UI29",
-        "PUB01"
+        "DEP02"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -906,6 +906,14 @@
         "DEP01"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "DEP02": {
+      "title": "Bundle existing local app into one deployment image",
+      "dependsOn": [
+        "PUB01"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

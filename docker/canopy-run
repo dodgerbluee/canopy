@@ -1,0 +1,76 @@
+#!/bin/bash
+# Run the unchanged API, worker and frontend together. There is no image
+# ENTRYPOINT, so codec jobs replace CMD directly and remain Docker-sandboxed.
+set -eu
+
+install -d -o 10001 -g 10001 /var/lib/canopy "${TMPDIR:-/srv/canopy/work}"
+export TMPDIR="${TMPDIR:-/srv/canopy/work}"
+if [ ! -S /var/run/docker.sock ]; then
+  echo 'canopy: mount /var/run/docker.sock for the existing photo sandbox' >&2
+  exit 1
+fi
+socket_group=$(stat -c '%g' /var/run/docker.sock)
+if [ -z "${CANOPY_MEDIA_IMAGE:-}" ]; then
+  CANOPY_MEDIA_IMAGE=$(docker inspect --format '{{.Config.Image}}' "$HOSTNAME")
+fi
+export CANOPY_MEDIA_IMAGE
+public_url="${CANOPY_PUBLIC_URL:-http://localhost:7080}"
+public_url="${public_url%/}"
+authority="${public_url#*://}"
+case "$public_url" in http://*|https://*) ;; *) echo 'canopy: invalid public URL' >&2; exit 1;; esac
+case "$authority" in ''|*/*|*'?'*|*'#'*|*'@'*) echo 'canopy: public URL must be an origin' >&2; exit 1;; esac
+case "$public_url" in
+  https://*) export CANOPY_COOKIE_SECURE="${CANOPY_COOKIE_SECURE:-1}" ;;
+esac
+export CANOPY_MCP_PUBLIC_URL="${CANOPY_MCP_PUBLIC_URL:-$public_url/mcp}"
+export CANOPY_MCP_ALLOWED_HOSTS="${CANOPY_MCP_ALLOWED_HOSTS:-$authority}"
+
+password_file=''
+if [ -n "${CANOPY_INITIAL_PASSWORD:-}" ]; then
+  password_file=$(mktemp)
+  chmod 600 "$password_file"
+  printf '%s' "$CANOPY_INITIAL_PASSWORD" > "$password_file"
+fi
+unset CANOPY_INITIAL_PASSWORD
+cleanup_password() { if [ -n "$password_file" ]; then rm -f "$password_file"; fi; }
+trap cleanup_password EXIT
+setpriv --reuid=10001 --regid=10001 --init-groups /usr/local/bin/migrate up
+if [ -n "$password_file" ]; then
+  result_file=$(mktemp)
+  if /usr/local/bin/admin owner create --workspace 'My garden' --timezone "${TZ:-UTC}" --currency USD --password-file "$password_file" >"$result_file" 2>&1; then
+    echo 'canopy: initial owner created'
+  elif grep -q 'owner already exists' "$result_file"; then
+    echo 'canopy: existing owner retained'
+  else
+    rm -f "$result_file"
+    echo 'canopy: owner bootstrap failed; check the initial password and timezone' >&2
+    exit 1
+  fi
+  rm -f "$result_file"
+  cleanup_password
+  password_file=''
+fi
+
+pids=()
+start() { "$@" & pids+=("$!"); }
+stop_children() {
+  if [ "${#pids[@]}" -gt 0 ]; then
+    kill "${pids[@]}" 2>/dev/null || true
+    wait "${pids[@]}" 2>/dev/null || true
+  fi
+}
+trap 'stop_children; exit 0' TERM INT
+start setpriv --reuid=10001 --regid=10001 --init-groups /usr/local/bin/api
+start /usr/local/bin/caddy run --config /etc/caddy/Caddyfile --adapter caddyfile
+start setpriv --reuid=10001 --regid=10001 --groups "10001,$socket_group" /usr/local/bin/worker
+# Any service failure tears down its peers so Docker restarts one coherent app.
+while true; do
+  for pid in "${pids[@]}"; do
+    if ! kill -0 "$pid" 2>/dev/null; then
+      echo 'canopy: a service exited; restarting the application' >&2
+      stop_children
+      exit 1
+    fi
+  done
+  sleep 1
+done

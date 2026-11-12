@@ -965,3 +965,13 @@ Own: `server/internal/media/processor/`, `server/internal/insights/receipt_proce
 Acceptance: Default app + PostgreSQL deployment has no Docker socket, host work directory or runtime Docker CLI requirement. Run installed codecs/OCR as bounded unprivileged subprocesses; preserve formats, orientation, capture dates, derivatives and receipt extraction. Context cancellation kills codec process groups. Publish tested v1.1.2 and promote its verified digest to latest. Preserve local production data/configuration.
 
 Verify: Runner tests for command restrictions, path mapping, bounded output, missing tools, cancellation and resource limits; real HEIC/JPEG/WebP/PNG and PDF/image OCR in the combined image without socket mounts; actual queued photo job, capture date and restart smoke; release CI and AMD64/ARM64 manifests.
+
+### MIG02 — Remote production data migration
+
+Depends: MIG01, DEP03.
+
+Own: `docs/plan/tasks/MIG02.md`, `.artifacts/agents/MIG02/`, `.artifacts/dev/migration/`, `docs/deployment.md`. Integrator owns graph/ledger. Authorized operator scope: SSH to the user-authorized destination using the supplied identity; inspect, back up and migrate into containers canopy/canopy-db. Privately preserve remote configuration and existing data before replacement. Keep local source and rollback assets.
+
+Acceptance: Transfer complete database and media/encryption-key storage consistently; retain garden IDs, users/passwords, acquisitions, care, knowledge, AI and agent records. Preserve target connection/public URL settings and verify counts, row fingerprints, file hashes, readiness and worker processing. Do not overwrite an unrelated garden without clarification. Do not disclose credentials or publish private backups.
+
+Verify: Source/destination inventories and backups with checksums, quiesced final snapshot, restored table and file reconciliation, actual target readiness/media and worker verification. Keep both source and destination rollback backups.

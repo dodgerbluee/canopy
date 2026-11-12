@@ -520,7 +520,8 @@
         "AUTH05",
         "MIG01",
         "PUB02",
-        "DEP03"
+        "DEP03",
+        "MIG02"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -984,6 +985,15 @@
       "title": "Socket-free bundled media and OCR processing; publish v1.1.2",
       "dependsOn": [
         "PUB02"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "MIG02": {
+      "title": "Migrate local production garden to remote Docker deployment",
+      "dependsOn": [
+        "MIG01",
+        "DEP03"
       ],
       "status": "ACCEPTED",
       "release": "R3"

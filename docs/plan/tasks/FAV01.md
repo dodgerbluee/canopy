@@ -1,6 +1,6 @@
 # FAV01 — Safari favicon
 
-Status: IN_PROGRESS.
+Status: ACCEPTED.
 
 ### FAV01 — Deployed Safari favicon
 
@@ -11,3 +11,11 @@ Own: `web/src/index.html`, `web/public/`, `docker/Caddyfile.web`, `scripts/relea
 Acceptance: Existing Canopy brand renders through Safari-compatible raster/ICO fallbacks and modern SVG metadata, with fresh content-versioned URLs. Include Apple touch/pinned-tab assets. Missing icon files return 404 rather than cached SPA HTML. Verify real deployed resources/browser decoding and publish a stable combined image for both supported architectures. Preserve the running garden.
 
 Verify: Node24 production build; Chromium/WebKit image decoding, MIME and intrinsic dimensions; real origin/public static-file requests including missing icon 404; release smoke and CI, anonymous manifest/pull and promotion digest equality. Do not claim user Safari UI verification from Playwright WebKit alone.
+
+Released and deployed v1.1.4. Full release CI: 43361523777; latest promotion:
+43363433071. Source revision: 9f2507089b964078ac9e3b16d29b984be667aa7a.
+Verified both public image tags, published checksums, live favicon bytes/MIME,
+missing icon 404 and all five icon decodes in Chromium/Playwright WebKit. Updated
+the existing Portainer stack definition and application image. Destination DB
+container, environment, mounts and all pre-deployment record counts matched.
+Evidence: `.artifacts/agents/FAV01/EVIDENCE.md`.

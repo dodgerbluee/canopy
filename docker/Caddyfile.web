@@ -13,6 +13,14 @@
 			flush_interval -1
 		}
 	}
+	# Never turn a missing icon into a cacheable HTML response.
+	@icons path /favicon* /canopy-icon* /apple-touch-icon* /icons/*
+	handle @icons {
+		root * /srv
+		header Cache-Control "no-cache"
+		header X-Content-Type-Options "nosniff"
+		file_server
+	}
 	handle {
 		root * /srv
 		header Cache-Control "no-cache"

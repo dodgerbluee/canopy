@@ -4,6 +4,7 @@ Requires the local canopy-release-test:smoke image.
 Never connects to the development database or reuses its credentials.
 """
 import http.cookiejar
+from html.parser import HTMLParser
 import json
 import os
 from pathlib import Path
@@ -85,6 +86,24 @@ try:
     csrf=session['csrfToken']
     html=request('/plants/smoke/gallery').decode()
     assert '<app-root' in html
+    class IconLinks(HTMLParser):
+        def __init__(self): super().__init__(); self.icons=[]
+        def handle_starttag(self, tag, attributes):
+            attributes=dict(attributes)
+            if tag=='link' and 'icon' in attributes.get('rel',''):
+                self.icons.append(attributes)
+    head=IconLinks(); head.feed(html)
+    assert {icon['rel'] for icon in head.icons} == {'icon','apple-touch-icon','mask-icon'}
+    assert any(icon.get('type')=='image/png' and icon.get('sizes')=='32x32' for icon in head.icons)
+    for icon in head.icons:
+        assert icon['href'].startswith('/icons/')
+        content=request(icon['href'])
+        assert not content.startswith(b'<!doctype') and len(content)>100
+    try:
+        request('/icons/missing.ico')
+        raise RuntimeError('Missing favicon returned the SPA instead of 404')
+    except urllib.error.HTTPError as error:
+        assert error.code==404
     assert request('/readyz')
     try:
         request('/mcp')
@@ -125,7 +144,7 @@ try:
             except (OSError,urllib.error.URLError):stable=0
         if time.monotonic()>deadline:raise RuntimeError('Bundled worker failure was not recovered')
         time.sleep(1)
-    result={'compose':True,'twoServices':True,'noDockerSocketOrHostMounts':True,'bundledFrontendAPIWorker':True,'ownerLogin':True,'spaDeepLink':True,'mcpRequiresCredential':True,'queuedPhotoProcessed':True,'originalCaptureDate':True,'privateDerivative':True,'supervisedRestart':True,'bootstrapSurvivesRestart':True}
+    result={'compose':True,'twoServices':True,'noDockerSocketOrHostMounts':True,'faviconAssetsAnd404':True,'bundledFrontendAPIWorker':True,'ownerLogin':True,'spaDeepLink':True,'mcpRequiresCredential':True,'queuedPhotoProcessed':True,'originalCaptureDate':True,'privateDerivative':True,'supervisedRestart':True,'bootstrapSurvivesRestart':True}
     report=Path(os.environ.get('CANOPY_RELEASE_SMOKE_REPORT',str(root/'.artifacts/agents/DEP02/smoke.json')))
     report.parent.mkdir(parents=True,exist_ok=True);report.write_text(json.dumps(result,indent=2)+'\n')
     print(json.dumps(result))

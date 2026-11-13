@@ -521,7 +521,8 @@
         "MIG01",
         "PUB02",
         "DEP03",
-        "MIG02"
+        "MIG02",
+        "FAV01"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -996,6 +997,15 @@
         "DEP03"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "FAV01": {
+      "title": "Safari favicon compatibility and cache-safe deployment",
+      "dependsOn": [
+        "DEP03",
+        "MIG02"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

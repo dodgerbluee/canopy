@@ -975,3 +975,13 @@ Own: `docs/plan/tasks/MIG02.md`, `.artifacts/agents/MIG02/`, `.artifacts/dev/mig
 Acceptance: Transfer complete database and media/encryption-key storage consistently; retain garden IDs, users/passwords, acquisitions, care, knowledge, AI and agent records. Preserve target connection/public URL settings and verify counts, row fingerprints, file hashes, readiness and worker processing. Do not overwrite an unrelated garden without clarification. Do not disclose credentials or publish private backups.
 
 Verify: Source/destination inventories and backups with checksums, quiesced final snapshot, restored table and file reconciliation, actual target readiness/media and worker verification. Keep both source and destination rollback backups.
+
+### FAV01 — Deployed Safari favicon
+
+Depends: DEP03, MIG02.
+
+Own: `web/src/index.html`, `web/public/`, `docker/Caddyfile.web`, `scripts/release/smoke.py`, `deploy/compose.yaml`, `docs/plan/tasks/FAV01.md`, `.artifacts/agents/FAV01/`. Integrator owns graph/ledger. Operator scope: privately back up the authorized remote Canopy stack; update only its app image version in the existing Portainer stack and deploy the durable fix with rollback available. Preserve its database, storage, credentials, public URL and sessions.
+
+Acceptance: Existing Canopy brand renders through Safari-compatible raster/ICO fallbacks and modern SVG metadata, with fresh content-versioned URLs. Include Apple touch/pinned-tab assets. Missing icon files return 404 rather than cached SPA HTML. Verify real deployed resources/browser decoding and publish a stable combined image for both supported architectures. Preserve the running garden.
+
+Verify: Node24 production build; Chromium/WebKit image decoding, MIME and intrinsic dimensions; real origin/public static-file requests including missing icon 404; release smoke and CI, anonymous manifest/pull and promotion digest equality. Do not claim user Safari UI verification from Playwright WebKit alone.

@@ -1,6 +1,6 @@
 services:
   canopy:
-    image: ${CANOPY_IMAGE_PREFIX:-ghcr.io/dodgerbluee/canopy}:${CANOPY_VERSION:-1.1.3}
+    image: ${CANOPY_IMAGE_PREFIX:-ghcr.io/dodgerbluee/canopy}:${CANOPY_VERSION:-1.1.4}
     restart: unless-stopped
     ports:
       - "${CANOPY_PORT:-7080}:80"

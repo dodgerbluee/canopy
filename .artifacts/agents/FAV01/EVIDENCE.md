@@ -24,3 +24,8 @@ processing, original capture date, private media and supervised worker restart.
 Private remote stack/configuration backup and resolved-config checks are stored
 outside source control. Raw browser reports, screenshots, generation helpers,
 image build and smoke evidence remain ignored beside this summary.
+
+An additional pre-publication review checked [Apple's pinned-tab requirements](https://developer.apple.com/library/archive/documentation/AppleApplications/Reference/SafariWebContent/pinnedTabs/pinnedTabs.html).
+The monochrome mask now uses a 16x16 viewBox and one scaled black path.
+The earlier v1.1.3 candidate was cancelled before any image publication;
+release verification will use a fresh v1.1.4 tag.

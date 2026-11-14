@@ -522,7 +522,8 @@
         "PUB02",
         "DEP03",
         "MIG02",
-        "FAV01"
+        "FAV01",
+        "PLAN00"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -1004,6 +1005,14 @@
       "dependsOn": [
         "DEP03",
         "MIG02"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN00": {
+      "title": "Design the future planting planner",
+      "dependsOn": [
+        "FAV01"
       ],
       "status": "ACCEPTED",
       "release": "R3"

@@ -985,3 +985,13 @@ Own: `web/src/index.html`, `web/public/`, `docker/Caddyfile.web`, `scripts/relea
 Acceptance: Existing Canopy brand renders through Safari-compatible raster/ICO fallbacks and modern SVG metadata, with fresh content-versioned URLs. Include Apple touch/pinned-tab assets. Missing icon files return 404 rather than cached SPA HTML. Verify real deployed resources/browser decoding and publish a stable combined image for both supported architectures. Preserve the running garden.
 
 Verify: Node24 production build; Chromium/WebKit image decoding, MIME and intrinsic dimensions; real origin/public static-file requests including missing icon 404; release smoke and CI, anonymous manifest/pull and promotion digest equality. Do not claim user Safari UI verification from Playwright WebKit alone.
+
+### PLAN00 — Future planting planner design
+
+Depends: FAV01.
+
+Own: `docs/features/planting-planner.md`, `docs/plan/tasks/PLAN00.md`, `.artifacts/agents/PLAN00/`. Integrator owns graph and ledger.
+
+Acceptance: Produce a repository-grounded implementation plan for future plantings, including clean modal UX, independent future records, regional/source-supported timing, honest estimates, existing calendar/year/AI integration, transactional conversion into actual plants, portability and sequential implementation packets. Describe current code gaps and V1 boundaries. Planning/documentation only; no app/runtime/provider changes.
+
+Verify: Review existing routes, collection/knowledge/calendar contracts, source registry, mutation patterns and portability allowlist. Validate plan links, consistency and repository plan/boundary gates. Never assert unexecuted application tests or deployment.

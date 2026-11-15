@@ -1,8 +1,8 @@
 # Future planting planner
 
-Status: step 1 of 8 complete; PLAN02 is implementing the real planning API and
-portability. The Planning page remains hidden until its UI packet lands. Existing
-production deployments are unchanged.
+Status: steps 1 and 2 of 8 complete. Planning contracts, storage, real CRUD API and
+portability are accepted on the feature branch. Crop-based guidance is next; the
+Planning page arrives in step 5. Existing production deployments are unchanged.
 
 ## Product direction
 
@@ -276,15 +276,15 @@ plant. Completing the overall plan is distinct from ownership and an elapsed dat
 
 ## Eight sequential implementation packets
 
-PLAN01 is the accepted contract/storage step. Register the remaining sequential
-implementation packets when they are kicked off. Its accepted contract is recorded
-in `docs/plan/tasks/PLAN01-contract-change.md`; the planning SDL is deliberately
-staged outside the runtime server schema until PLAN02 provides real resolvers.
+PLAN01 and PLAN02 are accepted. Register the remaining sequential implementation
+packets when they are kicked off. The accepted contract is recorded in
+`docs/plan/tasks/PLAN01-contract-change.md`; PLAN02 now registers its SDL with real
+resolvers and populated portability coverage. UI navigation arrives in PLAN05.
 
 | Step | Deliverable | Main paths | Acceptance/verification |
 | --- | --- | --- | --- |
 | 1 — complete | Contracts and storage | Accepted contract change record; `contracts/graphql/planning.graphql`, operations, migration 00019 | States, date precision, source vs user dates, permissions, pagination, revisions and promotion semantics defined. Disposable PostgreSQL up/down/reapply, generators, local regression suite and full GitHub CI passed. |
-| 2 | Planning domain and CRUD | `server/internal/planning/`, DB queries, GraphQL resolver, portability manifests | Workspace isolation, validated optional fields, exact budgets, idempotency/conflict/audit behavior and full backup/export inclusion. Real PostgreSQL tests, including backup/restore of new rows. |
+| 2 — complete | Planning domain and CRUD | `server/internal/planning/`, DB queries, GraphQL resolver, portability manifests | Workspace isolation, optional values, exact budgets, transactional revisions/audit/replay, scoped cursors and complete backup/export inclusion implemented. Real HTTP operations, populated and legacy restore, race checks, full backend regression and GitHub CI passed. |
 | 3 | Crop-based guidance | `server/internal/knowledge/`, source adapters, enrichment queries/worker | Guidance works before a plant exists; add seed/sow/transplant facts without breaking current seasonal kinds. Test source/cultivar/region/method matching, unsupported/manual paths, stale-generation refusal and provider failure. |
 | 4 | Schedule engine | `server/internal/planning/schedule.go` and scoped query/confirmation commands | Pure, clock-injected calculations with preserved granularity and evidence. Test multiple windows, New Year, leap days, hemisphere, missing anchors, first-harvest uncertainty and unchanged accepted dates after refresh. |
 | 5 | Angular page and shared modals | `web/src/app/features/planning/`, data layer, routes/shell/More, reusable timeline primitives | Complete ideas/plans/detail/edit flow on desktop and phone. Test fresh-form validation, unknown/failed guidance, cancel/restore, URL filters, keyboard focus, scrolling and both themes. Serve a local Docker preview. |

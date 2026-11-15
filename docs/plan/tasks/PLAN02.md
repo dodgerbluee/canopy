@@ -1,6 +1,6 @@
 # PLAN02 — Planning API
 
-Status: IN_PROGRESS.
+Status: ACCEPTED. Evidence: `.artifacts/agents/PLAN02/EVIDENCE.md`.
 
 ### PLAN02 — Planning domain, CRUD API and portability
 

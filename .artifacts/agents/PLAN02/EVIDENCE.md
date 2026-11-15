@@ -1,6 +1,9 @@
 # PLAN02 — Planning domain, CRUD API and portability
 
-Implementation and local verification complete; GitHub CI acceptance pending.
+Status: ACCEPTED. Implementation commit: e67c34f01cc8a50180d812c2ee64a42b1de9f0fb.
+
+Full GitHub CI passed on that commit:
+https://github.com/dodgerbluee/canopy/actions/runs/43677855402
 
 Implemented two planning queries and eight mutations using the accepted PLAN01
 contract. Domain commands are independent of GraphQL/provider code, use injected
@@ -43,8 +46,15 @@ Executed focused checks against disposable PostgreSQL 17:
   portability tests. New domain/HTTP checks also passed with the race detector.
 - Generation no-diff, lint (Go vet/format, Node24 TypeScript and Angular build), frozen
   operation limits, task dispatch and plan/boundary gates passed locally.
+- GitHub CI passed release tooling, clean dependency installation, generation
+  no-diff, plan/boundary gates, lint/build, unit tests and real PostgreSQL
+  integration on the final implementation commit.
 
 No production database, provider configuration, app container or deployment was
-changed. Tests use only the named disposable canopy-plan02-pg instance. There is
+changed. The named disposable canopy-plan02-pg test instance was removed after
+local verification. Changes are pushed to feature/planting-planner, without a
+main-branch merge or deployment image release. There is
 no new UI, source ingestion, reminder job, garden promotion or agent tool yet.
 Raw logs remain ignored under this directory.
+
+Next: PLAN03, crop-based source guidance and enrichment for future plants.

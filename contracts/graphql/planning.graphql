@@ -225,8 +225,8 @@ type PlantingPlanPayload {
   clientMutationId: String
 }
 
-# Staged contract: server/gqlgen.yml deliberately excludes this file until
-# PLAN02 registers real resolvers. No public not-implemented handlers are added.
+# Activated in PLAN02 with real CRUD resolvers and populated portability coverage.
+# Guidance generation, scheduling and promotion commands land in later packets.
 extend type Query {
   """Workspace-scoped keyset pagination. first 1..100; cursor bound to filter/order."""
   plantingPlans(first: Int = 25, after: String, filter: PlantingPlanFilter, order: PlantingPlanOrder = NAME_ASC): PlantingPlanConnection!

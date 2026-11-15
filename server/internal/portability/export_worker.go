@@ -131,6 +131,10 @@ func (w *ExportBuildWorker) Work(ctx context.Context, job *river.Job[ExportBuild
 		name string
 		get  func() ([][]byte, error)
 	}{
+		{"planting_plans", func() ([][]byte, error) { return q.ExportPlantingPlans(ctx, ws) }},
+		{"planting_actions", func() ([][]byte, error) { return q.ExportPlantingActions(ctx, ws) }},
+		{"planting_guidance_snapshots", func() ([][]byte, error) { return q.ExportPlantingGuidance(ctx, ws) }},
+		{"planting_fulfillments", func() ([][]byte, error) { return q.ExportPlantingFulfillments(ctx, ws) }},
 		{"locations", func() ([][]byte, error) { return q.ExportLocations(ctx, ws) }},
 		{"tags", func() ([][]byte, error) { return q.ExportTags(ctx, ws) }},
 		{"plant_tags", func() ([][]byte, error) { return q.ExportPlantTags(ctx, ws) }},

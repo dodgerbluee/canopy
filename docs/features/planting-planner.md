@@ -1,8 +1,8 @@
 # Future planting planner
 
-Status: step 1 of 8 complete. PLAN01 establishes the accepted staged contracts and
-storage. PLAN02 is next; the page and live API remain hidden until their
-implementation packets land.
+Status: step 1 of 8 complete; PLAN02 is implementing the real planning API and
+portability. The Planning page remains hidden until its UI packet lands. Existing
+production deployments are unchanged.
 
 ## Product direction
 

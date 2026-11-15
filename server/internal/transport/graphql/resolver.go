@@ -32,6 +32,7 @@ import (
 	"canopy/server/internal/journal"
 	"canopy/server/internal/knowledge"
 	"canopy/server/internal/media"
+	"canopy/server/internal/planning"
 	"canopy/server/internal/portability"
 	"canopy/server/internal/purchases"
 	"canopy/server/internal/transport/graphql/gql"
@@ -42,13 +43,14 @@ import (
 // Resolver is the hand-written ResolverRoot. The generated stub file
 // (resolvers_gen.go) is scaffolding and is never hand-edited.
 type Resolver struct {
-	DB      *dbgen.Queries
-	Coll    *collection.Service
-	Purch   *purchases.Service
-	Media   *media.Service
-	Journal *journal.Service
-	Care    *care.Service
-	Port    *portability.Service
+	DB       *dbgen.Queries
+	Coll     *collection.Service
+	Purch    *purchases.Service
+	Media    *media.Service
+	Journal  *journal.Service
+	Care     *care.Service
+	Port     *portability.Service
+	Planning *planning.Service
 	// Insights is the AI analysis lane (T29). It is wired only when the
 	// operator config warrants it (provider + queue); nil means the
 	// analysis surfaces answer honestly, never fake data.
@@ -78,6 +80,7 @@ func NewResolverFromPool(pool *pgxpool.Pool, log *slog.Logger) *Resolver {
 		Purch:     purchases.New(pool, log),
 		Journal:   journal.New(pool),
 		Care:      careSvc,
+		Planning:  planning.New(pool, log),
 		Log:       log,
 	}
 }

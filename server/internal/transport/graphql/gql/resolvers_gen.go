@@ -334,6 +334,46 @@ func (r *mutationResolver) AskGarden(ctx context.Context, question string, year 
 	panic("not implemented")
 }
 
+// CreatePlantingPlan is the resolver for the createPlantingPlan field.
+func (r *mutationResolver) CreatePlantingPlan(ctx context.Context, input CreatePlantingPlanInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
+// UpdatePlantingPlan is the resolver for the updatePlantingPlan field.
+func (r *mutationResolver) UpdatePlantingPlan(ctx context.Context, input UpdatePlantingPlanInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
+// ChangePlantingPlanState is the resolver for the changePlantingPlanState field.
+func (r *mutationResolver) ChangePlantingPlanState(ctx context.Context, input ChangePlantingPlanStateInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
+// CancelPlantingPlan is the resolver for the cancelPlantingPlan field.
+func (r *mutationResolver) CancelPlantingPlan(ctx context.Context, input CancelPlantingPlanInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
+// RestorePlantingPlan is the resolver for the restorePlantingPlan field.
+func (r *mutationResolver) RestorePlantingPlan(ctx context.Context, input RestorePlantingPlanInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
+// CreatePlantingAction is the resolver for the createPlantingAction field.
+func (r *mutationResolver) CreatePlantingAction(ctx context.Context, input CreatePlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
+// UpdatePlantingAction is the resolver for the updatePlantingAction field.
+func (r *mutationResolver) UpdatePlantingAction(ctx context.Context, input UpdatePlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
+// DeletePlantingAction is the resolver for the deletePlantingAction field.
+func (r *mutationResolver) DeletePlantingAction(ctx context.Context, input DeletePlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
 // Session is the resolver for the session field.
 func (r *queryResolver) Session(ctx context.Context) (*Session, error) {
 	panic("not implemented")
@@ -466,6 +506,16 @@ func (r *queryResolver) GardenPlaces(ctx context.Context, search string) ([]*Gar
 
 // TodayOverview is the resolver for the todayOverview field.
 func (r *queryResolver) TodayOverview(ctx context.Context) (*TodayOverview, error) {
+	panic("not implemented")
+}
+
+// PlantingPlans is the resolver for the plantingPlans field.
+func (r *queryResolver) PlantingPlans(ctx context.Context, first *int, after *string, filter *PlantingPlanFilter, order *PlantingPlanOrder) (*PlantingPlanConnection, error) {
+	panic("not implemented")
+}
+
+// PlantingPlan is the resolver for the plantingPlan field.
+func (r *queryResolver) PlantingPlan(ctx context.Context, id string) (*PlantingPlan, error) {
 	panic("not implemented")
 }
 

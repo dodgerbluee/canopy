@@ -332,6 +332,102 @@ func (q *Queries) ExportPlantTags(ctx context.Context, workspaceID pgtype.UUID) 
 	return items, nil
 }
 
+const exportPlantingActions = `-- name: ExportPlantingActions :many
+SELECT to_jsonb(a) AS row FROM planting_actions a WHERE a.workspace_id=$1 ORDER BY a.plan_id,a.scheduled_on,a.id
+`
+
+func (q *Queries) ExportPlantingActions(ctx context.Context, workspaceID pgtype.UUID) ([][]byte, error) {
+	rows, err := q.db.Query(ctx, exportPlantingActions, workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := [][]byte{}
+	for rows.Next() {
+		var row []byte
+		if err := rows.Scan(&row); err != nil {
+			return nil, err
+		}
+		items = append(items, row)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const exportPlantingFulfillments = `-- name: ExportPlantingFulfillments :many
+SELECT to_jsonb(f) AS row FROM planting_fulfillments f WHERE f.workspace_id=$1 ORDER BY f.plan_id
+`
+
+func (q *Queries) ExportPlantingFulfillments(ctx context.Context, workspaceID pgtype.UUID) ([][]byte, error) {
+	rows, err := q.db.Query(ctx, exportPlantingFulfillments, workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := [][]byte{}
+	for rows.Next() {
+		var row []byte
+		if err := rows.Scan(&row); err != nil {
+			return nil, err
+		}
+		items = append(items, row)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const exportPlantingGuidance = `-- name: ExportPlantingGuidance :many
+SELECT to_jsonb(g) AS row FROM planting_guidance_snapshots g WHERE g.workspace_id=$1 ORDER BY g.plan_id,g.generation
+`
+
+func (q *Queries) ExportPlantingGuidance(ctx context.Context, workspaceID pgtype.UUID) ([][]byte, error) {
+	rows, err := q.db.Query(ctx, exportPlantingGuidance, workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := [][]byte{}
+	for rows.Next() {
+		var row []byte
+		if err := rows.Scan(&row); err != nil {
+			return nil, err
+		}
+		items = append(items, row)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const exportPlantingPlans = `-- name: ExportPlantingPlans :many
+SELECT to_jsonb(p) AS row FROM planting_plans p WHERE p.workspace_id=$1 ORDER BY p.id
+`
+
+func (q *Queries) ExportPlantingPlans(ctx context.Context, workspaceID pgtype.UUID) ([][]byte, error) {
+	rows, err := q.db.Query(ctx, exportPlantingPlans, workspaceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := [][]byte{}
+	for rows.Next() {
+		var row []byte
+		if err := rows.Scan(&row); err != nil {
+			return nil, err
+		}
+		items = append(items, row)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const exportPlants = `-- name: ExportPlants :many
 SELECT to_jsonb(t) AS row FROM plants t WHERE t.workspace_id = $1 ORDER BY t.id
 `

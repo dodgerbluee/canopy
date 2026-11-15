@@ -58,7 +58,7 @@ func fragmentClosure(t *testing.T, opsSrc, fragsSrc string) string {
 func TestFrozenOperationsFitDefaultLimits(t *testing.T) {
 	es := gql.NewExecutableSchema(gql.Config{Resolvers: NewResolver(nil, slog.New(slog.DiscardHandler))})
 	schema := es.Schema()
-	for _, file := range []string{"collection", "session-portability", "purchases"} {
+	for _, file := range []string{"collection", "session-portability", "purchases", "planning"} {
 		ops, err := os.ReadFile("../../../../contracts/operations/" + file + ".graphql")
 		if err != nil {
 			t.Fatalf("read %s operations: %v", file, err)
@@ -213,4 +213,30 @@ func tight() Limits {
 	l := DefaultLimits()
 	l.MaxComplexity = 150
 	return l
+}
+
+func TestPlanningActionListsChargeActualMaximum(t *testing.T) {
+	es := gql.NewExecutableSchema(gql.Config{Resolvers: NewResolver(nil, slog.New(slog.DiscardHandler))})
+	doc, err := gqlparser.LoadQuery(es.Schema(), `query { plantingPlan(id:"example") { id actions { id } } }`)
+	if len(err) > 0 {
+		t.Fatal(err)
+	}
+	limits := DefaultLimits()
+	limits.MaxComplexity = 50
+	if Validate(es.Schema(), doc, limits) == nil {
+		t.Fatal("100-action list was charged as only 25")
+	}
+}
+
+func TestPlanningVariablePageChargesMaximum(t *testing.T) {
+	es := gql.NewExecutableSchema(gql.Config{Resolvers: NewResolver(nil, slog.New(slog.DiscardHandler))})
+	doc, err := gqlparser.LoadQuery(es.Schema(), `query($first:Int){plantingPlans(first:$first){items{id}}}`)
+	if len(err) > 0 {
+		t.Fatal(err)
+	}
+	limits := DefaultLimits()
+	limits.MaxComplexity = 50
+	if Validate(es.Schema(), doc, limits) == nil {
+		t.Fatal("variable planner page did not charge full allowed size")
+	}
 }

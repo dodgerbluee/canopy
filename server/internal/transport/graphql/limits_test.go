@@ -240,3 +240,21 @@ func TestPlanningVariablePageChargesMaximum(t *testing.T) {
 		t.Fatal("variable planner page did not charge full allowed size")
 	}
 }
+
+func TestPlanningScheduleVariablePageAndAnchorsChargeTheirBounds(t *testing.T) {
+	es := gql.NewExecutableSchema(gql.Config{Resolvers: NewResolver(nil, slog.New(slog.DiscardHandler))})
+	for _, source := range []string{
+		`query($first:Int){plantingSchedule(planId:"id",input:{fromMonth:"2027-01",toMonth:"2027-12"},first:$first){items{id}}}`,
+		`query{plantingSchedule(planId:"id",input:{fromMonth:"2027-01",toMonth:"2027-12"},first:1){assumptions{anchors{kind on}}}}`,
+	} {
+		doc, errs := gqlparser.LoadQuery(es.Schema(), source)
+		if len(errs) > 0 {
+			t.Fatal(errs)
+		}
+		limits := DefaultLimits()
+		limits.MaxComplexity = 10
+		if Validate(es.Schema(), doc, limits) == nil {
+			t.Fatal("schedule list bounds were undercharged")
+		}
+	}
+}

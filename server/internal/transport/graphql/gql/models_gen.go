@@ -618,6 +618,19 @@ type CompleteOccurrencePayload struct {
 	ClientMutationID *string            `json:"clientMutationId,omitempty"`
 }
 
+type ConfirmPlantingScheduleInput struct {
+	PlanID           string                            `json:"planId"`
+	ExpectedRevision int                               `json:"expectedRevision"`
+	SnapshotID       string                            `json:"snapshotId"`
+	Generation       int                               `json:"generation"`
+	FactID           string                            `json:"factId"`
+	WindowIndex      int                               `json:"windowIndex"`
+	Year             int                               `json:"year"`
+	Assumptions      *PlantingScheduleAssumptionsInput `json:"assumptions,omitempty"`
+	// An explicit user choice contained by the selected supported window.
+	TargetPeriod *PlantingPeriodInput `json:"targetPeriod"`
+}
+
 // The general activity update/void commands reject activities linked to a completion with LINKED_COMPLETION_USE_CORRECTION; this is the only path to edit or undo a completion. Exactly one of undo or field edits.
 type CorrectOccurrenceCompletionInput struct {
 	OccurrenceID     string `json:"occurrenceId"`
@@ -1455,8 +1468,9 @@ type PlantingPlan struct {
 	// Current context/source generation, independent of the edit revision.
 	GuidanceGeneration int `json:"guidanceGeneration"`
 	// Only the current generation; null while no current snapshot exists.
-	LatestGuidance   *PlantingGuidanceSnapshot `json:"latestGuidance,omitempty"`
-	AcceptedGuidance *PlantingGuidanceSnapshot `json:"acceptedGuidance,omitempty"`
+	LatestGuidance   *PlantingGuidanceSnapshot  `json:"latestGuidance,omitempty"`
+	AcceptedGuidance *PlantingGuidanceSnapshot  `json:"acceptedGuidance,omitempty"`
+	AcceptedSchedule *PlantingScheduleSelection `json:"acceptedSchedule,omitempty"`
 	// Ownership is independent of progress; adding a nursery plant does not complete plant-out actions.
 	Fulfillment *PlantingFulfillment `json:"fulfillment,omitempty"`
 	CreatedAt   scalars.DateTime     `json:"createdAt"`
@@ -1482,11 +1496,94 @@ type PlantingPlanPayload struct {
 	ClientMutationID *string            `json:"clientMutationId,omitempty"`
 }
 
+type PlantingProjectedWindow struct {
+	ID     string `json:"id"`
+	FactID string `json:"factId"`
+	// Zero-based index within the immutable source fact.
+	WindowIndex int                        `json:"windowIndex"`
+	Year        int                        `json:"year"`
+	Phase       PlantingPhaseKind          `json:"phase"`
+	Label       string                     `json:"label"`
+	Resolution  PlantingScheduleResolution `json:"resolution"`
+	Message     string                     `json:"message"`
+	Status      PlantingPeriodStatus       `json:"status"`
+	// Source precision; a season or month is never replaced by a fabricated day.
+	Period *PlantingPeriod `json:"period,omitempty"`
+	// Approximate clipped rendering band only. Never an asserted action date.
+	DisplayMonths       *PlantingMonthRange `json:"displayMonths,omitempty"`
+	ContinuesBefore     bool                `json:"continuesBefore"`
+	ContinuesAfter      bool                `json:"continuesAfter"`
+	Estimated           bool                `json:"estimated"`
+	FirstHarvestUnknown bool                `json:"firstHarvestUnknown"`
+	Selectable          bool                `json:"selectable"`
+}
+
 // Offsets are signed; null is unknown, never zero by default. No frost date is inferred from zone.
 type PlantingRelativeWindow struct {
 	Anchor   PlantingTimingAnchor `json:"anchor"`
 	FromDays *int                 `json:"fromDays,omitempty"`
 	ToDays   *int                 `json:"toDays,omitempty"`
+}
+
+type PlantingScheduleAnchor struct {
+	Kind PlantingTimingAnchor `json:"kind"`
+	On   scalars.Date         `json:"on"`
+}
+
+// An explicit planning assumption; never a recorded garden event or inferred frost date.
+type PlantingScheduleAnchorInput struct {
+	Kind PlantingTimingAnchor `json:"kind"`
+	On   scalars.Date         `json:"on"`
+}
+
+type PlantingScheduleAssumptions struct {
+	Hemisphere *PlantingHemisphere       `json:"hemisphere,omitempty"`
+	Anchors    []*PlantingScheduleAnchor `json:"anchors"`
+}
+
+type PlantingScheduleAssumptionsInput struct {
+	Hemisphere *PlantingHemisphere `json:"hemisphere,omitempty"`
+	// At most six anchors, one per named kind. UNKNOWN cannot supply a date.
+	Anchors []*PlantingScheduleAnchorInput `json:"anchors"`
+}
+
+type PlantingScheduleConnection struct {
+	PlanID              string                       `json:"planId"`
+	Revision            int                          `json:"revision"`
+	GuidanceGeneration  int                          `json:"guidanceGeneration"`
+	Timezone            string                       `json:"timezone"`
+	Today               scalars.Date                 `json:"today"`
+	TargetPeriod        *PlantingPeriod              `json:"targetPeriod,omitempty"`
+	TargetHemisphere    *PlantingHemisphere          `json:"targetHemisphere,omitempty"`
+	TargetStatus        PlantingPeriodStatus         `json:"targetStatus"`
+	TargetDisplayMonths *PlantingMonthRange          `json:"targetDisplayMonths,omitempty"`
+	TargetVisible       bool                         `json:"targetVisible"`
+	AcceptedSchedule    *PlantingScheduleSelection   `json:"acceptedSchedule,omitempty"`
+	SourceSnapshotID    *string                      `json:"sourceSnapshotId,omitempty"`
+	GuidanceState       KnowledgeState               `json:"guidanceState"`
+	GuidanceCurrent     bool                         `json:"guidanceCurrent"`
+	Message             string                       `json:"message"`
+	Assumptions         *PlantingScheduleAssumptions `json:"assumptions"`
+	Items               []*PlantingProjectedWindow   `json:"items"`
+	PageInfo            *PageInfo                    `json:"pageInfo"`
+}
+
+type PlantingScheduleInput struct {
+	// Inclusive canonical YYYY-MM range, at most twelve months.
+	FromMonth   string                            `json:"fromMonth"`
+	ToMonth     string                            `json:"toMonth"`
+	Assumptions *PlantingScheduleAssumptionsInput `json:"assumptions,omitempty"`
+}
+
+type PlantingScheduleSelection struct {
+	Version     int    `json:"version"`
+	FactID      string `json:"factId"`
+	WindowIndex int    `json:"windowIndex"`
+	// Annual starting year, relative anchor year, or absolute period starting year.
+	Year            int                          `json:"year"`
+	Assumptions     *PlantingScheduleAssumptions `json:"assumptions"`
+	SupportedPeriod *PlantingPeriod              `json:"supportedPeriod"`
+	ConfirmedAt     scalars.DateTime             `json:"confirmedAt"`
 }
 
 // Year of the season's start, not its end. Hemisphere is never inferred from timezone.
@@ -4649,6 +4746,67 @@ func (e PlantingPeriodPrecision) MarshalJSON() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
+type PlantingPeriodStatus string
+
+const (
+	PlantingPeriodStatusUnscheduled PlantingPeriodStatus = "UNSCHEDULED"
+	PlantingPeriodStatusUpcoming    PlantingPeriodStatus = "UPCOMING"
+	PlantingPeriodStatusInWindow    PlantingPeriodStatus = "IN_WINDOW"
+	PlantingPeriodStatusPassed      PlantingPeriodStatus = "PASSED"
+	PlantingPeriodStatusNeedsReview PlantingPeriodStatus = "NEEDS_REVIEW"
+)
+
+var AllPlantingPeriodStatus = []PlantingPeriodStatus{
+	PlantingPeriodStatusUnscheduled,
+	PlantingPeriodStatusUpcoming,
+	PlantingPeriodStatusInWindow,
+	PlantingPeriodStatusPassed,
+	PlantingPeriodStatusNeedsReview,
+}
+
+func (e PlantingPeriodStatus) IsValid() bool {
+	switch e {
+	case PlantingPeriodStatusUnscheduled, PlantingPeriodStatusUpcoming, PlantingPeriodStatusInWindow, PlantingPeriodStatusPassed, PlantingPeriodStatusNeedsReview:
+		return true
+	}
+	return false
+}
+
+func (e PlantingPeriodStatus) String() string {
+	return string(e)
+}
+
+func (e *PlantingPeriodStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PlantingPeriodStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PlantingPeriodStatus", str)
+	}
+	return nil
+}
+
+func (e PlantingPeriodStatus) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PlantingPeriodStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PlantingPeriodStatus) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type PlantingPhaseKind string
 
 const (
@@ -4830,6 +4988,73 @@ func (e *PlantingPlanState) UnmarshalJSON(b []byte) error {
 }
 
 func (e PlantingPlanState) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type PlantingScheduleResolution string
+
+const (
+	PlantingScheduleResolutionResolved           PlantingScheduleResolution = "RESOLVED"
+	PlantingScheduleResolutionUnknown            PlantingScheduleResolution = "UNKNOWN"
+	PlantingScheduleResolutionNeedsAnchor        PlantingScheduleResolution = "NEEDS_ANCHOR"
+	PlantingScheduleResolutionNeedsOffset        PlantingScheduleResolution = "NEEDS_OFFSET"
+	PlantingScheduleResolutionNeedsHemisphere    PlantingScheduleResolution = "NEEDS_HEMISPHERE"
+	PlantingScheduleResolutionHemisphereMismatch PlantingScheduleResolution = "HEMISPHERE_MISMATCH"
+	PlantingScheduleResolutionInvalidDate        PlantingScheduleResolution = "INVALID_DATE"
+	PlantingScheduleResolutionOutOfRange         PlantingScheduleResolution = "OUT_OF_RANGE"
+)
+
+var AllPlantingScheduleResolution = []PlantingScheduleResolution{
+	PlantingScheduleResolutionResolved,
+	PlantingScheduleResolutionUnknown,
+	PlantingScheduleResolutionNeedsAnchor,
+	PlantingScheduleResolutionNeedsOffset,
+	PlantingScheduleResolutionNeedsHemisphere,
+	PlantingScheduleResolutionHemisphereMismatch,
+	PlantingScheduleResolutionInvalidDate,
+	PlantingScheduleResolutionOutOfRange,
+}
+
+func (e PlantingScheduleResolution) IsValid() bool {
+	switch e {
+	case PlantingScheduleResolutionResolved, PlantingScheduleResolutionUnknown, PlantingScheduleResolutionNeedsAnchor, PlantingScheduleResolutionNeedsOffset, PlantingScheduleResolutionNeedsHemisphere, PlantingScheduleResolutionHemisphereMismatch, PlantingScheduleResolutionInvalidDate, PlantingScheduleResolutionOutOfRange:
+		return true
+	}
+	return false
+}
+
+func (e PlantingScheduleResolution) String() string {
+	return string(e)
+}
+
+func (e *PlantingScheduleResolution) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PlantingScheduleResolution(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PlantingScheduleResolution", str)
+	}
+	return nil
+}
+
+func (e PlantingScheduleResolution) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *PlantingScheduleResolution) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e PlantingScheduleResolution) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

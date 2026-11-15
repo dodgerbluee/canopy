@@ -1,0 +1,66 @@
+{
+  "data": {
+    "confirmPlantingSchedule": {
+      "plan": {
+        "id": "f0000000-0000-4000-8000-000000000001",
+        "name": "Future fig",
+        "scientificName": null,
+        "cultivar": null,
+        "category": "FIG",
+        "desiredQuantity": 1,
+        "method": "NURSERY_PLANT",
+        "intendedLocation": null,
+        "intendedPlacement": "GROUND",
+        "targetPeriod": {
+          "precision": "DATE_RANGE",
+          "dates": {
+            "from": "2028-01-17",
+            "to": "2028-01-17"
+          },
+          "months": null,
+          "season": null,
+          "year": null
+        },
+        "budget": null,
+        "notes": null,
+        "state": "PLANNED",
+        "cancelledAt": null,
+        "completedAt": null,
+        "revision": 3,
+        "actions": [],
+        "fulfillment": null,
+        "createdAt": "2026-11-14T12:00:00Z",
+        "updatedAt": "2026-11-14T12:00:00Z",
+        "acceptedGuidance": {
+          "id": "f0000000-0000-4000-8000-000000000002",
+          "generation": 1,
+          "state": "READY"
+        },
+        "guidanceGeneration": 1,
+        "acceptedSchedule": {
+          "version": 1,
+          "factId": "fixture-fact",
+          "windowIndex": 0,
+          "year": 2027,
+          "assumptions": {
+            "hemisphere": "NORTHERN",
+            "anchors": []
+          },
+          "supportedPeriod": {
+            "precision": "MONTH_RANGE",
+            "dates": null,
+            "months": {
+              "from": "2027-12",
+              "to": "2028-02"
+            },
+            "season": null,
+            "year": null
+          },
+          "confirmedAt": "2026-11-15T12:00:00Z"
+        }
+      },
+      "problems": [],
+      "clientMutationId": "fixture-confirm"
+    }
+  }
+}

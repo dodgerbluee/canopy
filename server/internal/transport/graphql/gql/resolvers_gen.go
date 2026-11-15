@@ -379,6 +379,11 @@ func (r *mutationResolver) RefreshPlantingGuidance(ctx context.Context, input Re
 	panic("not implemented")
 }
 
+// ConfirmPlantingSchedule is the resolver for the confirmPlantingSchedule field.
+func (r *mutationResolver) ConfirmPlantingSchedule(ctx context.Context, input ConfirmPlantingScheduleInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
 // Session is the resolver for the session field.
 func (r *queryResolver) Session(ctx context.Context) (*Session, error) {
 	panic("not implemented")
@@ -521,6 +526,11 @@ func (r *queryResolver) PlantingPlans(ctx context.Context, first *int, after *st
 
 // PlantingPlan is the resolver for the plantingPlan field.
 func (r *queryResolver) PlantingPlan(ctx context.Context, id string) (*PlantingPlan, error) {
+	panic("not implemented")
+}
+
+// PlantingSchedule is the resolver for the plantingSchedule field.
+func (r *queryResolver) PlantingSchedule(ctx context.Context, planID string, input PlantingScheduleInput, first *int, after *string) (*PlantingScheduleConnection, error) {
 	panic("not implemented")
 }
 

@@ -303,6 +303,17 @@ func TestPlanningMigrationDownUpPreservesExistingGarden(t *testing.T) {
 	if err := s.pool.QueryRow(ctx, "SELECT to_jsonb(p) FROM plants p WHERE id=$1", s.plantID).Scan(&before); err != nil {
 		t.Fatal(err)
 	}
+	scheduleMigration, err := candb.Migrations.ReadFile("migrations/00021_planning_schedule.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	scheduleUp, scheduleDown, foundSchedule := strings.Cut(string(scheduleMigration), "-- +goose Down")
+	if !foundSchedule {
+		t.Fatal("missing schedule Down")
+	}
+	if _, err = s.pool.Exec(ctx, scheduleDown); err != nil {
+		t.Fatal(err)
+	}
 	guidanceMigration, err := candb.Migrations.ReadFile("migrations/00020_planning_guidance.sql")
 	if err != nil {
 		t.Fatal(err)
@@ -335,11 +346,55 @@ func TestPlanningMigrationDownUpPreservesExistingGarden(t *testing.T) {
 	if _, err = s.pool.Exec(ctx, guidanceUp); err != nil {
 		t.Fatal(err)
 	}
+	if _, err = s.pool.Exec(ctx, scheduleUp); err != nil {
+		t.Fatal(err)
+	}
 	var after []byte
 	if err = s.pool.QueryRow(ctx, "SELECT to_jsonb(p) FROM plants p WHERE id=$1", s.plantID).Scan(&after); err != nil {
 		t.Fatal(err)
 	}
 	if string(before) != string(after) {
 		t.Fatal("migration changed existing plant")
+	}
+}
+
+func TestPlanningScheduleSelectionNeedsAcceptedPeriodAndSurvivesMigrationRollback(t *testing.T) {
+	s := seedWorld(t)
+	ctx := context.Background()
+	plan, snapshot := planningIdea(t, s, "Schedule metadata"), uid()
+	for _, raw := range []string{`{}`, `[]`, `{"oversize":"` + strings.Repeat("x", 8200) + `"}`} {
+		_, err := s.pool.Exec(ctx, `UPDATE planting_plans SET accepted_schedule=$2 WHERE id=$1`, plan, raw)
+		expectDBError(t, err, "planting_schedule_selection")
+	}
+	if _, err := s.pool.Exec(ctx, `INSERT INTO planting_guidance_snapshots(id,workspace_id,plan_id,generation,context_sha256,state,facts,retrieved_at) VALUES($1,$2,$3,1,repeat('a',64),'READY','[{}]',now())`, snapshot, s.wsID, plan); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := s.pool.Exec(ctx, `UPDATE planting_plans SET target_precision='YEAR',target_year=2027,accepted_guidance_id=$2,accepted_schedule='{"version":1}' WHERE id=$1`, plan, snapshot); err != nil {
+		t.Fatal(err)
+	}
+	var before, after []byte
+	if err := s.pool.QueryRow(ctx, `SELECT to_jsonb(p)-'accepted_schedule' FROM planting_plans p WHERE id=$1`, plan).Scan(&before); err != nil {
+		t.Fatal(err)
+	}
+	migration, err := candb.Migrations.ReadFile("migrations/00021_planning_schedule.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	up, down, _ := strings.Cut(string(migration), "-- +goose Down")
+	if _, err = s.pool.Exec(ctx, down); err != nil {
+		t.Fatal(err)
+	}
+	if _, err = s.pool.Exec(ctx, up); err != nil {
+		t.Fatal(err)
+	}
+	if err = s.pool.QueryRow(ctx, `SELECT to_jsonb(p)-'accepted_schedule' FROM planting_plans p WHERE id=$1`, plan).Scan(&after); err != nil {
+		t.Fatal(err)
+	}
+	if string(before) != string(after) {
+		t.Fatal("selection migration changed existing intent/provenance")
+	}
+	var unknown bool
+	if err = s.pool.QueryRow(ctx, `SELECT accepted_schedule IS NULL FROM planting_plans WHERE id=$1`, plan).Scan(&unknown); err != nil || !unknown {
+		t.Fatal("migration invented selection metadata", err)
 	}
 }

@@ -155,7 +155,7 @@ func (w *walker) walkField(f *ast.Field, parent *ast.Definition, depth, connSize
 		}
 		// A variable first value is unknown here. Planner connections charge
 		// their full allowed page to keep the new nested lists bounded.
-		if typeName == "PlantingPlanConnection" {
+		if typeName == "PlantingPlanConnection" || typeName == "PlantingScheduleConnection" {
 			for _, arg := range f.Arguments {
 				if arg.Name == "first" && arg.Value != nil && arg.Value.Kind == ast.Variable {
 					size = w.lim.MaxPageSize
@@ -188,6 +188,8 @@ func (w *walker) walkField(f *ast.Field, parent *ast.Definition, depth, connSize
 				mult = planning.MaxGuidanceWindows
 			case "PlantingGuidanceFact.conditions":
 				mult = planning.MaxGuidanceConditions
+			case "PlantingScheduleAssumptions.anchors":
+				mult = planning.MaxScheduleAnchors
 			}
 		}
 		if n, bounded := staticIntArg(f.Arguments, "first"); bounded {

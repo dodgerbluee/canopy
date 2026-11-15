@@ -23,7 +23,8 @@ UPDATE planting_plans SET name=sqlc.arg(name),scientific_name=sqlc.narg(scientif
  target_year=sqlc.narg(target_year),target_season=sqlc.narg(target_season),budget_minor=sqlc.narg(budget_minor),
  budget_currency=sqlc.narg(budget_currency),notes=sqlc.narg(notes),revision=revision+1,
  guidance_generation=guidance_generation+CASE WHEN sqlc.arg(context_changed)::boolean THEN 1 ELSE 0 END,
- accepted_guidance_id=CASE WHEN sqlc.arg(period_changed)::boolean THEN NULL ELSE accepted_guidance_id END
+ accepted_guidance_id=CASE WHEN sqlc.arg(period_changed)::boolean THEN NULL ELSE accepted_guidance_id END,
+ accepted_schedule=CASE WHEN sqlc.arg(period_changed)::boolean THEN NULL ELSE accepted_schedule END
 WHERE workspace_id=sqlc.arg(workspace_id) AND id=sqlc.arg(id)
 RETURNING *;
 
@@ -150,3 +151,10 @@ WHERE workspace_id=sqlc.arg(workspace_id) AND plan_id=sqlc.arg(plan_id) AND id=s
 -- name: AbandonPlanningGuidance :exec
 UPDATE planting_guidance_snapshots SET state='FAILED',message='A newer plan or context replaced this research.',next_check_at=NULL
 WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND state IN('PENDING','PROCESSING');
+
+-- name: ConfirmPlanningSchedule :one
+UPDATE planting_plans SET target_precision=sqlc.narg(target_precision),target_from=sqlc.narg(target_from),target_to=sqlc.narg(target_to),
+ target_from_month=sqlc.narg(target_from_month),target_to_month=sqlc.narg(target_to_month),
+ target_year=sqlc.narg(target_year),target_season=sqlc.narg(target_season),
+ accepted_guidance_id=sqlc.arg(snapshot_id),accepted_schedule=sqlc.arg(accepted_schedule),revision=revision+1
+WHERE workspace_id=sqlc.arg(workspace_id) AND id=sqlc.arg(id) RETURNING *;

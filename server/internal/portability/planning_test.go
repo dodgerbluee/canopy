@@ -9,7 +9,9 @@ import (
 	"sort"
 	"strings"
 	"testing"
+	"time"
 
+	"canopy/server/internal/planning"
 	"canopy/server/internal/platform"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/riverqueue/river"
@@ -58,7 +60,11 @@ func seedPlanner(t *testing.T, e *env) (pgtype.UUID, pgtype.UUID) {
 	if _, err = e.pool.Exec(e.ctx, `INSERT INTO planting_guidance_snapshots(id,workspace_id,plan_id,generation,context_sha256,state,message) VALUES($1,$2,$3,2,repeat('b',64),'FAILED','Fixture provider unavailable')`, ids.New(), e.ws, plan); err != nil {
 		t.Fatal(err)
 	}
-	if _, err = e.pool.Exec(e.ctx, `UPDATE planting_plans SET accepted_guidance_id=$1 WHERE id=$2`, snapshot, plan); err != nil {
+	selection, err := json.Marshal(planning.ScheduleSelection{Version: planning.ScheduleVersion, FactID: "fixture-fact", WindowIndex: 0, Year: 2027, Assumptions: planning.ScheduleAssumptions{Anchors: []planning.ScheduleAnchor{{Kind: "LAST_FROST", On: "2027-03-20"}}}, SupportedPeriod: &planning.Period{Precision: planning.MonthRangePrecision, Months: &planning.MonthRange{From: "2027-12", To: "2028-02"}}, ConfirmedAt: time.Date(2026, 11, 15, 12, 0, 0, 0, time.UTC)})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err = e.pool.Exec(e.ctx, `UPDATE planting_plans SET accepted_guidance_id=$1,accepted_schedule=$3 WHERE id=$2`, snapshot, plan, selection); err != nil {
 		t.Fatal(err)
 	}
 	if _, err = e.pool.Exec(e.ctx, `INSERT INTO planting_fulfillments(id,workspace_id,plan_id,plant_id,action_id,mode) VALUES($1,$2,$3,$4,$5,'EXISTING')`, ids.New(), e.ws, plan, plant, action); err != nil {
@@ -161,6 +167,9 @@ func TestPlanningExportIsScopedAndIncludesGuidanceAndLinks(t *testing.T) {
 	}
 	if !bytes.Contains(entries["data/planting_guidance_snapshots.jsonl"], []byte("https://example.invalid/planting-fixture")) {
 		t.Fatal("citations missing from export")
+	}
+	if !bytes.Contains(entries["data/planting_plans.jsonl"], []byte(`"accepted_schedule": {`)) || !bytes.Contains(entries["data/planting_plans.jsonl"], []byte("2027-03-20")) {
+		t.Fatal("accepted schedule assumptions missing from export")
 	}
 	if !bytes.Contains(entries["data/planting_fulfillments.jsonl"], []byte(`"plant_id": null`)) {
 		t.Fatal("purge marker missing")
@@ -291,6 +300,8 @@ func TestPlanningRestorePopulatedPreGuidanceArchiveAndRebuildableCaches(t *testi
 		legacy.WriteByte('\n')
 	}
 	entries["db/planting_guidance_snapshots.jsonl"] = legacy.Bytes()
+	// The same old archive also predates selection metadata on its plans.
+	entries["db/planting_plans.jsonl"] = stripPlannerArchiveColumn(t, entries["db/planting_plans.jsonl"], "accepted_schedule")
 	path := rewrittenPlannerArchive(t, entries, inner)
 	b := blankEnv(t)
 	result, err := b.svc.Restore(b.ctx, RestoreOptions{Archive: path, Ledger: sum.Ledger})
@@ -306,5 +317,53 @@ func TestPlanningRestorePopulatedPreGuidanceArchiveAndRebuildableCaches(t *testi
 	}
 	if _, err = b.pool.Exec(b.ctx, `UPDATE planting_guidance_snapshots SET next_check_at=now() WHERE state='READY'`); err != nil {
 		t.Fatal("old READY snapshot could not schedule review", err)
+	}
+	var selections int
+	if err = b.pool.QueryRow(b.ctx, `SELECT count(*) FROM planting_plans WHERE accepted_schedule IS NOT NULL`).Scan(&selections); err != nil || selections != 0 {
+		t.Fatal("old archive acquired invented selection assumptions", selections, err)
+	}
+}
+
+func stripPlannerArchiveColumn(t *testing.T, data []byte, column string) []byte {
+	t.Helper()
+	var out bytes.Buffer
+	for _, line := range splitLines(data) {
+		var row map[string]any
+		if err := json.Unmarshal(line, &row); err != nil {
+			t.Fatal(err)
+		}
+		delete(row, column)
+		raw, err := json.Marshal(row)
+		if err != nil {
+			t.Fatal(err)
+		}
+		out.Write(raw)
+		out.WriteByte('\n')
+	}
+	return out.Bytes()
+}
+
+func TestPlanningRestorePopulatedPreScheduleArchiveRetainsAcceptedSource(t *testing.T) {
+	e := newEnv(t)
+	plan, _ := seedPlanner(t, e)
+	sum, err := e.svc.Backup(e.ctx, BackupOptions{Dest: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries := readTar(t, sum.Archive)
+	var manifest BackupManifest
+	if err = json.Unmarshal(entries["manifest.json"], &manifest); err != nil {
+		t.Fatal(err)
+	}
+	entries["db/planting_plans.jsonl"] = stripPlannerArchiveColumn(t, entries["db/planting_plans.jsonl"], "accepted_schedule")
+	path := rewrittenPlannerArchive(t, entries, manifest)
+	b := blankEnv(t)
+	if _, err = b.svc.Restore(b.ctx, RestoreOptions{Archive: path, Ledger: sum.Ledger}); err != nil {
+		t.Fatal(err)
+	}
+	var hasAccepted, hasSelection bool
+	var target string
+	if err = b.pool.QueryRow(b.ctx, `SELECT accepted_guidance_id IS NOT NULL,accepted_schedule IS NOT NULL,target_from_month FROM planting_plans WHERE id=$1`, plan).Scan(&hasAccepted, &hasSelection, &target); err != nil || !hasAccepted || hasSelection || target != "2027-12" {
+		t.Fatal("legacy accepted choice changed", hasAccepted, hasSelection, target, err)
 	}
 }

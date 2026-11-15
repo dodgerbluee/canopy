@@ -30,7 +30,7 @@ func (q *Queries) AbandonPlanningGuidance(ctx context.Context, arg AbandonPlanni
 const advancePlanningGuidance = `-- name: AdvancePlanningGuidance :one
 UPDATE planting_plans SET guidance_generation=guidance_generation+1,
  revision=revision+CASE WHEN $1::boolean THEN 1 ELSE 0 END
-WHERE workspace_id=$2 AND id=$3 RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at
+WHERE workspace_id=$2 AND id=$3 RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule
 `
 
 type AdvancePlanningGuidanceParams struct {
@@ -72,6 +72,7 @@ func (q *Queries) AdvancePlanningGuidance(ctx context.Context, arg AdvancePlanni
 		&i.AcceptedGuidanceID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AcceptedSchedule,
 	)
 	return i, err
 }
@@ -92,7 +93,7 @@ func (q *Queries) AdvancePlantingActionSchedules(ctx context.Context, arg Advanc
 }
 
 const bumpPlantingPlan = `-- name: BumpPlantingPlan :one
-UPDATE planting_plans SET revision=revision+1 WHERE workspace_id=$1 AND id=$2 RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at
+UPDATE planting_plans SET revision=revision+1 WHERE workspace_id=$1 AND id=$2 RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule
 `
 
 type BumpPlantingPlanParams struct {
@@ -133,6 +134,7 @@ func (q *Queries) BumpPlantingPlan(ctx context.Context, arg BumpPlantingPlanPara
 		&i.AcceptedGuidanceID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AcceptedSchedule,
 	)
 	return i, err
 }
@@ -174,6 +176,78 @@ func (q *Queries) ClaimPlanningGuidance(ctx context.Context, arg ClaimPlanningGu
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.NextCheckAt,
+	)
+	return i, err
+}
+
+const confirmPlanningSchedule = `-- name: ConfirmPlanningSchedule :one
+UPDATE planting_plans SET target_precision=$1,target_from=$2,target_to=$3,
+ target_from_month=$4,target_to_month=$5,
+ target_year=$6,target_season=$7,
+ accepted_guidance_id=$8,accepted_schedule=$9,revision=revision+1
+WHERE workspace_id=$10 AND id=$11 RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule
+`
+
+type ConfirmPlanningScheduleParams struct {
+	TargetPrecision  NullPlantingPeriodPrecision
+	TargetFrom       pgtype.Date
+	TargetTo         pgtype.Date
+	TargetFromMonth  pgtype.Text
+	TargetToMonth    pgtype.Text
+	TargetYear       pgtype.Int4
+	TargetSeason     NullPlantingSeason
+	SnapshotID       pgtype.UUID
+	AcceptedSchedule []byte
+	WorkspaceID      pgtype.UUID
+	ID               pgtype.UUID
+}
+
+func (q *Queries) ConfirmPlanningSchedule(ctx context.Context, arg ConfirmPlanningScheduleParams) (PlantingPlan, error) {
+	row := q.db.QueryRow(ctx, confirmPlanningSchedule,
+		arg.TargetPrecision,
+		arg.TargetFrom,
+		arg.TargetTo,
+		arg.TargetFromMonth,
+		arg.TargetToMonth,
+		arg.TargetYear,
+		arg.TargetSeason,
+		arg.SnapshotID,
+		arg.AcceptedSchedule,
+		arg.WorkspaceID,
+		arg.ID,
+	)
+	var i PlantingPlan
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.Name,
+		&i.ScientificName,
+		&i.Cultivar,
+		&i.Category,
+		&i.DesiredQuantity,
+		&i.Method,
+		&i.IntendedLocationID,
+		&i.IntendedPlacement,
+		&i.TargetPrecision,
+		&i.TargetFrom,
+		&i.TargetTo,
+		&i.TargetFromMonth,
+		&i.TargetToMonth,
+		&i.TargetYear,
+		&i.TargetSeason,
+		&i.BudgetMinor,
+		&i.BudgetCurrency,
+		&i.Notes,
+		&i.State,
+		&i.ResumeState,
+		&i.CancelledAt,
+		&i.CompletedAt,
+		&i.Revision,
+		&i.GuidanceGeneration,
+		&i.AcceptedGuidanceID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.AcceptedSchedule,
 	)
 	return i, err
 }
@@ -329,7 +403,7 @@ func (q *Queries) GetPlantingAction(ctx context.Context, arg GetPlantingActionPa
 }
 
 const getPlantingPlan = `-- name: GetPlantingPlan :one
-SELECT id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at FROM planting_plans WHERE workspace_id=$1 AND id=$2
+SELECT id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule FROM planting_plans WHERE workspace_id=$1 AND id=$2
 `
 
 type GetPlantingPlanParams struct {
@@ -370,6 +444,7 @@ func (q *Queries) GetPlantingPlan(ctx context.Context, arg GetPlantingPlanParams
 		&i.AcceptedGuidanceID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AcceptedSchedule,
 	)
 	return i, err
 }
@@ -507,7 +582,7 @@ VALUES($1,$2,$3,$4,$5,$6,
  $7,$8,$9,$10,
  $11,$12,$13,$14,$15,
  $16,$17,$18,$19,$20,$21)
-RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at
+RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule
 `
 
 type InsertPlantingPlanParams struct {
@@ -589,6 +664,7 @@ func (q *Queries) InsertPlantingPlan(ctx context.Context, arg InsertPlantingPlan
 		&i.AcceptedGuidanceID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AcceptedSchedule,
 	)
 	return i, err
 }
@@ -732,7 +808,7 @@ func (q *Queries) ListPlantingFulfillments(ctx context.Context, arg ListPlanting
 }
 
 const listPlantingPlansNameAsc = `-- name: ListPlantingPlansNameAsc :many
-SELECT id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at FROM planting_plans p
+SELECT id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule FROM planting_plans p
 WHERE p.workspace_id=$1
  AND p.state=ANY($2::text[]::planting_plan_state[])
  AND ($3::planting_method IS NULL OR p.method=$3)
@@ -802,6 +878,7 @@ func (q *Queries) ListPlantingPlansNameAsc(ctx context.Context, arg ListPlanting
 			&i.AcceptedGuidanceID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.AcceptedSchedule,
 		); err != nil {
 			return nil, err
 		}
@@ -814,7 +891,7 @@ func (q *Queries) ListPlantingPlansNameAsc(ctx context.Context, arg ListPlanting
 }
 
 const listPlantingPlansUpdatedDesc = `-- name: ListPlantingPlansUpdatedDesc :many
-SELECT id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at FROM planting_plans p
+SELECT id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule FROM planting_plans p
 WHERE p.workspace_id=$1
  AND p.state=ANY($2::text[]::planting_plan_state[])
  AND ($3::planting_method IS NULL OR p.method=$3)
@@ -884,6 +961,7 @@ func (q *Queries) ListPlantingPlansUpdatedDesc(ctx context.Context, arg ListPlan
 			&i.AcceptedGuidanceID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.AcceptedSchedule,
 		); err != nil {
 			return nil, err
 		}
@@ -913,7 +991,7 @@ func (q *Queries) LockPlantingLocation(ctx context.Context, arg LockPlantingLoca
 }
 
 const lockPlantingPlan = `-- name: LockPlantingPlan :one
-SELECT id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at FROM planting_plans WHERE workspace_id=$1 AND id=$2 FOR UPDATE
+SELECT id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule FROM planting_plans WHERE workspace_id=$1 AND id=$2 FOR UPDATE
 `
 
 type LockPlantingPlanParams struct {
@@ -954,12 +1032,13 @@ func (q *Queries) LockPlantingPlan(ctx context.Context, arg LockPlantingPlanPara
 		&i.AcceptedGuidanceID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AcceptedSchedule,
 	)
 	return i, err
 }
 
 const planningGuidanceCandidates = `-- name: PlanningGuidanceCandidates :many
-SELECT p.id, p.workspace_id, p.name, p.scientific_name, p.cultivar, p.category, p.desired_quantity, p.method, p.intended_location_id, p.intended_placement, p.target_precision, p.target_from, p.target_to, p.target_from_month, p.target_to_month, p.target_year, p.target_season, p.budget_minor, p.budget_currency, p.notes, p.state, p.resume_state, p.cancelled_at, p.completed_at, p.revision, p.guidance_generation, p.accepted_guidance_id, p.created_at, p.updated_at FROM planting_plans p LEFT JOIN planting_guidance_snapshots g
+SELECT p.id, p.workspace_id, p.name, p.scientific_name, p.cultivar, p.category, p.desired_quantity, p.method, p.intended_location_id, p.intended_placement, p.target_precision, p.target_from, p.target_to, p.target_from_month, p.target_to_month, p.target_year, p.target_season, p.budget_minor, p.budget_currency, p.notes, p.state, p.resume_state, p.cancelled_at, p.completed_at, p.revision, p.guidance_generation, p.accepted_guidance_id, p.created_at, p.updated_at, p.accepted_schedule FROM planting_plans p LEFT JOIN planting_guidance_snapshots g
  ON g.workspace_id=p.workspace_id AND g.plan_id=p.id AND g.generation=p.guidance_generation
 WHERE p.state IN('IDEA','PLANNED','IN_PROGRESS')
  AND (g.id IS NULL OR COALESCE(g.next_check_at,g.updated_at)<=now())
@@ -1005,6 +1084,7 @@ func (q *Queries) PlanningGuidanceCandidates(ctx context.Context) ([]PlantingPla
 			&i.AcceptedGuidanceID,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.AcceptedSchedule,
 		); err != nil {
 			return nil, err
 		}
@@ -1025,9 +1105,10 @@ UPDATE planting_plans SET name=$1,scientific_name=$2,cultivar=$3,
  target_year=$14,target_season=$15,budget_minor=$16,
  budget_currency=$17,notes=$18,revision=revision+1,
  guidance_generation=guidance_generation+CASE WHEN $19::boolean THEN 1 ELSE 0 END,
- accepted_guidance_id=CASE WHEN $20::boolean THEN NULL ELSE accepted_guidance_id END
+ accepted_guidance_id=CASE WHEN $20::boolean THEN NULL ELSE accepted_guidance_id END,
+ accepted_schedule=CASE WHEN $20::boolean THEN NULL ELSE accepted_schedule END
 WHERE workspace_id=$21 AND id=$22
-RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at
+RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule
 `
 
 type ReplacePlantingIntentParams struct {
@@ -1111,6 +1192,7 @@ func (q *Queries) ReplacePlantingIntent(ctx context.Context, arg ReplacePlanting
 		&i.AcceptedGuidanceID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AcceptedSchedule,
 	)
 	return i, err
 }
@@ -1135,7 +1217,7 @@ const setPlantingPlanState = `-- name: SetPlantingPlanState :one
 UPDATE planting_plans SET state=$1,resume_state=$2,
  cancelled_at=$3,completed_at=$4,revision=revision+1
 WHERE workspace_id=$5 AND id=$6
-RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at
+RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule
 `
 
 type SetPlantingPlanStateParams struct {
@@ -1187,6 +1269,7 @@ func (q *Queries) SetPlantingPlanState(ctx context.Context, arg SetPlantingPlanS
 		&i.AcceptedGuidanceID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.AcceptedSchedule,
 	)
 	return i, err
 }

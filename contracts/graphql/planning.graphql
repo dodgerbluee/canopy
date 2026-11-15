@@ -146,6 +146,7 @@ type PlantingPlan {
   """Only the current generation; null while no current snapshot exists."""
   latestGuidance: PlantingGuidanceSnapshot
   acceptedGuidance: PlantingGuidanceSnapshot
+  acceptedSchedule: PlantingScheduleSelection
   """Ownership is independent of progress; adding a nursery plant does not complete plant-out actions."""
   fulfillment: PlantingFulfillment
   createdAt: DateTime!
@@ -226,7 +227,7 @@ type PlantingPlanPayload {
 }
 
 # Activated in PLAN02 with real CRUD resolvers and populated portability coverage.
-# Guidance generation, scheduling and promotion commands land in later packets.
+# Research and scheduling join in PLAN03/PLAN04; garden promotion is PLAN07.
 extend type Query {
   """Workspace-scoped keyset pagination. first 1..100; cursor bound to filter/order."""
   plantingPlans(first: Int = 25, after: String, filter: PlantingPlanFilter, order: PlantingPlanOrder = NAME_ASC): PlantingPlanConnection!
@@ -247,4 +248,95 @@ extend type Mutation {
 input RefreshPlantingGuidanceInput { id: ID!, expectedRevision: Int! }
 extend type Mutation {
   refreshPlantingGuidance(input: RefreshPlantingGuidanceInput!, clientMutationId: String): PlantingPlanPayload!
+}
+
+enum PlantingScheduleResolution { RESOLVED UNKNOWN NEEDS_ANCHOR NEEDS_OFFSET NEEDS_HEMISPHERE HEMISPHERE_MISMATCH INVALID_DATE OUT_OF_RANGE }
+enum PlantingPeriodStatus { UNSCHEDULED UPCOMING IN_WINDOW PASSED NEEDS_REVIEW }
+"""An explicit planning assumption; never a recorded garden event or inferred frost date."""
+input PlantingScheduleAnchorInput { kind: PlantingTimingAnchor!, on: LocalDate! }
+type PlantingScheduleAnchor { kind: PlantingTimingAnchor!, on: LocalDate! }
+input PlantingScheduleAssumptionsInput {
+  hemisphere: PlantingHemisphere
+  """At most six anchors, one per named kind. UNKNOWN cannot supply a date."""
+  anchors: [PlantingScheduleAnchorInput!]! = []
+}
+type PlantingScheduleAssumptions {
+  hemisphere: PlantingHemisphere
+  anchors: [PlantingScheduleAnchor!]!
+}
+input PlantingScheduleInput {
+  """Inclusive canonical YYYY-MM range, at most twelve months."""
+  fromMonth: String!
+  toMonth: String!
+  assumptions: PlantingScheduleAssumptionsInput
+}
+type PlantingScheduleSelection {
+  version: Int!
+  factId: ID!
+  windowIndex: Int!
+  """Annual starting year, relative anchor year, or absolute period starting year."""
+  year: Int!
+  assumptions: PlantingScheduleAssumptions!
+  supportedPeriod: PlantingPeriod!
+  confirmedAt: DateTime!
+}
+type PlantingProjectedWindow {
+  id: ID!
+  factId: ID!
+  """Zero-based index within the immutable source fact."""
+  windowIndex: Int!
+  year: Int!
+  phase: PlantingPhaseKind!
+  label: String!
+  resolution: PlantingScheduleResolution!
+  message: String!
+  status: PlantingPeriodStatus!
+  """Source precision; a season or month is never replaced by a fabricated day."""
+  period: PlantingPeriod
+  """Approximate clipped rendering band only. Never an asserted action date."""
+  displayMonths: PlantingMonthRange
+  continuesBefore: Boolean!
+  continuesAfter: Boolean!
+  estimated: Boolean!
+  firstHarvestUnknown: Boolean!
+  selectable: Boolean!
+}
+type PlantingScheduleConnection {
+  planId: ID!
+  revision: Int!
+  guidanceGeneration: Int!
+  timezone: String!
+  today: LocalDate!
+  targetPeriod: PlantingPeriod
+  targetHemisphere: PlantingHemisphere
+  targetStatus: PlantingPeriodStatus!
+  targetDisplayMonths: PlantingMonthRange
+  targetVisible: Boolean!
+  acceptedSchedule: PlantingScheduleSelection
+  sourceSnapshotId: ID
+  guidanceState: KnowledgeState!
+  guidanceCurrent: Boolean!
+  message: String!
+  assumptions: PlantingScheduleAssumptions!
+  items: [PlantingProjectedWindow!]!
+  pageInfo: PageInfo!
+}
+input ConfirmPlantingScheduleInput {
+  planId: ID!
+  expectedRevision: Int!
+  snapshotId: ID!
+  generation: Int!
+  factId: ID!
+  windowIndex: Int!
+  year: Int!
+  assumptions: PlantingScheduleAssumptionsInput
+  """An explicit user choice contained by the selected supported window."""
+  targetPeriod: PlantingPeriodInput!
+}
+extend type Query {
+  """Read-only per-plan projection. Null for absent/private ids. Cursor binds the view, assumptions, local day and current plan/source context."""
+  plantingSchedule(planId: ID!, input: PlantingScheduleInput!, first: Int = 25, after: String): PlantingScheduleConnection
+}
+extend type Mutation {
+  confirmPlantingSchedule(input: ConfirmPlantingScheduleInput!, clientMutationId: String): PlantingPlanPayload!
 }

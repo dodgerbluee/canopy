@@ -2367,6 +2367,7 @@ type PlantingPlan struct {
 	AcceptedGuidanceID pgtype.UUID
 	CreatedAt          pgtype.Timestamptz
 	UpdatedAt          pgtype.Timestamptz
+	AcceptedSchedule   []byte
 }
 
 type Purchase struct {

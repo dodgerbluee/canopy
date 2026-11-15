@@ -206,7 +206,11 @@ func (q queryResolver) plantingPlanOut(ctx context.Context, p httpx.Principal, p
 	for _, a := range plan.Actions {
 		out.Actions = append(out.Actions, &gql.PlantingAction{ID: uuidString(a.ID), Kind: gql.PlantingActionKind(a.Kind), Title: a.Title, ScheduledOn: *dateOut(a.ScheduledOn), ReminderOn: dateOut(a.ReminderOn), ScheduleRevision: int(a.ScheduleRevision), Notes: textPtr(a.Notes), State: gql.PlantingActionState(a.State), CompletedOn: dateOut(a.CompletedOn), CompletedAt: dtPtrOut(a.CompletedAt), DismissedAt: dtPtrOut(a.DismissedAt), CreatedAt: dtOut(a.CreatedAt), UpdatedAt: dtOut(a.UpdatedAt)})
 	}
-	var err error
+	selection, err := planning.DecodeScheduleSelection(row.AcceptedSchedule)
+	if err != nil {
+		return nil, err
+	}
+	out.AcceptedSchedule = plantingScheduleSelectionOut(selection)
 	out.LatestGuidance, err = plantingGuidanceOut(plan.LatestGuidance)
 	if err != nil {
 		return nil, err

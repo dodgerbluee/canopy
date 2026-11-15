@@ -1,9 +1,8 @@
 # Future planting planner
 
-Status: steps 1–3 of 8 accepted on the feature branch. Step 4's pure schedule
-engine, scoped projections and explicit source-backed selection are under final
-verification. The Planning page follows in step 5. Existing production deployments
-are unchanged.
+Status: steps 1–4 of 8 complete and accepted on the feature branch, including
+the pure schedule engine and explicit source-backed selection. The Planning page
+follows in step 5. Existing production deployments are unchanged.
 
 ## Product direction
 
@@ -277,7 +276,7 @@ plant. Completing the overall plan is distinct from ownership and an elapsed dat
 
 ## Eight sequential implementation packets
 
-PLAN01, PLAN02 and PLAN03 are accepted; PLAN04 is under final verification.
+PLAN01 through PLAN04 are accepted.
 Register the remaining sequential implementation packets when they are kicked off. The
 accepted base contract is recorded in `docs/plan/tasks/PLAN01-contract-change.md`;
 PLAN03's additive refresh/research contract is recorded in
@@ -288,7 +287,7 @@ PLAN03's additive refresh/research contract is recorded in
 | 1 — complete | Contracts and storage | Accepted contract change record; `contracts/graphql/planning.graphql`, operations, migration 00019 | States, date precision, source vs user dates, permissions, pagination, revisions and promotion semantics defined. Disposable PostgreSQL up/down/reapply, generators, local regression suite and full GitHub CI passed. |
 | 2 — complete | Planning domain and CRUD | `server/internal/planning/`, DB queries, GraphQL resolver, portability manifests | Workspace isolation, optional values, exact budgets, transactional revisions/audit/replay, scoped cursors and complete backup/export inclusion implemented. Real HTTP operations, populated and legacy restore, race checks, full backend regression and GitHub CI passed. |
 | 3 — complete | Crop-based guidance | `server/internal/knowledge/`, source adapters, enrichment queries/worker | Research before a plant exists, automatic/explicit refresh, immutable provenance, honest timing, stale-generation fencing, public cache and bounded provider usage. Source/cultivar/region/method matching, three configured transports, failed/manual paths, populated/legacy portability, race checks, fresh primary-source/local-model smoke and full GitHub CI passed. |
-| 4 — verifying | Schedule engine | `server/internal/planning/schedule.go` and scoped query/confirmation commands | Pure civil projections, twelve-month per-plan pagination, preserved precision/display bands and explicit acceptance with portable assumptions. Verify distinct/overlapping windows, Gregorian leap cycle, hemispheres, missing/wrong anchors, first-harvest uncertainty, context/revision conflicts, atomic audit/replay and unchanged choices after refresh. |
+| 4 — complete | Schedule engine | `server/internal/planning/schedule.go` and scoped query/confirmation commands | Pure civil projections, twelve-month per-plan pagination and explicit acceptance with portable assumptions. Distinct/overlapping windows, Gregorian leap cycle, hemispheres, missing/wrong anchors, first-harvest uncertainty, conflicts/replay/rollback and preserved choices verified. Populated/legacy restore, migration CLI 21→20→21, race checks, full Go regression and GitHub CI passed. |
 | 5 | Angular page and shared modals | `web/src/app/features/planning/`, data layer, routes/shell/More, reusable timeline primitives | Complete ideas/plans/detail/edit flow on desktop and phone. Test fresh-form validation, unknown/failed guidance, cancel/restore, URL filters, keyboard focus, scrolling and both themes. Serve a local Docker preview. |
 | 6 | Calendar, Year, Today and reminders | Existing calendar/seasons/today/inbox modules; scoped planner projections and worker | Planning stays visually distinct and filterable, with no fake real-plant events. Only explicit dates create markers/reminders. Test near-term scheduling, duplicate suppression, cancellation and date changes. |
 | 7 | Add to garden | Planning promotion command, narrow collection transaction interface, existing plant form | One atomic conversion to one plant/group, with confirmed actual values and origin link. Test retry after lost response, concurrent different keys, stale revisions, conflicts, rollback, unknown actual count, linking an existing plant and buying early while a later plant-out action stays open. |

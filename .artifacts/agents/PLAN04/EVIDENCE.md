@@ -1,6 +1,10 @@
 # PLAN04 — Pure schedule engine and explicit confirmation
 
-Status: IN_PROGRESS. Local checks passed; GitHub CI pending.
+Status: ACCEPTED. Implementation commit:
+ba6c6cc5843be61c69cd3d229f2f8e2159a8a977.
+
+Full GitHub CI passed on that commit:
+https://github.com/dodgerbluee/canopy/actions/runs/43688758483
 
 Implemented a pure projection engine that receives immutable source facts,
 explicit planning assumptions, selected period, civil month range and local
@@ -54,10 +58,16 @@ Executed checks:
 - Lint passed Go format/vet, Node24 TypeScript and Angular production build
   (`lint.log`). Generation no-diff and plan/packet/dispatch/import-boundary gates
   passed (`generation-no-diff.log`, `final-plan-boundary.log`). Final source-linked
-  portability fixtures passed (`final-portability.log`). GitHub CI pending.
+  portability fixtures passed (`final-portability.log`).
+- GitHub CI passed release tooling, clean dependency installation, generation
+  no-diff, plan/boundary gates, lint/build, unit tests and real PostgreSQL
+  integration. Structured result and full logs are retained as `ci-result.json`
+  and `ci.log`.
 
-Tests use the disposable canopy-plan04-pg database, separate from running app
-databases. No production configuration, records or runtime is changed by PLAN04.
+Tests used the disposable canopy-plan04-pg database, separate from running app
+databases; it was removed after local verification. No production configuration,
+records or runtime was changed by PLAN04. Changes are pushed only to
+feature/planting-planner, without a main-branch merge or deployment release.
 No new UI, Calendar/Year/Today integration, reminders, garden promotion or MCP
 tool is included. Raw logs remain ignored in this directory.
 

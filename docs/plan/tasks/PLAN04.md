@@ -1,6 +1,6 @@
 # PLAN04 — Planting schedule engine
 
-Status: IN_PROGRESS.
+Status: ACCEPTED. Evidence: `.artifacts/agents/PLAN04/EVIDENCE.md`.
 
 ### PLAN04 — Pure schedule projections and explicit confirmation
 

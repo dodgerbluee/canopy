@@ -1,6 +1,6 @@
 # PLAN08 — Planner agents, assistant drafts and final gate
 
-Status: IN_PROGRESS.
+Status: ACCEPTED.
 
 ### PLAN08 — Scoped MCP planner tools, reviewed assistant drafts and final gate
 

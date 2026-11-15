@@ -1083,7 +1083,7 @@
       "dependsOn": [
         "PLAN07"
       ],
-      "status": "IN_PROGRESS",
+      "status": "ACCEPTED",
       "release": "R3"
     }
   },

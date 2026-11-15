@@ -1,6 +1,6 @@
 # PLAN06 — Planning integrations and opt-in reminders
 
-Status: IN_PROGRESS. Local verification passed; exact-source CI pending.
+Status: ACCEPTED. Local verification and full exact-source CI passed.
 
 Calendar uses a separate typed, scoped and paginated 62-day explicit-action projection. Planning markers/filters do not require an owned plant and never count as recorded history. Garden year has an opt-in dashed chosen-window overlay; Today shows a bounded next-week section with honest service failures. Linked actions open their plan. Inbox routes PLANTING_ACTION notices to Planning and preserves explicit read state.
 
@@ -17,4 +17,4 @@ Executed checks so far:
 - All 32 authenticated desktop/phone × light/dark browser scenarios passed, including separate Calendar filters/counts, Today/deep links, optional Year overlay with zero axe violations, and Inbox explicit unread state (`browser.log`).
 - Full Go regression passed with isolated PostgreSQL (`go-regression.log`); final Go vet, contracts typecheck and production build passed (`lint.log`).
 
-Pending: exact-source GitHub CI; acceptance then proceeds to PLAN07 and PLAN08.
+Full GitHub CI passed for `82b3521d93ebd48bee99fbef1d190a98982e8d18`: https://github.com/dodgerbluee/canopy/actions/runs/43743143862 (generation, lint, all unit and real PostgreSQL integrations). Acceptance proceeds to PLAN07 and PLAN08.

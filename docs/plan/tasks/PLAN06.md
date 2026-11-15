@@ -1,6 +1,6 @@
 # PLAN06 — Planning integrations and opt-in reminders
 
-Status: IN_PROGRESS.
+Status: ACCEPTED.
 
 ### PLAN06 — Calendar, Garden year, Today and planning reminders
 

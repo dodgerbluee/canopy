@@ -1067,7 +1067,7 @@
       "dependsOn": [
         "PLAN05"
       ],
-      "status": "IN_PROGRESS",
+      "status": "ACCEPTED",
       "release": "R3"
     }
   },

@@ -528,7 +528,8 @@
         "PLAN02",
         "PLAN03",
         "PLAN04",
-        "PLAN08"
+        "PLAN08",
+        "FIX09"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -1084,6 +1085,14 @@
         "PLAN07"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "FIX09": {
+      "title": "Remove default login identity and connect garden rain reviews",
+      "dependsOn": [
+        "PLAN08"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

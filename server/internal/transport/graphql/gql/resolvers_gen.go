@@ -244,6 +244,11 @@ func (r *mutationResolver) VoidRain(ctx context.Context, input VoidRainInput, cl
 	panic("not implemented")
 }
 
+// DismissRainReview is the resolver for the dismissRainReview field.
+func (r *mutationResolver) DismissRainReview(ctx context.Context, input DismissRainReviewInput, clientMutationID *string) (*DismissRainReviewPayload, error) {
+	panic("not implemented")
+}
+
 // CreateSource is the resolver for the createSource field.
 func (r *mutationResolver) CreateSource(ctx context.Context, input CreateSourceInput, clientMutationID *string) (*SourcePayload, error) {
 	panic("not implemented")

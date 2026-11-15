@@ -2427,6 +2427,20 @@ type RainEvent struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
+type RainReview struct {
+	ID          pgtype.UUID
+	WorkspaceID pgtype.UUID
+	EventDate   pgtype.Date
+	Latitude    pgtype.Numeric
+	Longitude   pgtype.Numeric
+	Timezone    string
+	EstimatedMm *pgtype.Numeric
+	CheckedAt   pgtype.Timestamptz
+	Response    string
+	RespondedAt pgtype.Timestamptz
+	RainEventID pgtype.UUID
+}
+
 type RegistrationHandover struct {
 	OwnerID    pgtype.UUID
 	TokenHash  string

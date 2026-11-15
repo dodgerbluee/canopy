@@ -35,6 +35,7 @@ import { STARTER_PLANTS, starterKey } from '../collection/starter';
 import { conflictNote, type PayloadProblem } from '../collection/shared';
 import { UpcomingPlantings } from '../planning/upcoming-plantings';
 import { HeroRotation } from './hero-rotation';
+import { RainPanel } from './rain-panel';
 import { InsightSuggestionCard } from '../insights/suggestion-card';
 import {
   dueNote,
@@ -87,6 +88,7 @@ function cardUrl(p: PlantFieldsFragment): string {
     UiStatus,
     InsightSuggestionCard,
     UpcomingPlantings,
+    RainPanel,
   ],
   templateUrl: './today.html',
   styleUrl: './today.css',

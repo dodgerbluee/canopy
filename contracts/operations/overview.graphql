@@ -4,6 +4,10 @@
 # detail rendered.
 query TodayOverview {
   todayOverview {
+    rainReview {
+      status areaLabel checkedAt
+      proposals { id day estimatedAmountMm checkedAt }
+    }
     dueTasks {
       items {
         ...CareOccurrenceFields

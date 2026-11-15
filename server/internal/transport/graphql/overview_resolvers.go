@@ -16,6 +16,7 @@ import (
 	dbgen "canopy/server/db/generated"
 	"canopy/server/internal/journal"
 	"canopy/server/internal/transport/graphql/gql"
+	"canopy/server/internal/transport/graphql/scalars"
 )
 
 const (
@@ -84,7 +85,19 @@ func (q queryResolver) TodayOverview(ctx context.Context) (*gql.TodayOverview, e
 		conditions = &gql.TodayConditions{Snapshot: out, LocationName: row.LocationName}
 	}
 
-	return &gql.TodayOverview{DueTasks: due, RecentEntries: recent, Conditions: conditions}, nil
+	review, err := q.r.Journal.RainReview(ctx, p.WorkspaceID, time.Now())
+	if err != nil {
+		return nil, internalError(ctx, err)
+	}
+	rainReview := &gql.RainReviewState{Status: gql.RainReviewStatus(review.Status), AreaLabel: review.AreaLabel, Proposals: []*gql.RainProposal{}}
+	if review.CheckedAt != nil {
+		t := scalars.DateTime(*review.CheckedAt)
+		rainReview.CheckedAt = &t
+	}
+	for _, v := range review.Proposals {
+		rainReview.Proposals = append(rainReview.Proposals, &gql.RainProposal{ID: v.ID, Day: scalars.Date(v.Day), EstimatedAmountMm: scalars.Decimal(v.EstimatedAmountMm), CheckedAt: scalars.DateTime(v.CheckedAt)})
+	}
+	return &gql.TodayOverview{DueTasks: due, RecentEntries: recent, Conditions: conditions, RainReview: rainReview}, nil
 }
 
 func weatherSnapshotFromRow(r dbgen.LatestWorkspaceWeatherRow) dbgen.WeatherSnapshot {

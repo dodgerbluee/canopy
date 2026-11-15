@@ -486,6 +486,11 @@ func TestBackupRestoreRoundTrip(t *testing.T) {
 	if _, err := e.pool.Exec(e.ctx, `INSERT INTO rain_events(id,workspace_id,event_date,amount_mm,note) VALUES($1,$2,'2026-11-01',25.4,'Rain restore')`, platform.UUIDv4{}.New(), e.ws); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := e.pool.Exec(e.ctx, `INSERT INTO rain_reviews(id,workspace_id,event_date,latitude,longitude,timezone,estimated_mm,checked_at,response,responded_at,rain_event_id)
+ VALUES($1,$3,'2026-11-01',32,-96,'UTC',12,now(),'CONFIRMED',now(),(SELECT id FROM rain_events WHERE workspace_id=$3 AND note='Rain restore')),
+ ($2,$3,'2026-11-02',32,-96,'UTC',2,now(),'DISMISSED',now(),NULL)`, platform.UUIDv4{}.New(), platform.UUIDv4{}.New(), e.ws); err != nil {
+		t.Fatal(err)
+	}
 	if _, err := e.pool.Exec(e.ctx, `INSERT INTO garden_knowledge_settings(workspace_id,country,region,place,enabled) VALUES($1,'US','Texas','Restored garden',false)`, e.ws); err != nil {
 		t.Fatal(err)
 	}
@@ -583,6 +588,10 @@ func TestBackupRestoreRoundTrip(t *testing.T) {
 	var rainAmount string
 	if err := b.pool.QueryRow(b.ctx, `SELECT amount_mm::text FROM rain_events WHERE workspace_id=$1 AND note='Rain restore'`, e.ws).Scan(&rainAmount); err != nil || rainAmount != "25.4" {
 		t.Fatal("rain must survive restore exactly", err, rainAmount)
+	}
+	var confirmedRainReviews, dismissedRainReviews int
+	if err := b.pool.QueryRow(b.ctx, `SELECT count(*) FILTER(WHERE response='CONFIRMED' AND rain_event_id IS NOT NULL),count(*) FILTER(WHERE response='DISMISSED') FROM rain_reviews WHERE workspace_id=$1`, e.ws).Scan(&confirmedRainReviews, &dismissedRainReviews); err != nil || confirmedRainReviews != 1 || dismissedRainReviews != 1 {
+		t.Fatal("rain review responses must survive restore", err, confirmedRainReviews, dismissedRainReviews)
 	}
 	// ledger re-applied: tombstone present, gone flag present, epoch kept
 	var tombs, gone int

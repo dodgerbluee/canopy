@@ -502,6 +502,12 @@ type ComplexityRoot struct {
 		Problems          func(childComplexity int) int
 	}
 
+	DismissRainReviewPayload struct {
+		ClientMutationID func(childComplexity int) int
+		DismissedID      func(childComplexity int) int
+		Problems         func(childComplexity int) int
+	}
+
 	DismissSuggestionPayload struct {
 		ClientMutationID func(childComplexity int) int
 		Problems         func(childComplexity int) int
@@ -707,6 +713,7 @@ type ComplexityRoot struct {
 		DeletePlantingAction        func(childComplexity int, input DeletePlantingActionInput, clientMutationID *string) int
 		DetachReceipt               func(childComplexity int, input DetachReceiptInput, clientMutationID *string) int
 		DismissPlantingAction       func(childComplexity int, input DismissPlantingActionInput, clientMutationID *string) int
+		DismissRainReview           func(childComplexity int, input DismissRainReviewInput, clientMutationID *string) int
 		DismissSuggestion           func(childComplexity int, input DismissSuggestionInput, clientMutationID *string) int
 		FinalizeUpload              func(childComplexity int, input FinalizeUploadInput, clientMutationID *string) int
 		MarkNotificationRead        func(childComplexity int, input MarkNotificationReadInput, clientMutationID *string) int
@@ -1310,6 +1317,20 @@ type ComplexityRoot struct {
 		Revision func(childComplexity int) int
 	}
 
+	RainProposal struct {
+		CheckedAt         func(childComplexity int) int
+		Day               func(childComplexity int) int
+		EstimatedAmountMm func(childComplexity int) int
+		ID                func(childComplexity int) int
+	}
+
+	RainReviewState struct {
+		AreaLabel func(childComplexity int) int
+		CheckedAt func(childComplexity int) int
+		Proposals func(childComplexity int) int
+		Status    func(childComplexity int) int
+	}
+
 	ReasonEvidence struct {
 		Note            func(childComplexity int) int
 		SourceVersion   func(childComplexity int) int
@@ -1506,6 +1527,7 @@ type ComplexityRoot struct {
 	TodayOverview struct {
 		Conditions    func(childComplexity int) int
 		DueTasks      func(childComplexity int) int
+		RainReview    func(childComplexity int) int
 		RecentEntries func(childComplexity int) int
 	}
 
@@ -1668,6 +1690,7 @@ type MutationResolver interface {
 	DismissSuggestion(ctx context.Context, input DismissSuggestionInput, clientMutationID *string) (*DismissSuggestionPayload, error)
 	RecordRain(ctx context.Context, input RecordRainInput, clientMutationID *string) (*RecordRainPayload, error)
 	VoidRain(ctx context.Context, input VoidRainInput, clientMutationID *string) (*VoidRainPayload, error)
+	DismissRainReview(ctx context.Context, input DismissRainReviewInput, clientMutationID *string) (*DismissRainReviewPayload, error)
 	CreateSource(ctx context.Context, input CreateSourceInput, clientMutationID *string) (*SourcePayload, error)
 	UpdateSource(ctx context.Context, input UpdateSourceInput, clientMutationID *string) (*SourcePayload, error)
 	RetireSource(ctx context.Context, input RetireSourceInput, clientMutationID *string) (*SourcePayload, error)
@@ -3638,6 +3661,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.DetachReceiptPayload.Problems(childComplexity), true
 
+	case "DismissRainReviewPayload.clientMutationId":
+		if e.ComplexityRoot.DismissRainReviewPayload.ClientMutationID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DismissRainReviewPayload.ClientMutationID(childComplexity), true
+	case "DismissRainReviewPayload.dismissedId":
+		if e.ComplexityRoot.DismissRainReviewPayload.DismissedID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DismissRainReviewPayload.DismissedID(childComplexity), true
+	case "DismissRainReviewPayload.problems":
+		if e.ComplexityRoot.DismissRainReviewPayload.Problems == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DismissRainReviewPayload.Problems(childComplexity), true
+
 	case "DismissSuggestionPayload.clientMutationId":
 		if e.ComplexityRoot.DismissSuggestionPayload.ClientMutationID == nil {
 			break
@@ -4648,6 +4690,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DismissPlantingAction(childComplexity, args["input"].(DismissPlantingActionInput), args["clientMutationId"].(*string)), true
+	case "Mutation.dismissRainReview":
+		if e.ComplexityRoot.Mutation.DismissRainReview == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_dismissRainReview_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DismissRainReview(childComplexity, args["input"].(DismissRainReviewInput), args["clientMutationId"].(*string)), true
 	case "Mutation.dismissSuggestion":
 		if e.ComplexityRoot.Mutation.DismissSuggestion == nil {
 			break
@@ -7584,6 +7637,56 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.RainEvent.Revision(childComplexity), true
 
+	case "RainProposal.checkedAt":
+		if e.ComplexityRoot.RainProposal.CheckedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RainProposal.CheckedAt(childComplexity), true
+	case "RainProposal.day":
+		if e.ComplexityRoot.RainProposal.Day == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RainProposal.Day(childComplexity), true
+	case "RainProposal.estimatedAmountMm":
+		if e.ComplexityRoot.RainProposal.EstimatedAmountMm == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RainProposal.EstimatedAmountMm(childComplexity), true
+	case "RainProposal.id":
+		if e.ComplexityRoot.RainProposal.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RainProposal.ID(childComplexity), true
+
+	case "RainReviewState.areaLabel":
+		if e.ComplexityRoot.RainReviewState.AreaLabel == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RainReviewState.AreaLabel(childComplexity), true
+	case "RainReviewState.checkedAt":
+		if e.ComplexityRoot.RainReviewState.CheckedAt == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RainReviewState.CheckedAt(childComplexity), true
+	case "RainReviewState.proposals":
+		if e.ComplexityRoot.RainReviewState.Proposals == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RainReviewState.Proposals(childComplexity), true
+	case "RainReviewState.status":
+		if e.ComplexityRoot.RainReviewState.Status == nil {
+			break
+		}
+
+		return e.ComplexityRoot.RainReviewState.Status(childComplexity), true
+
 	case "ReasonEvidence.note":
 		if e.ComplexityRoot.ReasonEvidence.Note == nil {
 			break
@@ -8329,6 +8432,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.TodayOverview.DueTasks(childComplexity), true
+	case "TodayOverview.rainReview":
+		if e.ComplexityRoot.TodayOverview.RainReview == nil {
+			break
+		}
+
+		return e.ComplexityRoot.TodayOverview.RainReview(childComplexity), true
 	case "TodayOverview.recentEntries":
 		if e.ComplexityRoot.TodayOverview.RecentEntries == nil {
 			break
@@ -8746,6 +8855,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("DeletePlantingActionInput", ec.unmarshalInputDeletePlantingActionInput),
 			graphql.NewInputUnmarshaler("DetachReceiptInput", ec.unmarshalInputDetachReceiptInput),
 			graphql.NewInputUnmarshaler("DismissPlantingActionInput", ec.unmarshalInputDismissPlantingActionInput),
+			graphql.NewInputUnmarshaler("DismissRainReviewInput", ec.unmarshalInputDismissRainReviewInput),
 			graphql.NewInputUnmarshaler("DismissSuggestionInput", ec.unmarshalInputDismissSuggestionInput),
 			graphql.NewInputUnmarshaler("EveryNDaysInput", ec.unmarshalInputEveryNDaysInput),
 			graphql.NewInputUnmarshaler("FinalizeUploadInput", ec.unmarshalInputFinalizeUploadInput),
@@ -9459,10 +9569,16 @@ type CalendarEvent {
 enum CalendarEventKind { ACTIVITY PHOTO PURCHASE MEASUREMENT CARE INSIGHT RAIN }
 type CalendarEventConnection { items: [CalendarEvent!]!, pageInfo: PageInfo! }
 type RainEvent { id: ID!, day: LocalDate!, amountMm: Decimal, note: String, revision: Int! }
-input RecordRainInput { day: LocalDate!, amountMm: Decimal, note: String }
+input RecordRainInput { day: LocalDate!, amountMm: Decimal, note: String, rainReviewId: ID }
 input VoidRainInput { id: ID!, expectedRevision: Int! }
 type RecordRainPayload { rain: RainEvent, problems: [MutationProblem!]!, clientMutationId: String }
 type VoidRainPayload { removedId: ID, problems: [MutationProblem!]!, clientMutationId: String }
+enum RainReviewStatus { NOT_CONFIGURED WAITING READY STALE }
+"Rain estimates cover elapsed hourly rain and showers only. Confirm to record actual area rain."
+type RainProposal { id: ID!, day: LocalDate!, estimatedAmountMm: Decimal!, checkedAt: DateTime! }
+type RainReviewState { status: RainReviewStatus!, areaLabel: String!, checkedAt: DateTime, proposals: [RainProposal!]! }
+input DismissRainReviewInput { id: ID! }
+type DismissRainReviewPayload { dismissedId: ID, problems: [MutationProblem!]!, clientMutationId: String }
 extend type Query {
   """Inclusive dates; maximum 62 days. Complete pagination before displaying a month."""
   calendarEvents(from: LocalDate!, to: LocalDate!, first: Int = 100, after: String): CalendarEventConnection!
@@ -9471,6 +9587,8 @@ extend type Mutation {
   """Area rain only. Never creates WATER activities or completes care tasks."""
   recordRain(input: RecordRainInput!, clientMutationId: String): RecordRainPayload!
   voidRain(input: VoidRainInput!, clientMutationId: String): VoidRainPayload!
+  "Dismiss an area rain prompt. This never logs watering or rain."
+  dismissRainReview(input: DismissRainReviewInput!, clientMutationId: String): DismissRainReviewPayload!
 }
 `, BuiltIn: false},
 	{Name: "../../../../../contracts/graphql/care.graphql", Input: `# Care domain: sources, reviewed knowledge profiles, plans, occurrences, agenda,
@@ -10693,6 +10811,8 @@ type TodayOverview {
   freshness bands (FRESH/STALE/UNAVAILABLE) are the frozen care semantics.
   """
   conditions: TodayConditions
+  "Garden-location weather checks and at most three recent local days awaiting confirmation."
+  rainReview: RainReviewState!
 }
 
 extend type Query {
@@ -12812,6 +12932,18 @@ func (ec *executionContext) childFields_DetachReceiptPayload(ctx context.Context
 	return nil, fmt.Errorf("no field named %q was found under type DetachReceiptPayload", field.Name)
 }
 
+func (ec *executionContext) childFields_DismissRainReviewPayload(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "dismissedId":
+		return ec.fieldContext_DismissRainReviewPayload_dismissedId(ctx, field)
+	case "problems":
+		return ec.fieldContext_DismissRainReviewPayload_problems(ctx, field)
+	case "clientMutationId":
+		return ec.fieldContext_DismissRainReviewPayload_clientMutationId(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type DismissRainReviewPayload", field.Name)
+}
+
 func (ec *executionContext) childFields_DismissSuggestionPayload(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "suggestion":
@@ -14056,6 +14188,34 @@ func (ec *executionContext) childFields_RainEvent(ctx context.Context, field gra
 	return nil, fmt.Errorf("no field named %q was found under type RainEvent", field.Name)
 }
 
+func (ec *executionContext) childFields_RainProposal(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_RainProposal_id(ctx, field)
+	case "day":
+		return ec.fieldContext_RainProposal_day(ctx, field)
+	case "estimatedAmountMm":
+		return ec.fieldContext_RainProposal_estimatedAmountMm(ctx, field)
+	case "checkedAt":
+		return ec.fieldContext_RainProposal_checkedAt(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type RainProposal", field.Name)
+}
+
+func (ec *executionContext) childFields_RainReviewState(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "status":
+		return ec.fieldContext_RainReviewState_status(ctx, field)
+	case "areaLabel":
+		return ec.fieldContext_RainReviewState_areaLabel(ctx, field)
+	case "checkedAt":
+		return ec.fieldContext_RainReviewState_checkedAt(ctx, field)
+	case "proposals":
+		return ec.fieldContext_RainReviewState_proposals(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type RainReviewState", field.Name)
+}
+
 func (ec *executionContext) childFields_ReasonEvidence(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "sourceVersion":
@@ -14428,6 +14588,8 @@ func (ec *executionContext) childFields_TodayOverview(ctx context.Context, field
 		return ec.fieldContext_TodayOverview_recentEntries(ctx, field)
 	case "conditions":
 		return ec.fieldContext_TodayOverview_conditions(ctx, field)
+	case "rainReview":
+		return ec.fieldContext_TodayOverview_rainReview(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type TodayOverview", field.Name)
 }
@@ -15440,6 +15602,28 @@ func (ec *executionContext) field_Mutation_dismissPlantingAction_args(ctx contex
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (DismissPlantingActionInput, error) {
 			return ec.unmarshalNDismissPlantingActionInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissPlantingActionInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "clientMutationId",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["clientMutationId"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_dismissRainReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (DismissRainReviewInput, error) {
+			return ec.unmarshalNDismissRainReviewInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissRainReviewInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -24930,6 +25114,84 @@ func (ec *executionContext) fieldContext_DetachReceiptPayload_clientMutationId(_
 	return graphql.NewScalarFieldContext("DetachReceiptPayload", field, false, false, "String")
 }
 
+func (ec *executionContext) _DismissRainReviewPayload_dismissedId(ctx context.Context, field graphql.CollectedField, obj *DismissRainReviewPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DismissRainReviewPayload_dismissedId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.DismissedID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOID2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_DismissRainReviewPayload_dismissedId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DismissRainReviewPayload", field, false, false, "ID")
+}
+
+func (ec *executionContext) _DismissRainReviewPayload_problems(ctx context.Context, field graphql.CollectedField, obj *DismissRainReviewPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DismissRainReviewPayload_problems(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Problems, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*MutationProblem) graphql.Marshaler {
+			return ec.marshalNMutationProblem2ᚕᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐMutationProblemᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_DismissRainReviewPayload_problems(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "DismissRainReviewPayload",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_MutationProblem(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _DismissRainReviewPayload_clientMutationId(ctx context.Context, field graphql.CollectedField, obj *DismissRainReviewPayload) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DismissRainReviewPayload_clientMutationId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ClientMutationID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_DismissRainReviewPayload_clientMutationId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DismissRainReviewPayload", field, false, false, "String")
+}
+
 func (ec *executionContext) _DismissSuggestionPayload_suggestion(ctx context.Context, field graphql.CollectedField, obj *DismissSuggestionPayload) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -29574,6 +29836,50 @@ func (ec *executionContext) fieldContext_Mutation_voidRain(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_voidRain_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_dismissRainReview(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_dismissRainReview(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DismissRainReview(ctx, fc.Args["input"].(DismissRainReviewInput), fc.Args["clientMutationId"].(*string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *DismissRainReviewPayload) graphql.Marshaler {
+			return ec.marshalNDismissRainReviewPayload2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissRainReviewPayload(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_dismissRainReview(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_DismissRainReviewPayload(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_dismissRainReview_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -40970,6 +41276,199 @@ func (ec *executionContext) fieldContext_RainEvent_revision(_ context.Context, f
 	return graphql.NewScalarFieldContext("RainEvent", field, false, false, "Int")
 }
 
+func (ec *executionContext) _RainProposal_id(ctx context.Context, field graphql.CollectedField, obj *RainProposal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RainProposal_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RainProposal_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RainProposal", field, false, false, "ID")
+}
+
+func (ec *executionContext) _RainProposal_day(ctx context.Context, field graphql.CollectedField, obj *RainProposal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RainProposal_day(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Day, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v scalars.Date) graphql.Marshaler {
+			return ec.marshalNLocalDate2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋscalarsᚐDate(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RainProposal_day(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RainProposal", field, false, false, "LocalDate")
+}
+
+func (ec *executionContext) _RainProposal_estimatedAmountMm(ctx context.Context, field graphql.CollectedField, obj *RainProposal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RainProposal_estimatedAmountMm(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.EstimatedAmountMm, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v scalars.Decimal) graphql.Marshaler {
+			return ec.marshalNDecimal2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋscalarsᚐDecimal(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RainProposal_estimatedAmountMm(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RainProposal", field, false, false, "Decimal")
+}
+
+func (ec *executionContext) _RainProposal_checkedAt(ctx context.Context, field graphql.CollectedField, obj *RainProposal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RainProposal_checkedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CheckedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v scalars.DateTime) graphql.Marshaler {
+			return ec.marshalNDateTime2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋscalarsᚐDateTime(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RainProposal_checkedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RainProposal", field, false, false, "DateTime")
+}
+
+func (ec *executionContext) _RainReviewState_status(ctx context.Context, field graphql.CollectedField, obj *RainReviewState) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RainReviewState_status(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v RainReviewStatus) graphql.Marshaler {
+			return ec.marshalNRainReviewStatus2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainReviewStatus(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RainReviewState_status(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RainReviewState", field, false, false, "RainReviewStatus")
+}
+
+func (ec *executionContext) _RainReviewState_areaLabel(ctx context.Context, field graphql.CollectedField, obj *RainReviewState) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RainReviewState_areaLabel(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.AreaLabel, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RainReviewState_areaLabel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RainReviewState", field, false, false, "String")
+}
+
+func (ec *executionContext) _RainReviewState_checkedAt(ctx context.Context, field graphql.CollectedField, obj *RainReviewState) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RainReviewState_checkedAt(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.CheckedAt, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *scalars.DateTime) graphql.Marshaler {
+			return ec.marshalODateTime2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋscalarsᚐDateTime(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_RainReviewState_checkedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("RainReviewState", field, false, false, "DateTime")
+}
+
+func (ec *executionContext) _RainReviewState_proposals(ctx context.Context, field graphql.CollectedField, obj *RainReviewState) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_RainReviewState_proposals(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Proposals, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*RainProposal) graphql.Marshaler {
+			return ec.marshalNRainProposal2ᚕᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainProposalᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_RainReviewState_proposals(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "RainReviewState",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RainProposal(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ReasonEvidence_sourceVersion(ctx context.Context, field graphql.CollectedField, obj *ReasonEvidence) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -44126,6 +44625,38 @@ func (ec *executionContext) fieldContext_TodayOverview_conditions(_ context.Cont
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_TodayConditions(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _TodayOverview_rainReview(ctx context.Context, field graphql.CollectedField, obj *TodayOverview) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_TodayOverview_rainReview(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.RainReview, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *RainReviewState) graphql.Marshaler {
+			return ec.marshalNRainReviewState2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainReviewState(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_TodayOverview_rainReview(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TodayOverview",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_RainReviewState(ctx, field)
 		},
 	}
 	return fc, nil
@@ -49288,6 +49819,48 @@ func UnmarshalDismissPlantingActionInput(ctx context.Context, raw any) (DismissP
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputDismissRainReviewInput(ctx context.Context, obj any) (DismissRainReviewInput, error) {
+	var it DismissRainReviewInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalDismissRainReviewInput unmarshals raw into the DismissRainReviewInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalDismissRainReviewInput(ctx context.Context, raw any) (DismissRainReviewInput, error) {
+	var out DismissRainReviewInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "DismissRainReviewInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputDismissSuggestionInput(ctx context.Context, obj any) (DismissSuggestionInput, error) {
 	var it DismissSuggestionInput
 	if obj == nil {
@@ -51253,7 +51826,7 @@ func (ec *executionContext) unmarshalInputRecordRainInput(ctx context.Context, o
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"day", "amountMm", "note"}
+	fieldsInOrder := [...]string{"day", "amountMm", "note", "rainReviewId"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -51281,6 +51854,13 @@ func (ec *executionContext) unmarshalInputRecordRainInput(ctx context.Context, o
 				return it, err
 			}
 			it.Note = data
+		case "rainReviewId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rainReviewId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.RainReviewID = data
 		}
 	}
 	return it, nil
@@ -57271,6 +57851,49 @@ func (ec *executionContext) _DetachReceiptPayload(ctx context.Context, sel ast.S
 	return out
 }
 
+var dismissRainReviewPayloadImplementors = []string{"DismissRainReviewPayload"}
+
+func (ec *executionContext) _DismissRainReviewPayload(ctx context.Context, sel ast.SelectionSet, obj *DismissRainReviewPayload) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dismissRainReviewPayloadImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DismissRainReviewPayload")
+		case "dismissedId":
+			out.Values[i] = ec._DismissRainReviewPayload_dismissedId(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "problems":
+			out.Values[i] = ec._DismissRainReviewPayload_problems(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "clientMutationId":
+			out.Values[i] = ec._DismissRainReviewPayload_clientMutationId(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
 var dismissSuggestionPayloadImplementors = []string{"DismissSuggestionPayload"}
 
 func (ec *executionContext) _DismissSuggestionPayload(ctx context.Context, sel ast.SelectionSet, obj *DismissSuggestionPayload) graphql.Marshaler {
@@ -58761,6 +59384,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "voidRain":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_voidRain(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "dismissRainReview":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_dismissRainReview(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -62623,6 +63253,102 @@ func (ec *executionContext) _RainEvent(ctx context.Context, sel ast.SelectionSet
 	return out
 }
 
+var rainProposalImplementors = []string{"RainProposal"}
+
+func (ec *executionContext) _RainProposal(ctx context.Context, sel ast.SelectionSet, obj *RainProposal) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, rainProposalImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RainProposal")
+		case "id":
+			out.Values[i] = ec._RainProposal_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "day":
+			out.Values[i] = ec._RainProposal_day(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "estimatedAmountMm":
+			out.Values[i] = ec._RainProposal_estimatedAmountMm(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "checkedAt":
+			out.Values[i] = ec._RainProposal_checkedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var rainReviewStateImplementors = []string{"RainReviewState"}
+
+func (ec *executionContext) _RainReviewState(ctx context.Context, sel ast.SelectionSet, obj *RainReviewState) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, rainReviewStateImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RainReviewState")
+		case "status":
+			out.Values[i] = ec._RainReviewState_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "areaLabel":
+			out.Values[i] = ec._RainReviewState_areaLabel(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "checkedAt":
+			out.Values[i] = ec._RainReviewState_checkedAt(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "proposals":
+			out.Values[i] = ec._RainReviewState_proposals(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
 var reasonEvidenceImplementors = []string{"ReasonEvidence"}
 
 func (ec *executionContext) _ReasonEvidence(ctx context.Context, sel ast.SelectionSet, obj *ReasonEvidence) graphql.Marshaler {
@@ -63937,6 +64663,11 @@ func (ec *executionContext) _TodayOverview(ctx context.Context, sel ast.Selectio
 		case "conditions":
 			out.Values[i] = ec._TodayOverview_conditions(ctx, field, obj)
 			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "rainReview":
+			out.Values[i] = ec._TodayOverview_rainReview(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		default:
@@ -66029,6 +66760,19 @@ func (ec *executionContext) unmarshalNDismissPlantingActionInput2canopyᚋserver
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNDismissRainReviewInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissRainReviewInput(ctx context.Context, v any) (DismissRainReviewInput, error) {
+	res, err := ec.unmarshalInputDismissRainReviewInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNDismissRainReviewPayload2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissRainReviewPayload(ctx context.Context, sel ast.SelectionSet, v *DismissRainReviewPayload) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "DismissRainReviewPayload!")
+		return graphql.Null
+	}
+	return ec._DismissRainReviewPayload(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNDismissSuggestionInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissSuggestionInput(ctx context.Context, v any) (DismissSuggestionInput, error) {
 	res, err := ec.unmarshalInputDismissSuggestionInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -67480,6 +68224,48 @@ func (ec *executionContext) unmarshalNQuantityKind2canopyᚋserverᚋinternalᚋ
 }
 
 func (ec *executionContext) marshalNQuantityKind2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐQuantityKind(ctx context.Context, sel ast.SelectionSet, v QuantityKind) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) marshalNRainProposal2ᚕᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainProposalᚄ(ctx context.Context, sel ast.SelectionSet, v []*RainProposal) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNRainProposal2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainProposal(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNRainProposal2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainProposal(ctx context.Context, sel ast.SelectionSet, v *RainProposal) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "RainProposal!")
+		return graphql.Null
+	}
+	return ec._RainProposal(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNRainReviewState2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainReviewState(ctx context.Context, sel ast.SelectionSet, v *RainReviewState) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "RainReviewState!")
+		return graphql.Null
+	}
+	return ec._RainReviewState(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNRainReviewStatus2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainReviewStatus(ctx context.Context, v any) (RainReviewStatus, error) {
+	var res RainReviewStatus
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNRainReviewStatus2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐRainReviewStatus(ctx context.Context, sel ast.SelectionSet, v RainReviewStatus) graphql.Marshaler {
 	return v
 }
 

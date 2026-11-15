@@ -881,6 +881,16 @@ type DismissPlantingActionInput struct {
 	ExpectedRevision int    `json:"expectedRevision"`
 }
 
+type DismissRainReviewInput struct {
+	ID string `json:"id"`
+}
+
+type DismissRainReviewPayload struct {
+	DismissedID      *string            `json:"dismissedId,omitempty"`
+	Problems         []*MutationProblem `json:"problems"`
+	ClientMutationID *string            `json:"clientMutationId,omitempty"`
+}
+
 type DismissSuggestionInput struct {
 	SuggestionID     string `json:"suggestionId"`
 	ExpectedRevision int    `json:"expectedRevision"`
@@ -1877,6 +1887,21 @@ type RainEvent struct {
 	Revision int              `json:"revision"`
 }
 
+// Rain estimates cover elapsed hourly rain and showers only. Confirm to record actual area rain.
+type RainProposal struct {
+	ID                string           `json:"id"`
+	Day               scalars.Date     `json:"day"`
+	EstimatedAmountMm scalars.Decimal  `json:"estimatedAmountMm"`
+	CheckedAt         scalars.DateTime `json:"checkedAt"`
+}
+
+type RainReviewState struct {
+	Status    RainReviewStatus  `json:"status"`
+	AreaLabel string            `json:"areaLabel"`
+	CheckedAt *scalars.DateTime `json:"checkedAt,omitempty"`
+	Proposals []*RainProposal   `json:"proposals"`
+}
+
 type ReasonEvidence struct {
 	SourceVersion   *SourceVersion   `json:"sourceVersion,omitempty"`
 	WeatherSnapshot *WeatherSnapshot `json:"weatherSnapshot,omitempty"`
@@ -1960,9 +1985,10 @@ type RecordMeasurementPayload struct {
 }
 
 type RecordRainInput struct {
-	Day      scalars.Date     `json:"day"`
-	AmountMm *scalars.Decimal `json:"amountMm,omitempty"`
-	Note     *string          `json:"note,omitempty"`
+	Day          scalars.Date     `json:"day"`
+	AmountMm     *scalars.Decimal `json:"amountMm,omitempty"`
+	Note         *string          `json:"note,omitempty"`
+	RainReviewID *string          `json:"rainReviewId,omitempty"`
 }
 
 type RecordRainPayload struct {
@@ -2320,6 +2346,8 @@ type TodayOverview struct {
 	// Null until a location is configured and at least one snapshot exists;
 	// freshness bands (FRESH/STALE/UNAVAILABLE) are the frozen care semantics.
 	Conditions *TodayConditions `json:"conditions,omitempty"`
+	// Garden-location weather checks and at most three recent local days awaiting confirmation.
+	RainReview *RainReviewState `json:"rainReview"`
 }
 
 type UpdateAcquisitionInput struct {
@@ -5560,6 +5588,65 @@ func (e *QuantityKind) UnmarshalJSON(b []byte) error {
 }
 
 func (e QuantityKind) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
+type RainReviewStatus string
+
+const (
+	RainReviewStatusNotConfigured RainReviewStatus = "NOT_CONFIGURED"
+	RainReviewStatusWaiting       RainReviewStatus = "WAITING"
+	RainReviewStatusReady         RainReviewStatus = "READY"
+	RainReviewStatusStale         RainReviewStatus = "STALE"
+)
+
+var AllRainReviewStatus = []RainReviewStatus{
+	RainReviewStatusNotConfigured,
+	RainReviewStatusWaiting,
+	RainReviewStatusReady,
+	RainReviewStatusStale,
+}
+
+func (e RainReviewStatus) IsValid() bool {
+	switch e {
+	case RainReviewStatusNotConfigured, RainReviewStatusWaiting, RainReviewStatusReady, RainReviewStatusStale:
+		return true
+	}
+	return false
+}
+
+func (e RainReviewStatus) String() string {
+	return string(e)
+}
+
+func (e *RainReviewStatus) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = RainReviewStatus(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid RainReviewStatus", str)
+	}
+	return nil
+}
+
+func (e RainReviewStatus) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *RainReviewStatus) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e RainReviewStatus) MarshalJSON() ([]byte, error) {
 	var buf bytes.Buffer
 	e.MarshalGQL(&buf)
 	return buf.Bytes(), nil

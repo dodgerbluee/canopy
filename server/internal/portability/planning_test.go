@@ -184,9 +184,29 @@ func TestPlanningRestoreAcceptsLegacyArchiveWithoutPlannerTables(t *testing.T) {
 		delete(entries, "db/"+table+".jsonl")
 		delete(inner.TableCounts, table)
 	}
-	kept := make([]ArchiveEntry, 0, len(inner.Entries))
+	path := rewrittenPlannerArchive(t, entries, inner)
+	b := blankEnv(t)
+	result, err := b.svc.Restore(b.ctx, RestoreOptions{Archive: path, Ledger: sum.Ledger})
+	if err != nil {
+		t.Fatal("legacy archive rejected", err)
+	}
+	if result.Reconcile["plants"] != 1 {
+		t.Fatal("legacy actual garden lost")
+	}
+	for _, table := range plannerTables {
+		if result.Reconcile[table] != 0 || string(plannerRows(t, b, table)) != "[]" {
+			t.Fatal("old archive invented plans", table)
+		}
+	}
+}
+
+func rewrittenPlannerArchive(t *testing.T, entries map[string][]byte, inner BackupManifest) string {
+	t.Helper()
+	kept := []ArchiveEntry{}
 	for _, entry := range inner.Entries {
-		if _, ok := entries[entry.Path]; ok {
+		if body, ok := entries[entry.Path]; ok {
+			entry.SHA256 = shaHex(body)
+			entry.Bytes = int64(len(body))
 			kept = append(kept, entry)
 		}
 	}
@@ -198,7 +218,7 @@ func TestPlanningRestoreAcceptsLegacyArchiveWithoutPlannerTables(t *testing.T) {
 	entries["manifest.json"] = encoded
 	var archive bytes.Buffer
 	tw := tar.NewWriter(&archive)
-	names := make([]string, 0, len(entries))
+	names := []string{}
 	for name := range entries {
 		names = append(names, name)
 	}
@@ -228,17 +248,63 @@ func TestPlanningRestoreAcceptsLegacyArchiveWithoutPlannerTables(t *testing.T) {
 	if err = os.WriteFile(strings.TrimSuffix(path, ".tar")+".manifest.json", outerBytes, 0o600); err != nil {
 		t.Fatal(err)
 	}
+	return path
+}
+func TestPlanningRestorePopulatedPreGuidanceArchiveAndRebuildableCaches(t *testing.T) {
+	e := newEnv(t)
+	seedPlanner(t, e)
+	if _, err := e.pool.Exec(e.ctx, `INSERT INTO knowledge_publications(url,provider,content_sha256,source_text,expires_at) VALUES('https://fixture.example.invalid/public','fixture',repeat('a',64),'Public fixture material',now()+interval '30 days')`); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.pool.Exec(e.ctx, `INSERT INTO planning_provider_usage(workspace_id,window_start,requests) VALUES($1,date_trunc('hour',now(),'UTC'),8)`, e.ws); err != nil {
+		t.Fatal(err)
+	}
+	sum, err := e.svc.Backup(e.ctx, BackupOptions{Dest: t.TempDir()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	entries := readTar(t, sum.Archive)
+	if _, ok := entries["db/knowledge_publications.jsonl"]; ok {
+		t.Fatal("public cache entered backup")
+	}
+	if _, ok := entries["db/planning_provider_usage.jsonl"]; ok {
+		t.Fatal("rebuildable usage entered backup")
+	}
+	var inner BackupManifest
+	if err = json.Unmarshal(entries["manifest.json"], &inner); err != nil {
+		t.Fatal(err)
+	}
+	// Version-19 snapshots had no operational next_check_at column. A populated
+	// archive remains valid and its provenance must not be assigned a fake date.
+	var legacy bytes.Buffer
+	for _, line := range splitLines(entries["db/planting_guidance_snapshots.jsonl"]) {
+		var row map[string]any
+		if err = json.Unmarshal(line, &row); err != nil {
+			t.Fatal(err)
+		}
+		delete(row, "next_check_at")
+		raw, err := json.Marshal(row)
+		if err != nil {
+			t.Fatal(err)
+		}
+		legacy.Write(raw)
+		legacy.WriteByte('\n')
+	}
+	entries["db/planting_guidance_snapshots.jsonl"] = legacy.Bytes()
+	path := rewrittenPlannerArchive(t, entries, inner)
 	b := blankEnv(t)
 	result, err := b.svc.Restore(b.ctx, RestoreOptions{Archive: path, Ledger: sum.Ledger})
 	if err != nil {
-		t.Fatal("legacy archive rejected", err)
+		t.Fatal(err)
 	}
-	if result.Reconcile["plants"] != 1 {
-		t.Fatal("legacy actual garden lost")
+	if result.Reconcile["planting_guidance_snapshots"] != 2 {
+		t.Fatal("populated legacy guidance lost")
 	}
-	for _, table := range plannerTables {
-		if result.Reconcile[table] != 0 || string(plannerRows(t, b, table)) != "[]" {
-			t.Fatal("old archive invented plans", table)
-		}
+	var unknown, public, usage int
+	if err = b.pool.QueryRow(b.ctx, `SELECT (SELECT count(*) FROM planting_guidance_snapshots WHERE next_check_at IS NULL),(SELECT count(*) FROM knowledge_publications),(SELECT count(*) FROM planning_provider_usage)`).Scan(&unknown, &public, &usage); err != nil || unknown != 2 || public != 0 || usage != 0 {
+		t.Fatal("legacy/operational data changed", unknown, public, usage, err)
+	}
+	if _, err = b.pool.Exec(b.ctx, `UPDATE planting_guidance_snapshots SET next_check_at=now() WHERE state='READY'`); err != nil {
+		t.Fatal("old READY snapshot could not schedule review", err)
 	}
 }

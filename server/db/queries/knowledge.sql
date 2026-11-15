@@ -75,3 +75,30 @@ WHERE k.plant_id=p.id AND k.workspace_id=p.workspace_id AND p.status='ACTIVE' AN
    AND jsonb_array_length(profile.facts)>0
    AND NOT EXISTS (SELECT 1 FROM jsonb_array_elements(profile.facts) fact WHERE COALESCE(fact->>'extractionVersion','')<>sqlc.arg(extraction_version)::text)
  );
+
+-- name: GetPublication :one
+SELECT * FROM knowledge_publications WHERE url=$1 AND expires_at>now();
+
+-- name: PutPublication :one
+INSERT INTO knowledge_publications(url,provider,content_sha256,source_text,expires_at)
+VALUES($1,$2,$3,$4,now()+interval '30 days')
+ON CONFLICT(url) DO UPDATE SET provider=excluded.provider,content_sha256=excluded.content_sha256,
+ source_text=excluded.source_text,fetched_at=now(),expires_at=excluded.expires_at,
+ planning_key=CASE WHEN knowledge_publications.content_sha256=excluded.content_sha256 THEN knowledge_publications.planning_key END,
+ planning_facts=CASE WHEN knowledge_publications.content_sha256=excluded.content_sha256 THEN knowledge_publications.planning_facts END,
+ planning_extracted_at=CASE WHEN knowledge_publications.content_sha256=excluded.content_sha256 THEN knowledge_publications.planning_extracted_at END
+RETURNING *;
+
+-- name: PutPlanningPublicationFacts :execrows
+UPDATE knowledge_publications SET planning_key=$2,planning_facts=$3,planning_extracted_at=now()
+WHERE url=$1 AND content_sha256=$4;
+
+-- name: ReservePlanningProviderRequest :execrows
+INSERT INTO planning_provider_usage(workspace_id,window_start,requests)
+VALUES($1,date_trunc('hour',now(),'UTC'),1)
+ON CONFLICT(workspace_id,window_start) DO UPDATE SET requests=planning_provider_usage.requests+1
+WHERE planning_provider_usage.requests<8;
+
+-- name: CleanupPlanningProviderUsage :exec
+DELETE FROM planning_provider_usage WHERE (workspace_id,window_start) IN
+ (SELECT workspace_id,window_start FROM planning_provider_usage WHERE window_start<now()-interval '7 days' LIMIT 512);

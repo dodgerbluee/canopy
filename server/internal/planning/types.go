@@ -108,10 +108,11 @@ type Page struct {
 }
 
 type Service struct {
-	Pool  *pgxpool.Pool
-	Log   *slog.Logger
-	Clock platform.Clock
-	IDs   platform.IDs
+	Pool     *pgxpool.Pool
+	Log      *slog.Logger
+	Clock    platform.Clock
+	IDs      platform.IDs
+	Guidance GuidanceProvider
 }
 
 func New(pool *pgxpool.Pool, log *slog.Logger) *Service {

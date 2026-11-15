@@ -525,7 +525,8 @@
         "FAV01",
         "PLAN00",
         "PLAN01",
-        "PLAN02"
+        "PLAN02",
+        "PLAN03"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -1033,6 +1034,14 @@
         "PLAN01"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN03": {
+      "title": "Crop-based regional planning guidance and bounded enrichment",
+      "dependsOn": [
+        "PLAN02"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

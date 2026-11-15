@@ -9,6 +9,10 @@ import (
 )
 
 func (s *Service) Create(ctx context.Context, a Actor, in CreateInput, key *string) (Result, []Problem, error) {
+	description, err := s.describeIntentGuidance(ctx, a, in.Intent)
+	if err != nil {
+		return Result{}, nil, err
+	}
 	return s.mutate(ctx, a, "createPlantingPlan", key, in, func(q *dbgen.Queries) (Result, []Problem, error) {
 		params, ps := validateIntent(in.Intent)
 		if len(ps) > 0 {
@@ -31,6 +35,9 @@ func (s *Service) Create(ctx context.Context, a Actor, in CreateInput, key *stri
 		if err != nil {
 			return Result{}, nil, err
 		}
+		if err = s.queueGuidance(ctx, q, row, description); err != nil {
+			return Result{}, nil, err
+		}
 		if err = s.audit(ctx, q, a, "createPlantingPlan", row, nil); err != nil {
 			return Result{}, nil, err
 		}
@@ -38,6 +45,10 @@ func (s *Service) Create(ctx context.Context, a Actor, in CreateInput, key *stri
 	})
 }
 func (s *Service) Update(ctx context.Context, a Actor, in UpdateInput, key *string) (Result, []Problem, error) {
+	description, err := s.describeIntentGuidance(ctx, a, in.Intent)
+	if err != nil {
+		return Result{}, nil, err
+	}
 	return s.mutate(ctx, a, "updatePlantingPlan", key, in, func(q *dbgen.Queries) (Result, []Problem, error) {
 		old, ps, err := lockPlan(ctx, q, a, in.ID, in.ExpectedRevision, "input.id")
 		if err != nil || len(ps) > 0 {
@@ -67,6 +78,11 @@ func (s *Service) Update(ctx context.Context, a Actor, in UpdateInput, key *stri
 		})
 		if err != nil {
 			return Result{}, nil, err
+		}
+		if contextChanged {
+			if err = s.queueGuidance(ctx, q, row, description); err != nil {
+				return Result{}, nil, err
+			}
 		}
 		if err = s.audit(ctx, q, a, "updatePlantingPlan", row, old); err != nil {
 			return Result{}, nil, err
@@ -101,6 +117,12 @@ func (s *Service) ChangeState(ctx context.Context, a Actor, in StateInput, key *
 		if err != nil {
 			return Result{}, nil, err
 		}
+		if row.State == dbgen.PlantingPlanStateCOMPLETED {
+			row, err = s.pauseGuidance(ctx, q, row)
+			if err != nil {
+				return Result{}, nil, err
+			}
+		}
 		if err = s.audit(ctx, q, a, "changePlantingPlanState", row, old); err != nil {
 			return Result{}, nil, err
 		}
@@ -114,6 +136,14 @@ func (s *Service) Restore(ctx context.Context, a Actor, in RevisionInput, key *s
 	return s.toggleCancellation(ctx, a, in, key, true)
 }
 func (s *Service) toggleCancellation(ctx context.Context, a Actor, in RevisionInput, key *string, restore bool) (Result, []Problem, error) {
+	var description *GuidanceContext
+	if restore {
+		var err error
+		description, err = s.describeStoredGuidance(ctx, a, in.ID)
+		if err != nil {
+			return Result{}, nil, err
+		}
+	}
 	op := "cancelPlantingPlan"
 	if restore {
 		op = "restorePlantingPlan"
@@ -145,6 +175,20 @@ func (s *Service) toggleCancellation(ctx context.Context, a Actor, in RevisionIn
 		// completion or destroying the user's selected future days.
 		if err = q.AdvancePlantingActionSchedules(ctx, dbgen.AdvancePlantingActionSchedulesParams{WorkspaceID: a.WorkspaceID, PlanID: old.ID}); err != nil {
 			return Result{}, nil, err
+		}
+		if restore && s.Guidance != nil {
+			row, err = q.AdvancePlanningGuidance(ctx, dbgen.AdvancePlanningGuidanceParams{WorkspaceID: a.WorkspaceID, ID: row.ID})
+			if err != nil {
+				return Result{}, nil, err
+			}
+			if err = s.queueGuidance(ctx, q, row, description); err != nil {
+				return Result{}, nil, err
+			}
+		} else {
+			row, err = s.pauseGuidance(ctx, q, row)
+			if err != nil {
+				return Result{}, nil, err
+			}
 		}
 		if err = s.audit(ctx, q, a, op, row, old); err != nil {
 			return Result{}, nil, err

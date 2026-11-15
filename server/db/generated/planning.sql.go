@@ -11,6 +11,71 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const abandonPlanningGuidance = `-- name: AbandonPlanningGuidance :exec
+UPDATE planting_guidance_snapshots SET state='FAILED',message='A newer plan or context replaced this research.',next_check_at=NULL
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND state IN('PENDING','PROCESSING')
+`
+
+type AbandonPlanningGuidanceParams struct {
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	ID          pgtype.UUID
+}
+
+func (q *Queries) AbandonPlanningGuidance(ctx context.Context, arg AbandonPlanningGuidanceParams) error {
+	_, err := q.db.Exec(ctx, abandonPlanningGuidance, arg.WorkspaceID, arg.PlanID, arg.ID)
+	return err
+}
+
+const advancePlanningGuidance = `-- name: AdvancePlanningGuidance :one
+UPDATE planting_plans SET guidance_generation=guidance_generation+1,
+ revision=revision+CASE WHEN $1::boolean THEN 1 ELSE 0 END
+WHERE workspace_id=$2 AND id=$3 RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at
+`
+
+type AdvancePlanningGuidanceParams struct {
+	EditRevision bool
+	WorkspaceID  pgtype.UUID
+	ID           pgtype.UUID
+}
+
+func (q *Queries) AdvancePlanningGuidance(ctx context.Context, arg AdvancePlanningGuidanceParams) (PlantingPlan, error) {
+	row := q.db.QueryRow(ctx, advancePlanningGuidance, arg.EditRevision, arg.WorkspaceID, arg.ID)
+	var i PlantingPlan
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.Name,
+		&i.ScientificName,
+		&i.Cultivar,
+		&i.Category,
+		&i.DesiredQuantity,
+		&i.Method,
+		&i.IntendedLocationID,
+		&i.IntendedPlacement,
+		&i.TargetPrecision,
+		&i.TargetFrom,
+		&i.TargetTo,
+		&i.TargetFromMonth,
+		&i.TargetToMonth,
+		&i.TargetYear,
+		&i.TargetSeason,
+		&i.BudgetMinor,
+		&i.BudgetCurrency,
+		&i.Notes,
+		&i.State,
+		&i.ResumeState,
+		&i.CancelledAt,
+		&i.CompletedAt,
+		&i.Revision,
+		&i.GuidanceGeneration,
+		&i.AcceptedGuidanceID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const advancePlantingActionSchedules = `-- name: AdvancePlantingActionSchedules :exec
 UPDATE planting_actions SET schedule_revision=schedule_revision+1
 WHERE workspace_id=$1 AND plan_id=$2 AND state='OPEN'
@@ -72,6 +137,47 @@ func (q *Queries) BumpPlantingPlan(ctx context.Context, arg BumpPlantingPlanPara
 	return i, err
 }
 
+const claimPlanningGuidance = `-- name: ClaimPlanningGuidance :one
+UPDATE planting_guidance_snapshots SET state='PROCESSING',message='Reading applicable regional sources.',
+ next_check_at=now()+interval '20 minutes'
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND generation=$4
+ AND (state='PENDING' OR (state='PROCESSING' AND COALESCE(next_check_at,updated_at+interval '20 minutes')<=now()))
+RETURNING id, workspace_id, plan_id, generation, context_sha256, state, message, facts, assumptions, retrieved_at, created_at, updated_at, next_check_at
+`
+
+type ClaimPlanningGuidanceParams struct {
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	ID          pgtype.UUID
+	Generation  int32
+}
+
+func (q *Queries) ClaimPlanningGuidance(ctx context.Context, arg ClaimPlanningGuidanceParams) (PlantingGuidanceSnapshot, error) {
+	row := q.db.QueryRow(ctx, claimPlanningGuidance,
+		arg.WorkspaceID,
+		arg.PlanID,
+		arg.ID,
+		arg.Generation,
+	)
+	var i PlantingGuidanceSnapshot
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.PlanID,
+		&i.Generation,
+		&i.ContextSha256,
+		&i.State,
+		&i.Message,
+		&i.Facts,
+		&i.Assumptions,
+		&i.RetrievedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.NextCheckAt,
+	)
+	return i, err
+}
+
 const countOpenPlantingActions = `-- name: CountOpenPlantingActions :one
 SELECT count(*)::int FROM planting_actions WHERE workspace_id=$1 AND plan_id=$2 AND state='OPEN'
 `
@@ -117,6 +223,76 @@ type DeletePlantingActionParams struct {
 func (q *Queries) DeletePlantingAction(ctx context.Context, arg DeletePlantingActionParams) error {
 	_, err := q.db.Exec(ctx, deletePlantingAction, arg.WorkspaceID, arg.PlanID, arg.ID)
 	return err
+}
+
+const finishPlanningGuidance = `-- name: FinishPlanningGuidance :execrows
+UPDATE planting_guidance_snapshots SET state=$1,message=$2,facts=$3,
+ assumptions=$4,retrieved_at=$5,next_check_at=now()+interval '15 minutes'
+WHERE workspace_id=$6 AND plan_id=$7 AND id=$8
+ AND generation=$9 AND state='PROCESSING' AND updated_at=$10
+`
+
+type FinishPlanningGuidanceParams struct {
+	State       PlantingGuidanceState
+	Message     string
+	Facts       []byte
+	Assumptions []string
+	RetrievedAt pgtype.Timestamptz
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	ID          pgtype.UUID
+	Generation  int32
+	ClaimedAt   pgtype.Timestamptz
+}
+
+func (q *Queries) FinishPlanningGuidance(ctx context.Context, arg FinishPlanningGuidanceParams) (int64, error) {
+	result, err := q.db.Exec(ctx, finishPlanningGuidance,
+		arg.State,
+		arg.Message,
+		arg.Facts,
+		arg.Assumptions,
+		arg.RetrievedAt,
+		arg.WorkspaceID,
+		arg.PlanID,
+		arg.ID,
+		arg.Generation,
+		arg.ClaimedAt,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const getCurrentPlanningGuidance = `-- name: GetCurrentPlanningGuidance :one
+SELECT id, workspace_id, plan_id, generation, context_sha256, state, message, facts, assumptions, retrieved_at, created_at, updated_at, next_check_at FROM planting_guidance_snapshots WHERE workspace_id=$1 AND plan_id=$2 AND generation=$3
+`
+
+type GetCurrentPlanningGuidanceParams struct {
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	Generation  int32
+}
+
+func (q *Queries) GetCurrentPlanningGuidance(ctx context.Context, arg GetCurrentPlanningGuidanceParams) (PlantingGuidanceSnapshot, error) {
+	row := q.db.QueryRow(ctx, getCurrentPlanningGuidance, arg.WorkspaceID, arg.PlanID, arg.Generation)
+	var i PlantingGuidanceSnapshot
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.PlanID,
+		&i.Generation,
+		&i.ContextSha256,
+		&i.State,
+		&i.Message,
+		&i.Facts,
+		&i.Assumptions,
+		&i.RetrievedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.NextCheckAt,
+	)
+	return i, err
 }
 
 const getPlantingAction = `-- name: GetPlantingAction :one
@@ -194,6 +370,52 @@ func (q *Queries) GetPlantingPlan(ctx context.Context, arg GetPlantingPlanParams
 		&i.AcceptedGuidanceID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const insertPlanningGuidance = `-- name: InsertPlanningGuidance :one
+INSERT INTO planting_guidance_snapshots(id,workspace_id,plan_id,generation,context_sha256,state,message,assumptions)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id, workspace_id, plan_id, generation, context_sha256, state, message, facts, assumptions, retrieved_at, created_at, updated_at, next_check_at
+`
+
+type InsertPlanningGuidanceParams struct {
+	ID            pgtype.UUID
+	WorkspaceID   pgtype.UUID
+	PlanID        pgtype.UUID
+	Generation    int32
+	ContextSha256 string
+	State         PlantingGuidanceState
+	Message       string
+	Assumptions   []string
+}
+
+func (q *Queries) InsertPlanningGuidance(ctx context.Context, arg InsertPlanningGuidanceParams) (PlantingGuidanceSnapshot, error) {
+	row := q.db.QueryRow(ctx, insertPlanningGuidance,
+		arg.ID,
+		arg.WorkspaceID,
+		arg.PlanID,
+		arg.Generation,
+		arg.ContextSha256,
+		arg.State,
+		arg.Message,
+		arg.Assumptions,
+	)
+	var i PlantingGuidanceSnapshot
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.PlanID,
+		&i.Generation,
+		&i.ContextSha256,
+		&i.State,
+		&i.Message,
+		&i.Facts,
+		&i.Assumptions,
+		&i.RetrievedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.NextCheckAt,
 	)
 	return i, err
 }
@@ -371,8 +593,18 @@ func (q *Queries) InsertPlantingPlan(ctx context.Context, arg InsertPlantingPlan
 	return i, err
 }
 
+const invalidateWorkspacePlanningGuidance = `-- name: InvalidateWorkspacePlanningGuidance :exec
+UPDATE planting_plans SET guidance_generation=guidance_generation+1
+WHERE workspace_id=$1 AND state IN('IDEA','PLANNED','IN_PROGRESS')
+`
+
+func (q *Queries) InvalidateWorkspacePlanningGuidance(ctx context.Context, workspaceID pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, invalidateWorkspacePlanningGuidance, workspaceID)
+	return err
+}
+
 const listCurrentPlantingGuidance = `-- name: ListCurrentPlantingGuidance :many
-SELECT g.id, g.workspace_id, g.plan_id, g.generation, g.context_sha256, g.state, g.message, g.facts, g.assumptions, g.retrieved_at, g.created_at, g.updated_at FROM planting_guidance_snapshots g JOIN planting_plans p ON p.workspace_id=g.workspace_id AND p.id=g.plan_id
+SELECT g.id, g.workspace_id, g.plan_id, g.generation, g.context_sha256, g.state, g.message, g.facts, g.assumptions, g.retrieved_at, g.created_at, g.updated_at, g.next_check_at FROM planting_guidance_snapshots g JOIN planting_plans p ON p.workspace_id=g.workspace_id AND p.id=g.plan_id
 WHERE g.workspace_id=$1 AND g.plan_id=ANY($2::uuid[])
  AND (g.generation=p.guidance_generation OR g.id=p.accepted_guidance_id)
 `
@@ -404,6 +636,7 @@ func (q *Queries) ListCurrentPlantingGuidance(ctx context.Context, arg ListCurre
 			&i.RetrievedAt,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.NextCheckAt,
 		); err != nil {
 			return nil, err
 		}
@@ -725,6 +958,64 @@ func (q *Queries) LockPlantingPlan(ctx context.Context, arg LockPlantingPlanPara
 	return i, err
 }
 
+const planningGuidanceCandidates = `-- name: PlanningGuidanceCandidates :many
+SELECT p.id, p.workspace_id, p.name, p.scientific_name, p.cultivar, p.category, p.desired_quantity, p.method, p.intended_location_id, p.intended_placement, p.target_precision, p.target_from, p.target_to, p.target_from_month, p.target_to_month, p.target_year, p.target_season, p.budget_minor, p.budget_currency, p.notes, p.state, p.resume_state, p.cancelled_at, p.completed_at, p.revision, p.guidance_generation, p.accepted_guidance_id, p.created_at, p.updated_at FROM planting_plans p LEFT JOIN planting_guidance_snapshots g
+ ON g.workspace_id=p.workspace_id AND g.plan_id=p.id AND g.generation=p.guidance_generation
+WHERE p.state IN('IDEA','PLANNED','IN_PROGRESS')
+ AND (g.id IS NULL OR COALESCE(g.next_check_at,g.updated_at)<=now())
+ORDER BY COALESCE(g.next_check_at,g.updated_at,p.created_at),p.id LIMIT 8
+`
+
+func (q *Queries) PlanningGuidanceCandidates(ctx context.Context) ([]PlantingPlan, error) {
+	rows, err := q.db.Query(ctx, planningGuidanceCandidates)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PlantingPlan{}
+	for rows.Next() {
+		var i PlantingPlan
+		if err := rows.Scan(
+			&i.ID,
+			&i.WorkspaceID,
+			&i.Name,
+			&i.ScientificName,
+			&i.Cultivar,
+			&i.Category,
+			&i.DesiredQuantity,
+			&i.Method,
+			&i.IntendedLocationID,
+			&i.IntendedPlacement,
+			&i.TargetPrecision,
+			&i.TargetFrom,
+			&i.TargetTo,
+			&i.TargetFromMonth,
+			&i.TargetToMonth,
+			&i.TargetYear,
+			&i.TargetSeason,
+			&i.BudgetMinor,
+			&i.BudgetCurrency,
+			&i.Notes,
+			&i.State,
+			&i.ResumeState,
+			&i.CancelledAt,
+			&i.CompletedAt,
+			&i.Revision,
+			&i.GuidanceGeneration,
+			&i.AcceptedGuidanceID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const replacePlantingIntent = `-- name: ReplacePlantingIntent :one
 UPDATE planting_plans SET name=$1,scientific_name=$2,cultivar=$3,
  category=$4,desired_quantity=$5,method=$6,
@@ -822,6 +1113,22 @@ func (q *Queries) ReplacePlantingIntent(ctx context.Context, arg ReplacePlanting
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const reviewPlanningGuidanceLater = `-- name: ReviewPlanningGuidanceLater :exec
+UPDATE planting_guidance_snapshots SET next_check_at=now()+interval '15 minutes'
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3
+`
+
+type ReviewPlanningGuidanceLaterParams struct {
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	ID          pgtype.UUID
+}
+
+func (q *Queries) ReviewPlanningGuidanceLater(ctx context.Context, arg ReviewPlanningGuidanceLaterParams) error {
+	_, err := q.db.Exec(ctx, reviewPlanningGuidanceLater, arg.WorkspaceID, arg.PlanID, arg.ID)
+	return err
 }
 
 const setPlantingPlanState = `-- name: SetPlantingPlanState :one

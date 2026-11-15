@@ -1806,6 +1806,12 @@ type RefreshKnowledgePayload struct {
 	ClientMutationID *string            `json:"clientMutationId,omitempty"`
 }
 
+// Re-read regional guidance without changing chosen dates or accepted provenance.
+type RefreshPlantingGuidanceInput struct {
+	ID               string `json:"id"`
+	ExpectedRevision int    `json:"expectedRevision"`
+}
+
 type RequestAnalysisInput struct {
 	Kind AnalysisKind `json:"kind"`
 	// Required for TEXT, VISION, IDENTIFICATION, SYNTHESIS; rejected for RECEIPT_EXTRACTION.

@@ -374,6 +374,11 @@ func (r *mutationResolver) DeletePlantingAction(ctx context.Context, input Delet
 	panic("not implemented")
 }
 
+// RefreshPlantingGuidance is the resolver for the refreshPlantingGuidance field.
+func (r *mutationResolver) RefreshPlantingGuidance(ctx context.Context, input RefreshPlantingGuidanceInput, clientMutationID *string) (*PlantingPlanPayload, error) {
+	panic("not implemented")
+}
+
 // Session is the resolver for the session field.
 func (r *queryResolver) Session(ctx context.Context) (*Session, error) {
 	panic("not implemented")

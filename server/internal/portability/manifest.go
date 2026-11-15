@@ -55,6 +55,7 @@ type ExportManifest struct {
 // ExportExclusions names what a user export never contains (03: no
 // secrets, sessions, idempotency receipts or raw operational logs).
 var ExportExclusions = []string{
+	"public publication cache", "planning provider usage counters",
 	"password hashes", "sessions", "csrf tokens", "idempotency receipts",
 	"audit prior values", "raw operational logs", "other workspaces",
 	"agent credential verifiers", "agent operation receipts",
@@ -62,6 +63,7 @@ var ExportExclusions = []string{
 
 // BackupExclusions names what a backup set never carries.
 var BackupExclusions = []string{
+	"public publication cache and planning provider usage counters (rebuilt after restore)",
 	"sessions (invalidated on restore)", "export archives (re-request after restore)",
 	"deletion ledger (retained separately and re-applied on restore)",
 }

@@ -99,3 +99,11 @@ mutation DeletePlantingAction($input: DeletePlantingActionInput!, $clientMutatio
     clientMutationId
   }
 }
+
+mutation RefreshPlantingGuidance($input: RefreshPlantingGuidanceInput!, $clientMutationId: String) {
+  refreshPlantingGuidance(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields latestGuidance { id generation state message retrievedAt } acceptedGuidance { id generation state } }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}

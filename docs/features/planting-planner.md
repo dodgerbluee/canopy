@@ -1,8 +1,9 @@
 # Future planting planner
 
-Status: steps 1 and 2 of 8 complete. Planning contracts, storage, real CRUD API and
-portability are accepted on the feature branch. Crop-based guidance is next; the
-Planning page arrives in step 5. Existing production deployments are unchanged.
+Status: steps 1 and 2 of 8 accepted. Step 3 implements crop-based guidance and is
+under final verification on the feature branch. The schedule engine follows in
+step 4; the Planning page arrives in step 5. Existing production deployments are
+unchanged.
 
 ## Product direction
 
@@ -28,9 +29,9 @@ Reviewed against the current source:
 | --- | --- |
 | `/year`, per-plant tracks and merged garden overview | Reuse the month-scale/segment presentation; keep future plans identifiable. |
 | Regional, cited knowledge and configured AI connections | Reuse fetching, source validation, model routing and provenance. |
-| `PlantKnowledge`, enrichment worker and `askGarden` | Currently require existing plant IDs. A future-crop lookup and planning context are needed. |
-| Seasonal kinds | Growth/bloom/harvest/care exist; seed-starting, direct sowing and transplant timing do not. |
-| Crop matching and source registry | Seven crop families and nine regional publications; this is not a universal planting catalog. |
+| `PlantKnowledge`, enrichment worker and `askGarden` | Keep the owned-plant adapter. PLAN03 adds crop-based research without an existing plant ID; planning chat context follows in PLAN08. |
+| Seasonal kinds | Existing growth/bloom/harvest/care remain compatible; PLAN03 adds separate seed-starting, direct sowing and transplant facts. |
+| Crop matching and source registry | Eight crop families and twelve regional publications after PLAN03, including reviewed Texas/Oregon tomato and UK strawberry sources; this is not a universal planting catalog. |
 | Garden geography | Explicit country/region/place, optional coordinates and zone; timezone does not imply climate. |
 | Calendar | Existing events are day-based and mostly reference owned plants. Planning needs a separate projection. |
 | Collection creation | Existing validated, audited, idempotent mutation; promotion must share its transaction. |
@@ -276,16 +277,17 @@ plant. Completing the overall plan is distinct from ownership and an elapsed dat
 
 ## Eight sequential implementation packets
 
-PLAN01 and PLAN02 are accepted. Register the remaining sequential implementation
-packets when they are kicked off. The accepted contract is recorded in
-`docs/plan/tasks/PLAN01-contract-change.md`; PLAN02 now registers its SDL with real
-resolvers and populated portability coverage. UI navigation arrives in PLAN05.
+PLAN01 and PLAN02 are accepted; PLAN03 is under final verification. Register the
+remaining sequential implementation packets when they are kicked off. The
+accepted base contract is recorded in `docs/plan/tasks/PLAN01-contract-change.md`;
+PLAN03's additive refresh/research contract is recorded in
+`docs/plan/tasks/PLAN03-contract-change.md`. UI navigation arrives in PLAN05.
 
 | Step | Deliverable | Main paths | Acceptance/verification |
 | --- | --- | --- | --- |
 | 1 — complete | Contracts and storage | Accepted contract change record; `contracts/graphql/planning.graphql`, operations, migration 00019 | States, date precision, source vs user dates, permissions, pagination, revisions and promotion semantics defined. Disposable PostgreSQL up/down/reapply, generators, local regression suite and full GitHub CI passed. |
 | 2 — complete | Planning domain and CRUD | `server/internal/planning/`, DB queries, GraphQL resolver, portability manifests | Workspace isolation, optional values, exact budgets, transactional revisions/audit/replay, scoped cursors and complete backup/export inclusion implemented. Real HTTP operations, populated and legacy restore, race checks, full backend regression and GitHub CI passed. |
-| 3 | Crop-based guidance | `server/internal/knowledge/`, source adapters, enrichment queries/worker | Guidance works before a plant exists; add seed/sow/transplant facts without breaking current seasonal kinds. Test source/cultivar/region/method matching, unsupported/manual paths, stale-generation refusal and provider failure. |
+| 3 — verifying | Crop-based guidance | `server/internal/knowledge/`, source adapters, enrichment queries/worker | Research before a plant exists, automatic/explicit refresh, immutable provenance, honest timing, stale-generation fencing, public cache and bounded provider usage. Verify source/cultivar/region/method matching, configured transports, failed/manual paths and portability. |
 | 4 | Schedule engine | `server/internal/planning/schedule.go` and scoped query/confirmation commands | Pure, clock-injected calculations with preserved granularity and evidence. Test multiple windows, New Year, leap days, hemisphere, missing anchors, first-harvest uncertainty and unchanged accepted dates after refresh. |
 | 5 | Angular page and shared modals | `web/src/app/features/planning/`, data layer, routes/shell/More, reusable timeline primitives | Complete ideas/plans/detail/edit flow on desktop and phone. Test fresh-form validation, unknown/failed guidance, cancel/restore, URL filters, keyboard focus, scrolling and both themes. Serve a local Docker preview. |
 | 6 | Calendar, Year, Today and reminders | Existing calendar/seasons/today/inbox modules; scoped planner projections and worker | Planning stays visually distinct and filterable, with no fake real-plant events. Only explicit dates create markers/reminders. Test near-term scheduling, duplicate suppression, cancellation and date changes. |

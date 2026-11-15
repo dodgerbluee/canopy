@@ -242,3 +242,9 @@ extend type Mutation {
   updatePlantingAction(input: UpdatePlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
   deletePlantingAction(input: DeletePlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
 }
+
+"""Re-read regional guidance without changing chosen dates or accepted provenance."""
+input RefreshPlantingGuidanceInput { id: ID!, expectedRevision: Int! }
+extend type Mutation {
+  refreshPlantingGuidance(input: RefreshPlantingGuidanceInput!, clientMutationId: String): PlantingPlanPayload!
+}

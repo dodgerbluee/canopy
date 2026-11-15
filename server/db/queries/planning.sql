@@ -106,3 +106,47 @@ WHERE mutation_receipts.expires_at<=now();
 -- name: LockPlantingLocation :one
 -- Hold the referenced key until the save commits, avoiding an FK race with purge.
 SELECT id FROM locations WHERE workspace_id=$1 AND id=$2 FOR KEY SHARE;
+
+-- name: InsertPlanningGuidance :one
+INSERT INTO planting_guidance_snapshots(id,workspace_id,plan_id,generation,context_sha256,state,message,assumptions)
+VALUES($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *;
+
+-- name: GetCurrentPlanningGuidance :one
+SELECT * FROM planting_guidance_snapshots WHERE workspace_id=$1 AND plan_id=$2 AND generation=$3;
+
+-- name: AdvancePlanningGuidance :one
+UPDATE planting_plans SET guidance_generation=guidance_generation+1,
+ revision=revision+CASE WHEN sqlc.arg(edit_revision)::boolean THEN 1 ELSE 0 END
+WHERE workspace_id=sqlc.arg(workspace_id) AND id=sqlc.arg(id) RETURNING *;
+
+-- name: InvalidateWorkspacePlanningGuidance :exec
+UPDATE planting_plans SET guidance_generation=guidance_generation+1
+WHERE workspace_id=$1 AND state IN('IDEA','PLANNED','IN_PROGRESS');
+
+-- name: PlanningGuidanceCandidates :many
+SELECT p.* FROM planting_plans p LEFT JOIN planting_guidance_snapshots g
+ ON g.workspace_id=p.workspace_id AND g.plan_id=p.id AND g.generation=p.guidance_generation
+WHERE p.state IN('IDEA','PLANNED','IN_PROGRESS')
+ AND (g.id IS NULL OR COALESCE(g.next_check_at,g.updated_at)<=now())
+ORDER BY COALESCE(g.next_check_at,g.updated_at,p.created_at),p.id LIMIT 8;
+
+-- name: ClaimPlanningGuidance :one
+UPDATE planting_guidance_snapshots SET state='PROCESSING',message='Reading applicable regional sources.',
+ next_check_at=now()+interval '20 minutes'
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND generation=$4
+ AND (state='PENDING' OR (state='PROCESSING' AND COALESCE(next_check_at,updated_at+interval '20 minutes')<=now()))
+RETURNING *;
+
+-- name: ReviewPlanningGuidanceLater :exec
+UPDATE planting_guidance_snapshots SET next_check_at=now()+interval '15 minutes'
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3;
+
+-- name: FinishPlanningGuidance :execrows
+UPDATE planting_guidance_snapshots SET state=sqlc.arg(state),message=sqlc.arg(message),facts=sqlc.arg(facts),
+ assumptions=sqlc.arg(assumptions),retrieved_at=sqlc.narg(retrieved_at),next_check_at=now()+interval '15 minutes'
+WHERE workspace_id=sqlc.arg(workspace_id) AND plan_id=sqlc.arg(plan_id) AND id=sqlc.arg(id)
+ AND generation=sqlc.arg(generation) AND state='PROCESSING' AND updated_at=sqlc.arg(claimed_at);
+
+-- name: AbandonPlanningGuidance :exec
+UPDATE planting_guidance_snapshots SET state='FAILED',message='A newer plan or context replaced this research.',next_check_at=NULL
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND state IN('PENDING','PROCESSING');

@@ -73,14 +73,17 @@ func NewResolver(db *dbgen.Queries, log *slog.Logger) *Resolver {
 // plant archive/restore/context edits drive the care plan in the same tx.
 func NewResolverFromPool(pool *pgxpool.Pool, log *slog.Logger) *Resolver {
 	careSvc := care.New(pool, log)
+	knowledgeSvc := knowledge.New(pool)
+	planner := planning.New(pool, log)
+	planner.Guidance = knowledge.PlanningProvider{Service: knowledgeSvc}
 	return &Resolver{
 		DB:        dbgen.New(pool),
-		Knowledge: knowledge.New(pool),
+		Knowledge: knowledgeSvc,
 		Coll:      collection.New(pool, log, care.CollectionHook{Svc: careSvc}),
 		Purch:     purchases.New(pool, log),
 		Journal:   journal.New(pool),
 		Care:      careSvc,
-		Planning:  planning.New(pool, log),
+		Planning:  planner,
 		Log:       log,
 	}
 }

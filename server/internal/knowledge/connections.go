@@ -25,6 +25,7 @@ func (s *Service) UseConnections(m *aiconnection.Manager) {
 		c := *selected.Config
 		model := NewModel(c.Origin(), c.APIKey, c.Model, c.ReasoningEffort)
 		model.HTTP = m.Client(c)
+		model.planningIdentity = hash([]any{c.Protocol, c.Endpoint, c.Model, c.ReasoningEffort, c.TokenLimitField, c.DeploymentLocal, c.ExternalConsent})
 		return model, nil
 	}
 }

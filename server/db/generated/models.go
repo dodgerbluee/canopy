@@ -2110,6 +2110,18 @@ type KnowledgeProfile struct {
 	UpdatedAt   pgtype.Timestamptz
 }
 
+type KnowledgePublication struct {
+	Url                 string
+	Provider            string
+	ContentSha256       string
+	SourceText          string
+	FetchedAt           pgtype.Timestamptz
+	ExpiresAt           pgtype.Timestamptz
+	PlanningKey         pgtype.Text
+	PlanningFacts       []byte
+	PlanningExtractedAt pgtype.Timestamptz
+}
+
 type Location struct {
 	ID          pgtype.UUID
 	WorkspaceID pgtype.UUID
@@ -2204,6 +2216,12 @@ type Owner struct {
 	PasswordHash string
 	CreatedAt    pgtype.Timestamptz
 	UpdatedAt    pgtype.Timestamptz
+}
+
+type PlanningProviderUsage struct {
+	WorkspaceID pgtype.UUID
+	WindowStart pgtype.Timestamptz
+	Requests    int32
 }
 
 type Plant struct {
@@ -2316,6 +2334,7 @@ type PlantingGuidanceSnapshot struct {
 	RetrievedAt   pgtype.Timestamptz
 	CreatedAt     pgtype.Timestamptz
 	UpdatedAt     pgtype.Timestamptz
+	NextCheckAt   pgtype.Timestamptz
 }
 
 type PlantingPlan struct {

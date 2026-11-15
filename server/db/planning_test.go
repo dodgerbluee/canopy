@@ -303,6 +303,17 @@ func TestPlanningMigrationDownUpPreservesExistingGarden(t *testing.T) {
 	if err := s.pool.QueryRow(ctx, "SELECT to_jsonb(p) FROM plants p WHERE id=$1", s.plantID).Scan(&before); err != nil {
 		t.Fatal(err)
 	}
+	guidanceMigration, err := candb.Migrations.ReadFile("migrations/00020_planning_guidance.sql")
+	if err != nil {
+		t.Fatal(err)
+	}
+	guidanceUp, guidanceDown, foundGuidance := strings.Cut(string(guidanceMigration), "-- +goose Down")
+	if !foundGuidance {
+		t.Fatal("missing guidance Down")
+	}
+	if _, err = s.pool.Exec(ctx, guidanceDown); err != nil {
+		t.Fatal(err)
+	}
 	migration, err := candb.Migrations.ReadFile("migrations/00019_planting_plans.sql")
 	if err != nil {
 		t.Fatal(err)
@@ -320,6 +331,9 @@ func TestPlanningMigrationDownUpPreservesExistingGarden(t *testing.T) {
 	}
 	if _, err = s.pool.Exec(ctx, up); err != nil {
 		t.Fatalf("up again: %v", err)
+	}
+	if _, err = s.pool.Exec(ctx, guidanceUp); err != nil {
+		t.Fatal(err)
 	}
 	var after []byte
 	if err = s.pool.QueryRow(ctx, "SELECT to_jsonb(p) FROM plants p WHERE id=$1", s.plantID).Scan(&after); err != nil {

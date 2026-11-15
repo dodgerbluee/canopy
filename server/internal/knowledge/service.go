@@ -204,6 +204,9 @@ func (s *Service) SaveSettings(ctx context.Context, a Actor, in SettingsInput, k
 		if _, err = q.RefreshKnowledge(ctx, dbgen.RefreshKnowledgeParams{WorkspaceID: a.WorkspaceID}); err != nil {
 			return cur, err
 		}
+		if err = q.InvalidateWorkspacePlanningGuidance(ctx, a.WorkspaceID); err != nil {
+			return cur, err
+		}
 		prior, _ := json.Marshal(cur)
 		_, err = q.InsertAuditRevision(ctx, dbgen.InsertAuditRevisionParams{ID: platform.UUIDv4{}.New(), WorkspaceID: a.WorkspaceID, ActorID: a.OwnerID, Action: "UPDATE", AggregateType: "garden_knowledge_settings", AggregateID: a.WorkspaceID, Revision: cur.Revision + 1, RequestID: uid(a.SessionID), PriorValues: prior})
 		if err != nil {

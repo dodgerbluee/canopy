@@ -1,0 +1,13 @@
+# PLAN03 — Planning knowledge
+
+Status: IN_PROGRESS.
+
+### PLAN03 — Crop-based regional planning guidance
+
+Depends: PLAN02.
+
+Own: `server/internal/planning/`, `server/internal/knowledge/`, `server/db/migrations/00020_planning_guidance.sql`, `server/db/planning_test.go`, `server/db/queries/planning.sql`, `server/db/queries/knowledge.sql`, `server/db/generated/` (generator only), `contracts/graphql/planning.graphql`, `contracts/operations/planning.graphql`, `contracts/fixtures/api/planning-guidance-*.json`, `contracts/generated/` (generator only), `server/internal/transport/graphql/planning_resolvers.go`, `server/internal/transport/graphql/planning_guidance.go`, `server/internal/transport/graphql/planning_http_test.go`, `server/internal/transport/graphql/planning_guidance_http_test.go`, `server/internal/transport/graphql/resolver.go`, `server/internal/transport/graphql/gql/` (generator only), `server/internal/transport/graphql/limits_test.go`, `server/internal/portability/planning_test.go`, `server/internal/portability/manifest.go`, `server/cmd/worker/main.go`, `docs/features/planting-planner.md`, `docs/plan/tasks/PLAN03.md`, `docs/plan/tasks/PLAN03-contract-change.md`, `.artifacts/agents/PLAN03/`. Integrator owns graph/ledger.
+
+Acceptance: Research a future crop without creating a real plant. Add a real refresh command, automatic context invalidation/outbox, bounded worker and provider usage limits. Reuse curated regional fetches and configured multi-provider garden AI. Keep owned-plant knowledge compatible. Validate source evidence, complete phase timing, method/placement/cultivar/geography and immutable provenance. Preserve annual/seasonal/relative/unknown precision without guessed frost dates or first-year harvest. Cache public publications separately from private plan context; year changes must reuse source extraction. Missing/disabled/unsupported/failed paths preserve manual plans and selected dates. Keep UI, schedule projection, promotion and MCP work for later packets; no production/runtime update.
+
+Verify: Pure timing/evidence/applicability tests; local mock provider/HTTP tests; real PostgreSQL generation races, stale job rejection, cache/quota/workspace isolation, pending dedup, failed/manual paths and schema rollback; actual GraphQL refresh; populated/legacy portability; controlled live primary-source fetch/extraction smoke without production writes; full Go regression, race checks, Node24 generation/typecheck/build and CI. New caches contain only public material and operational counters, and may be rebuilt on restore.

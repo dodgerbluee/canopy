@@ -126,5 +126,49 @@
     "scope": "Texas olive guidance; freeze risk, winter chilling and humidity make flowering and fruit set uncertain, especially outside favorable southwest growing areas.",
     "url": "https://mytexas.ag.tamu.edu/publications/olives-texas-fruit-and-nut-production/",
     "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "tamu-tomato",
+    "crop": "tomato",
+    "country": "US",
+    "regions": [
+      "Texas",
+      "TX"
+    ],
+    "title": "Easy Gardening: Tomatoes",
+    "publisher": "Texas A&M AgriLife Extension",
+    "scope": "Texas tomato guidance. Spring and fall plantings differ; frost anchors must be confirmed locally. Nursery transplants and seed starting are different methods.",
+    "url": "https://mytexas.ag.tamu.edu/publications/easy-gardening-tomatoes/",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "osu-tomato",
+    "crop": "tomato",
+    "country": "US",
+    "regions": [
+      "Oregon",
+      "OR"
+    ],
+    "title": "Grow your own tomatoes and tomatillos",
+    "publisher": "Oregon State University Extension",
+    "scope": "Oregon tomato guidance. Western, central and other cold-climate areas differ. This adapter covers tomatoes; tomatillo-only statements do not apply. Direct sowing is conditional, and maturity from transplanting is not maturity from sowing.",
+    "url": "https://extension.oregonstate.edu/catalog/ec-1333-grow-your-own-tomatoes-tomatillos",
+    "hemisphere": "NORTHERN"
+  },
+  {
+    "id": "rhs-strawberry",
+    "crop": "strawberry",
+    "country": "GB",
+    "regions": [
+      "England",
+      "Wales",
+      "Scotland",
+      "Northern Ireland"
+    ],
+    "title": "How to grow strawberries",
+    "publisher": "Royal Horticultural Society",
+    "scope": "UK strawberry guidance. Local exposure and climate differ. Alpine seed propagation, summer-fruiting plants, perpetual types and cold-stored runners have distinct conditions.",
+    "url": "https://www.rhs.org.uk/fruit/strawberries/grow-your-own",
+    "hemisphere": "NORTHERN"
   }
 ]

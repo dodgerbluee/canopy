@@ -316,3 +316,9 @@ func (m mutationResolver) DeletePlantingAction(ctx context.Context, in gql.Delet
 		return m.r.Planning.DeleteAction(ctx, a, planning.DeleteActionInput{PlanID: in.PlanID, ID: in.ID, ExpectedRevision: plantingPositiveInt(in.ExpectedRevision)}, key)
 	})
 }
+
+func (m mutationResolver) RefreshPlantingGuidance(ctx context.Context, in gql.RefreshPlantingGuidanceInput, key *string) (*gql.PlantingPlanPayload, error) {
+	return m.planningCommand(ctx, key, func(a planning.Actor) (planning.Result, []planning.Problem, error) {
+		return m.r.Planning.RefreshGuidance(ctx, a, planning.RevisionInput{ID: in.ID, ExpectedRevision: plantingPositiveInt(in.ExpectedRevision)}, key)
+	})
+}

@@ -41,6 +41,7 @@ func Registry() []Source {
 }
 
 var cropAliases = map[string][]string{
+	"tomato":  {"tomato", "tomatoes", "solanum lycopersicum", "lycopersicon esculentum"},
 	"avocado": {"avocado", "avocados", "persea americana"}, "olive": {"olive", "olives", "olea europaea"},
 	"citrus": {"citrus", "lemon", "lime", "mandarin", "satsuma", "orange", "grapefruit", "kumquat"},
 	"fig":    {"fig", "ficus carica"}, "strawberry": {"strawberry", "strawberries", "fragaria"},
@@ -55,7 +56,7 @@ func cropFor(name, scientific, category string) string {
 	// and categories. Ambiguous/unrecognized taxa stay unsupported; Rubus is
 	// not synonymous with blackberry and an indoor Ficus is not a fruiting fig.
 	if botanical := normalize(scientific); botanical != "" {
-		for _, crop := range []string{"citrus", "fig", "strawberry", "blackberry", "pomegranate", "avocado", "olive"} {
+		for _, crop := range []string{"citrus", "fig", "strawberry", "blackberry", "pomegranate", "avocado", "olive", "tomato"} {
 			for _, alias := range cropAliases[crop] {
 				isBotanical := strings.Contains(alias, " ") || alias == "citrus" || alias == "fragaria" || alias == "punica"
 				if isBotanical && (botanical == alias || strings.HasPrefix(botanical, alias+" ")) {
@@ -66,7 +67,7 @@ func cropFor(name, scientific, category string) string {
 		return ""
 	}
 	text := " " + normalize(name+" "+scientific+" "+category) + " "
-	keys := []string{"citrus", "fig", "strawberry", "blackberry", "pomegranate", "avocado", "olive"}
+	keys := []string{"citrus", "fig", "strawberry", "blackberry", "pomegranate", "avocado", "olive", "tomato"}
 	for _, crop := range keys {
 		for _, alias := range cropAliases[crop] {
 			if strings.Contains(text, " "+alias+" ") {

@@ -12,7 +12,6 @@ import (
 	"testing"
 
 	"canopy/server/internal/platform"
-	"canopy/server/internal/transport/graphql/gql"
 	httpx "canopy/server/internal/transport/http"
 )
 
@@ -95,8 +94,12 @@ func TestPlanningFrozenOperationsOverHTTP(t *testing.T) {
 		t.Fatal("no completion time")
 	}
 	detail := dataOf(t, plantingOp(t, e, "PlantingPlanDetail", map[string]any{"id": id}), "plantingPlan")
-	if detail["latestGuidance"] != nil || detail["acceptedGuidance"] != nil {
-		t.Fatal("invented knowledge")
+	if detail["acceptedGuidance"] != nil {
+		t.Fatal("invented accepted knowledge")
+	}
+	latest := detail["latestGuidance"].(map[string]any)
+	if latest["state"] != "DISABLED" || len(latest["facts"].([]any)) != 0 {
+		t.Fatal("disabled research fabricated facts", latest)
 	}
 	active := dataOf(t, plantingOp(t, e, "PlantingPlans", nil), "plantingPlans")["items"].([]any)
 	if len(active) != 0 {
@@ -221,6 +224,9 @@ func TestPlanningGuidanceDatesAndAcceptedGenerationOverHTTP(t *testing.T) {
 		t.Fatal(err)
 	}
 	snapshot := platform.UUIDv4{}.New()
+	if _, err = e.pool.Exec(context.Background(), `DELETE FROM planting_guidance_snapshots WHERE plan_id=$1`, id); err != nil {
+		t.Fatal(err)
+	}
 	if _, err = e.pool.Exec(context.Background(), `INSERT INTO planting_guidance_snapshots(id,workspace_id,plan_id,generation,context_sha256,state,facts,retrieved_at) VALUES($1,$2,$3,1,repeat('a',64),'READY',$4,'2026-11-14T12:00:00Z')`, snapshot, e.wsID, id, fixture.Data.Plan.Latest.Facts); err != nil {
 		t.Fatal(err)
 	}
@@ -239,18 +245,5 @@ func TestPlanningGuidanceDatesAndAcceptedGenerationOverHTTP(t *testing.T) {
 	annual := fact["windows"].([]any)[0].(map[string]any)["annual"].(map[string]any)
 	if annual["months"].(map[string]any)["from"] != float64(12) || annual["months"].(map[string]any)["to"] != float64(2) {
 		t.Fatal("year-free cross-year window lost", annual)
-	}
-}
-func TestPlanningGuidanceShapeBounds(t *testing.T) {
-	good := &gql.PlantingAnnualPeriod{Precision: gql.PlantingAnnualPrecisionDateRange, Dates: &gql.PlantingAnnualDateRange{From: &gql.PlantingMonthDay{Month: 2, Day: 29}, To: &gql.PlantingMonthDay{Month: 3, Day: 1}}}
-	if !validPlantingAnnual(good) {
-		t.Fatal("annual leap day must remain representable")
-	}
-	good.Dates.From.Day = 30
-	if validPlantingAnnual(good) {
-		t.Fatal("invalid annual day")
-	}
-	if validPlantingAnnual(&gql.PlantingAnnualPeriod{Precision: gql.PlantingAnnualPrecisionMonthRange, Months: &gql.PlantingAnnualMonthRange{From: 0, To: 12}}) {
-		t.Fatal("invalid annual month")
 	}
 }

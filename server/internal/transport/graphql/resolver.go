@@ -77,6 +77,7 @@ func NewResolverFromPool(pool *pgxpool.Pool, log *slog.Logger) *Resolver {
 	knowledgeSvc := knowledge.New(pool)
 	planner := planning.New(pool, log)
 	planner.Guidance = knowledge.PlanningProvider{Service: knowledgeSvc}
+	planner.Assistant = knowledge.PlanningAssistant{Service: knowledgeSvc}
 	coll := collection.New(pool, log, care.CollectionHook{Svc: careSvc})
 	planner.Garden = planninggarden.New(coll)
 	return &Resolver{

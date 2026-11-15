@@ -125,6 +125,12 @@
         >Find a US zone</a
       >. No zone is inferred from your timezone.
     </p>
+    @if (timezone() && timezone() !== settings()?.timezone) {
+      <p class="field-hint" role="status">
+        Planned calendar days stay the same. Unsent planning reminders will run at 9 am in
+        {{ timezone() }}. Delivered Inbox notices keep their history.
+      </p>
+    }
     <fieldset class="coordinates">
       <legend>Approximate coordinates <span class="optional">optional</span></legend>
       <div class="garden-fields">

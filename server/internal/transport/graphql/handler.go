@@ -137,7 +137,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 				if node.Name == "testAIConnection" {
 					connectionTests++
 				}
-				if node.Name == "askGarden" {
+				if node.Name == "askGarden" || node.Name == "askPlantingPlanner" {
 					questions++
 				}
 				countQuestions(node.SelectionSet)

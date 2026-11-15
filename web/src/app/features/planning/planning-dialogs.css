@@ -171,3 +171,9 @@
 .planning-modes input {
   accent-color: var(--accent);
 }
+
+.planning-detail-tools {
+  display: flex;
+  gap: 4px;
+  flex: none;
+}

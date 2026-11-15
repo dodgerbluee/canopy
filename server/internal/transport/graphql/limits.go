@@ -184,6 +184,10 @@ func (w *walker) walkField(f *ast.Field, parent *ast.Definition, depth, connSize
 				mult = planning.MaxGuidanceFacts
 			case "PlantingGuidanceSnapshot.assumptions":
 				mult = planning.MaxGuidanceAssumptions
+			case "PlantingAssistantReply.sources":
+				mult = 32
+			case "PlantingAssistantReply.planIds":
+				mult = 20
 			case "PlantingGuidanceFact.windows":
 				mult = planning.MaxGuidanceWindows
 			case "PlantingGuidanceFact.conditions":

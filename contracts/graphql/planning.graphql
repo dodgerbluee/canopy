@@ -342,6 +342,21 @@ extend type Mutation {
 }
 
 type PlantingBoardRow { plan: PlantingPlan!, schedule: PlantingScheduleConnection! }
+type PlantingAssistantCitation { ref: ID!, planId: ID!, planName: String!, fact: PlantingGuidanceFact! }
+type PlantingAssistantNote { planId: ID!, expectedRevision: Int!, text: String! }
+type PlantingAssistantReply {
+  answer: String!
+  "False for a deterministic manual-planning explanation when no current evidence exists."
+  isAI: Boolean!
+  planIds: [ID!]!
+  sources: [PlantingAssistantCitation!]!
+  "A reviewable note only. Applying it never saves, creates an action or changes a date."
+  note: PlantingAssistantNote
+}
+extend type Mutation {
+  "One bounded Garden-AI question about 1–20 explicitly selected workspace plans. Never writes."
+  askPlantingPlanner(question: String!, planIds: [ID!]!, year: Int!): PlantingAssistantReply!
+}
 input AddPlantingToGardenInput {
   planId: ID!
   expectedRevision: Int!

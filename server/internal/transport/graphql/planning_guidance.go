@@ -17,10 +17,7 @@ func plantingGuidanceOut(row *dbgen.PlantingGuidanceSnapshot) (*gql.PlantingGuid
 	}
 	out := &gql.PlantingGuidanceSnapshot{ID: uuidString(row.ID), Generation: int(row.Generation), State: gql.KnowledgeState(row.State), Message: row.Message, Facts: []*gql.PlantingGuidanceFact{}, Assumptions: append([]string{}, row.Assumptions...), RetrievedAt: dtPtrOut(row.RetrievedAt), CreatedAt: dtOut(row.CreatedAt), UpdatedAt: dtOut(row.UpdatedAt)}
 	for _, f := range facts {
-		fact := &gql.PlantingGuidanceFact{ID: f.ID, Phase: gql.PlantingPhaseKind(f.Phase), Label: f.Label, Summary: f.Summary, Conditions: append([]string{}, f.Conditions...), Windows: []*gql.PlantingGuidanceWindow{}, SourceTitle: f.SourceTitle, SourceURL: f.SourceURL, Publisher: f.Publisher, SourceRegion: f.SourceRegion, RetrievedAt: scalars.DateTime(f.RetrievedAt), ContentSha256: f.ContentSHA256}
-		for _, w := range f.Windows {
-			fact.Windows = append(fact.Windows, plantingWindowOut(w))
-		}
+		fact := plantingGuidanceFactOut(f)
 		out.Facts = append(out.Facts, fact)
 	}
 	return out, nil
@@ -48,4 +45,12 @@ func plantingWindowOut(w planning.GuidanceWindow) *gql.PlantingGuidanceWindow {
 		out.Relative = &gql.PlantingRelativeWindow{Anchor: gql.PlantingTimingAnchor(r.Anchor), FromDays: r.FromDays, ToDays: r.ToDays}
 	}
 	return out
+}
+
+func plantingGuidanceFactOut(f planning.GuidanceFact) *gql.PlantingGuidanceFact {
+	fact := &gql.PlantingGuidanceFact{ID: f.ID, Phase: gql.PlantingPhaseKind(f.Phase), Label: f.Label, Summary: f.Summary, Conditions: append([]string{}, f.Conditions...), Windows: []*gql.PlantingGuidanceWindow{}, SourceTitle: f.SourceTitle, SourceURL: f.SourceURL, Publisher: f.Publisher, SourceRegion: f.SourceRegion, RetrievedAt: scalars.DateTime(f.RetrievedAt), ContentSha256: f.ContentSHA256}
+	for _, w := range f.Windows {
+		fact.Windows = append(fact.Windows, plantingWindowOut(w))
+	}
+	return fact
 }

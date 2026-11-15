@@ -24,6 +24,7 @@ import { UiTabs, UiTab } from '../../ui/tabs';
 import { UiToasts } from '../../ui/toast';
 import { fmtMinor } from '../purchases/money';
 import { PlanEditor } from './plan-editor';
+import { PlanningAssistant, type ReviewedPlanningNote } from './planning-assistant';
 import { GardenEditor } from './garden-editor';
 import { ActionCompletion, needsLivingPlant } from './action-completion';
 import { ActionEditor } from './action-editor';
@@ -69,6 +70,7 @@ type Lifecycle = {
     PlanEditor,
     ActionEditor,
     GardenEditor,
+    PlanningAssistant,
     ActionCompletion,
     WindowChooser,
   ],
@@ -190,6 +192,9 @@ export class PlanningPage {
   readonly detailDialog = viewChild<UiEntryDialog>('detailDialog');
   readonly actionOpen = signal(false);
   readonly selectedAction = signal<Plan['actions'][number] | null>(null);
+  readonly assistantOpen = signal(false);
+  readonly assistantPlans = signal<Plan[]>([]);
+  readonly suggestedNote = signal<{ text: string; expectedRevision: number } | null>(null);
   readonly gardenOpen = signal(false);
   readonly completionOpen = signal(false);
   readonly completingAction = signal<Plan['actions'][number] | null>(null);
@@ -315,6 +320,7 @@ export class PlanningPage {
         !this.actionOpen() &&
         !this.chooserOpen() &&
         !this.gardenOpen() &&
+        !this.assistantOpen() &&
         !this.completionOpen() &&
         !this.detailLoading() &&
         (row.schedule.guidanceState !== this.detailSchedule()?.guidanceState ||
@@ -384,10 +390,12 @@ export class PlanningPage {
     });
   }
   create(): void {
+    this.suggestedNote.set(null);
     this.editPlan.set(null);
     this.editorOpen.set(true);
   }
   edit(plan: Plan): void {
+    this.suggestedNote.set(null);
     this.editPlan.set(plan);
     this.editorOpen.set(true);
   }
@@ -468,6 +476,16 @@ export class PlanningPage {
   hasOpenActions(plan: Plan): boolean {
     return plan.actions.some((action) => action.state === 'OPEN');
   }
+  askPlan(plan: Plan | null = null): void {
+    this.assistantPlans.set(plan ? [plan] : (this.board()?.items.map((r) => r.plan) ?? []));
+    this.assistantOpen.set(true);
+  }
+  reviewPlanningNote(note: ReviewedPlanningNote): void {
+    this.editPlan.set(note.plan);
+    this.suggestedNote.set({ text: note.text, expectedRevision: note.expectedRevision });
+    this.assistantOpen.set(false);
+    this.editorOpen.set(true);
+  }
   openGarden(action: Plan['actions'][number] | null = null): void {
     this.completingAction.set(action);
     this.gardenOpen.set(true);
@@ -481,6 +499,7 @@ export class PlanningPage {
   }
   async saved(plan: Plan, reveal = false): Promise<void> {
     this.editorOpen.set(false);
+    this.suggestedNote.set(null);
     this.actionOpen.set(false);
     this.chooserOpen.set(false);
     this.gardenOpen.set(false);

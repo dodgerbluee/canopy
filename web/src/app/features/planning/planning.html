@@ -5,11 +5,21 @@
       <h1>Your next <em>growing season.</em></h1>
       <p class="planning-intro">A little space for ideas. A clear path to getting them growing.</p>
     </div>
-    <button class="btn btn-primary" type="button" [disabled]="!context()" (click)="create()">
-      <ui-icon name="plus" [size]="18" />{{
-        view() === 'wishlist' ? 'Add an idea' : 'Plan a planting'
-      }}
-    </button>
+    <div class="planning-heading-actions">
+      <button
+        class="btn btn-ghost"
+        type="button"
+        [disabled]="!board()?.items?.length"
+        (click)="askPlan()"
+      >
+        <ui-icon name="sparkles" [size]="17" />Help me plan
+      </button>
+      <button class="btn btn-primary" type="button" [disabled]="!context()" (click)="create()">
+        <ui-icon name="plus" [size]="18" />{{
+          view() === 'wishlist' ? 'Add an idea' : 'Plan a planting'
+        }}
+      </button>
+    </div>
   </header>
   <section class="planning-summary" aria-label="Planning at a glance">
     <div>
@@ -502,9 +512,24 @@
         </p>
       </div>
       @if (active(plan)) {
-        <button class="icon-button" type="button" aria-label="Edit this plan" (click)="edit(plan)">
-          <ui-icon name="pencil" [size]="18" />
-        </button>
+        <div class="planning-detail-tools">
+          <button
+            class="icon-button"
+            type="button"
+            aria-label="Ask about this plan"
+            (click)="askPlan(plan)"
+          >
+            <ui-icon name="sparkles" [size]="18" />
+          </button>
+          <button
+            class="icon-button"
+            type="button"
+            aria-label="Edit this plan"
+            (click)="edit(plan)"
+          >
+            <ui-icon name="pencil" [size]="18" />
+          </button>
+        </div>
       }
     </div>
     <ui-tabs
@@ -751,6 +776,7 @@
   [plan]="editPlan()"
   [currency]="context()?.workspace?.defaultCurrency ?? 'USD'"
   [idea]="view() === 'wishlist'"
+  [suggestedNote]="suggestedNote()"
   [locations]="context()?.locations ?? []"
   (dismissed)="editorOpen.set(false)"
   (saved)="saved($event, true)"
@@ -817,4 +843,12 @@
   [locations]="context()?.locations ?? []"
   (dismissed)="completionOpen.set(false)"
   (saved)="saved($event)"
+/>
+
+<planning-assistant
+  [open]="assistantOpen()"
+  [plans]="assistantPlans()"
+  [year]="+from().slice(0, 4)"
+  (dismissed)="assistantOpen.set(false)"
+  (reviewed)="reviewPlanningNote($event)"
 />

@@ -1376,6 +1376,29 @@ type PlantingAnnualPeriod struct {
 	Season    *PlantingSeason           `json:"season,omitempty"`
 }
 
+type PlantingAssistantCitation struct {
+	Ref      string                `json:"ref"`
+	PlanID   string                `json:"planId"`
+	PlanName string                `json:"planName"`
+	Fact     *PlantingGuidanceFact `json:"fact"`
+}
+
+type PlantingAssistantNote struct {
+	PlanID           string `json:"planId"`
+	ExpectedRevision int    `json:"expectedRevision"`
+	Text             string `json:"text"`
+}
+
+type PlantingAssistantReply struct {
+	Answer string `json:"answer"`
+	// False for a deterministic manual-planning explanation when no current evidence exists.
+	IsAi    bool                         `json:"isAI"`
+	PlanIds []string                     `json:"planIds"`
+	Sources []*PlantingAssistantCitation `json:"sources"`
+	// A reviewable note only. Applying it never saves, creates an action or changes a date.
+	Note *PlantingAssistantNote `json:"note,omitempty"`
+}
+
 type PlantingBoardConnection struct {
 	Timezone string              `json:"timezone"`
 	Today    scalars.Date        `json:"today"`

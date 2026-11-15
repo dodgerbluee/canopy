@@ -8,6 +8,12 @@
   (dismissed)="dismissed.emit()"
 >
   <form (ngSubmit)="save()" novalidate>
+    @if (suggestedNote()) {
+      <p class="planning-note" role="status">
+        Review the proposed note and sources in Budget &amp; notes. Your existing notes are kept;
+        choose Save changes when ready.
+      </p>
+    }
     @if (message()) {
       <div class="form-error" role="alert">
         <p>{{ message() }}</p>
@@ -258,7 +264,7 @@
         </p>
       </fieldset>
     </details>
-    <details class="planning-form-fold" [open]="!!draft.budget">
+    <details class="planning-form-fold" [open]="!!draft.budget || !!suggestedNote()">
       <summary>Budget &amp; notes <span>Estimates, not spending</span></summary>
       <fieldset
         class="form-section"

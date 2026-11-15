@@ -28,6 +28,10 @@
   .planning-heading h1 {
     font-size: 36px;
   }
+  .planning-heading-actions {
+    justify-content: flex-start;
+    margin-top: 20px;
+  }
   .planning-heading > .btn {
     margin-top: 20px;
   }

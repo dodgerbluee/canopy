@@ -56,4 +56,23 @@ describe('planning modal form', () => {
     await f.componentInstance.save();
     expect(api.command.mock.calls[1][1].clientMutationId).not.toBe(key);
   });
+  it('appends a reviewed note as a protected unsaved draft and keeps existing notes', async () => {
+    const f = TestBed.createComponent(PlanEditor);
+    f.componentRef.setInput('plan', {
+      id: 'p',
+      name: 'Fig',
+      revision: 3,
+      category: 'FIG',
+      state: 'PLANNED',
+      notes: 'My own note',
+      actions: [],
+    });
+    f.componentRef.setInput('suggestedNote', { expectedRevision: 3, text: 'Reviewed suggestion' });
+    f.componentRef.setInput('open', true);
+    f.detectChanges();
+    await f.whenStable();
+    expect(f.componentInstance.draft.notes).toBe('My own note\n\nReviewed suggestion');
+    expect(f.componentInstance.dirty()).toBe(true);
+    expect(api.command).not.toHaveBeenCalled();
+  });
 });

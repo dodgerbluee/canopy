@@ -302,21 +302,9 @@ func (s *Service) Ask(ctx context.Context, ws pgtype.UUID, question string, year
 	if model == nil {
 		return AnswerDraft{}, nil, errors.New("garden chat requires a configured AI model")
 	}
-	s.chatMu.Lock()
-	now := time.Now()
-	key := uid(ws)
-	recent := []time.Time{}
-	for _, t := range s.chatUsage[key] {
-		if t.After(now.Add(-time.Hour)) {
-			recent = append(recent, t)
-		}
+	if err := s.reserveChat(ws); err != nil {
+		return AnswerDraft{}, nil, err
 	}
-	if len(recent) >= 12 {
-		s.chatMu.Unlock()
-		return AnswerDraft{}, nil, &Problem{Code: "RATE_LIMITED", Message: "Please wait before asking more garden questions."}
-	}
-	s.chatUsage[key] = append(recent, now)
-	s.chatMu.Unlock()
 	garden, err := s.Garden(ctx, ws, year)
 	if err != nil {
 		return AnswerDraft{}, nil, errors.New("Your garden could not be loaded.")

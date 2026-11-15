@@ -33,6 +33,7 @@ export class PlanEditor {
   readonly plan = input<Plan | null>(null);
   readonly currency = input('USD');
   readonly idea = input(false);
+  readonly suggestedNote = input<{ text: string; expectedRevision: number } | null>(null);
   readonly locations = input<Awaited<ReturnType<PlanningApi['context']>>['locations']>([]);
   readonly dismissed = output<void>();
   readonly saved = output<Plan>();
@@ -61,6 +62,9 @@ export class PlanEditor {
   private reset(plan: Plan | null): void {
     this.draft = planDraft(plan, this.currency(), this.idea());
     this.original = JSON.stringify(this.draft);
+    const suggestion = this.suggestedNote();
+    if (plan && suggestion && suggestion.expectedRevision === plan.revision)
+      this.draft.notes = [this.draft.notes, suggestion.text].filter(Boolean).join('\n\n');
     this.revision = plan?.revision ?? 0;
     this.attempt = new PlanningAttempt();
     this.errors = {};

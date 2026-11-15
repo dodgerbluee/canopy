@@ -1,10 +1,9 @@
 # Future planting planner
 
-Status: steps 1–7 of 8 accepted, including the Planning page and shared modal flows. An isolated Docker preview is available at
-http://127.0.0.1:7082/planning. Calendar/Year/Today integrations and opt-in reminders are implemented in step 6;
-atomic garden promotion and action completion are implemented in step 7;
-agent/assistant work follows in step 8; the user authorized continuing through all.
-Existing production deployments are unchanged.
+Status: steps 1–7 of 8 accepted; step 8 is implemented and under final validation/CI.
+The complete isolated preview is available at http://127.0.0.1:7082/planning.
+Original local and remote production deployments remain unchanged. The user
+authorized continuing through all eight implementation packets.
 
 ## Product direction
 
@@ -293,7 +292,7 @@ PLAN03's additive refresh/research contract is recorded in
 | 5 — complete | Angular page and shared modals | `web/src/app/features/planning/`, data layer, routes/shell/More, batched board composition | Complete ideas/plans/edit/actions/source-choice flows on desktop/phone with shared modal guards, hidden URL filters and both themes. 504 Angular tests/build, real API/race/regression checks, 20 authenticated browser/accessibility scenarios and paired Docker preview and full GitHub CI passed. |
 | 6 — complete | Calendar, Year, Today and reminders | Existing calendar/seasons/today/inbox modules; scoped planner projections and worker | Planning stays visually distinct and filterable, with no fake real-plant events. Only explicit dates create markers/reminders. Separate explicit-day projection, optional Year overlay, Today actions and opt-in in-app Inbox reminders verified with scope/date/cancellation/concurrency/timezone tests, 32 browser scenarios, full Go regression and GitHub CI. |
 | 7 — complete | Add to garden | Planning promotion command, narrow collection transaction interface, existing plant form | One atomic conversion to one plant/group, with confirmed actual values and origin link. Actual create/link, acquisition-only and sow/plant completion flows implemented. Lost-response retry, 12 competing clients, full audit rollback, purge replay, real/unknown price/count, early acquisition then later planting and populated restore pass; full GitHub CI passed. |
-| 8 | Agent integration and release gate | Agent catalog/context, remaining browser/portability tests, release/deployment tooling | Scoped MCP read/write/promote behavior, complete round-trip portability, full end-to-end journey and no planning leakage into actual totals. Verify deployed API/worker compatibility and queued jobs before release. |
+| 8 — verifying | Agent integration and release gate | Agent catalog/context, remaining browser/portability tests, release/deployment tooling | 102 finite tools with separate planner scopes, reviewed changes and actual-plant/finance permission guards; typed precision-preserving reads and purge-safe cached history. Garden-model planning questions return validated cited note drafts; normal explicit save remains required. Full browser/provider/SDK/portability and matched preview verification complete; final regression/CI pending. |
 
 Run one packet at a time. Each finishes with evidence, tests appropriate to the
 business behavior, and a clean handoff before the next model starts.
@@ -309,3 +308,13 @@ useful manual planner. Backup/restore retains plans, citations, actions and link
 
 Defer spatial bed maps, seed inventory, partial fulfillment, bulk individual-plant
 creation, automated succession runs and optimizer-generated garden layouts.
+
+## Completed V1 boundaries
+
+Planning assistant drafts are notes only. The deterministic source/window chooser remains the way to confirm dates; AI cannot silently schedule actions, buy plants, add ownership or complete work. The assistant is scoped to timing, conditions and organizational next steps, preserves propagation/container/cultivar distinctions and leaves physical care instructions to actual-plant care workflows. No current applicable evidence yields an explicit manual-planning explanation, not improvised climate or harvest advice.
+
+The existing Garden AI feature binding supports OpenAI-compatible, Anthropic and Gemini providers; no additional AI service or credential is introduced. The read-only assistant shares the existing twelve-question hourly service guard and validates 1–20 selected plans, bounded cited facts, draft fields, current plan/source/ownership context and privacy epoch. Requests through aliases/fragments cannot multiply synchronous model calls.
+
+Reminders are in-app only, selected per action. The worker considers at most 200 current open actions per sweep and catches up at most seven local days. Changes preserve chosen civil dates, recalculate unsent delivery in the garden timezone and retain delivered/read history. Calendar planning markers are scheduled intentions; a completed marker keeps its scheduled day and explicitly labels completion rather than fabricating an observed event on that day.
+
+Native Hermes/Grok account setup remains unverified; the existing pinned SDK HTTP/stdio paths and live preview MCP endpoint are exercised. No external account/tunnel or production deployment is enabled by this feature. Spatial layouts, seed inventory, partial/bulk fulfillment and automatic succession planning remain outside V1.

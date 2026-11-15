@@ -528,7 +528,7 @@
         "PLAN02",
         "PLAN03",
         "PLAN04",
-        "PLAN07"
+        "PLAN08"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -1076,6 +1076,14 @@
         "PLAN06"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN08": {
+      "title": "Scoped planner MCP tools, assistant drafts and final implementation gate",
+      "dependsOn": [
+        "PLAN07"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

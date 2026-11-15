@@ -20,8 +20,14 @@ func TestEveryNamedOperationValidatesAgainstApplicationSchema(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if _, errors := gqlparser.LoadQuery(e.Schema(), doc); errors != nil {
+			parsed, errors := gqlparser.LoadQuery(e.Schema(), doc)
+			if errors != nil {
 				t.Fatal(errors.Error(), doc)
+			}
+			if strings.HasPrefix(tool.Scope, "planning:") {
+				if err := gqlx.Validate(e.Schema(), parsed, gqlx.DefaultLimits()); err != nil {
+					t.Fatal("planner tool exceeds application request limits", err)
+				}
 			}
 			schema := inputSchema(e.Schema(), tool)
 			if schema["additionalProperties"] != false {

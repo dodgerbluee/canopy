@@ -70,7 +70,7 @@ func Complete(ctx context.Context, tx pgx.Tx, result any) error {
 	var object map[string]json.RawMessage
 	_ = json.Unmarshal(raw, &object)
 	refs := map[string]json.RawMessage{}
-	for _, k := range []string{"id", "ID", "revision", "Revision"} {
+	for _, k := range []string{"id", "ID", "revision", "Revision", "plantId"} {
 		if v, yes := object[k]; yes {
 			refs[k] = v
 		}

@@ -18,7 +18,7 @@ import (
 )
 
 var ErrDenied = errors.New("Agent access is unavailable or not permitted.")
-var Scopes = []string{"garden:read", "knowledge:read", "photos:read", "logs:write", "rain:write", "plants:write", "care:read", "care:write", "purchases:read", "purchases:write", "receipts:read", "media:write", "analysis:run", "suggestions:review", "inbox:read", "inbox:write", "exports:request"}
+var Scopes = []string{"planning:read", "planning:write", "garden:read", "knowledge:read", "photos:read", "logs:write", "rain:write", "plants:write", "care:read", "care:write", "purchases:read", "purchases:write", "receipts:read", "media:write", "analysis:run", "suggestions:review", "inbox:read", "inbox:write", "exports:request"}
 
 type Problem struct{ Code, Message string }
 
@@ -151,8 +151,8 @@ func (m *Manager) validate(ctx context.Context, ws pgtype.UUID, in SaveInput) ([
 			return nil, invalid("Choose each supported permission once.")
 		}
 		seen[s] = true
-		if len(in.PlantIDs) > 0 && (strings.HasPrefix(s, "purchases:") || s == "receipts:read" || s == "exports:request") {
-			return nil, invalid("Financial, receipt and export access requires an unrestricted garden grant.")
+		if len(in.PlantIDs) > 0 && (strings.HasPrefix(s, "purchases:") || strings.HasPrefix(s, "planning:") || s == "receipts:read" || s == "exports:request") {
+			return nil, invalid("Planning, financial, receipt and export access requires a workspace-wide grant.")
 		}
 	}
 	if (seen["purchases:write"] || seen["receipts:read"]) && !seen["purchases:read"] {

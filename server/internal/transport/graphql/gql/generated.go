@@ -680,6 +680,7 @@ type ComplexityRoot struct {
 		ArchivePlant                func(childComplexity int, input ArchivePlantInput, clientMutationID *string) int
 		ArchiveTag                  func(childComplexity int, input ArchiveTagInput, clientMutationID *string) int
 		AskGarden                   func(childComplexity int, question string, year int) int
+		AskPlantingPlanner          func(childComplexity int, question string, planIds []string, year int) int
 		AttachPhoto                 func(childComplexity int, input AttachPhotoInput, clientMutationID *string) int
 		AttachReceipt               func(childComplexity int, input AttachReceiptInput, clientMutationID *string) int
 		CancelAnalysis              func(childComplexity int, input CancelAnalysisInput, clientMutationID *string) int
@@ -936,6 +937,27 @@ type ComplexityRoot struct {
 		Months    func(childComplexity int) int
 		Precision func(childComplexity int) int
 		Season    func(childComplexity int) int
+	}
+
+	PlantingAssistantCitation struct {
+		Fact     func(childComplexity int) int
+		PlanID   func(childComplexity int) int
+		PlanName func(childComplexity int) int
+		Ref      func(childComplexity int) int
+	}
+
+	PlantingAssistantNote struct {
+		ExpectedRevision func(childComplexity int) int
+		PlanID           func(childComplexity int) int
+		Text             func(childComplexity int) int
+	}
+
+	PlantingAssistantReply struct {
+		Answer  func(childComplexity int) int
+		IsAi    func(childComplexity int) int
+		Note    func(childComplexity int) int
+		PlanIds func(childComplexity int) int
+		Sources func(childComplexity int) int
 	}
 
 	PlantingBoardConnection struct {
@@ -1674,6 +1696,7 @@ type MutationResolver interface {
 	DeletePlantingAction(ctx context.Context, input DeletePlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error)
 	RefreshPlantingGuidance(ctx context.Context, input RefreshPlantingGuidanceInput, clientMutationID *string) (*PlantingPlanPayload, error)
 	ConfirmPlantingSchedule(ctx context.Context, input ConfirmPlantingScheduleInput, clientMutationID *string) (*PlantingPlanPayload, error)
+	AskPlantingPlanner(ctx context.Context, question string, planIds []string, year int) (*PlantingAssistantReply, error)
 	AddPlantingToGarden(ctx context.Context, input AddPlantingToGardenInput, clientMutationID *string) (*PlantingPlanPayload, error)
 	CompletePlantingAction(ctx context.Context, input CompletePlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error)
 	DismissPlantingAction(ctx context.Context, input DismissPlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error)
@@ -4328,6 +4351,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.AskGarden(childComplexity, args["question"].(string), args["year"].(int)), true
+	case "Mutation.askPlantingPlanner":
+		if e.ComplexityRoot.Mutation.AskPlantingPlanner == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_askPlantingPlanner_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.AskPlantingPlanner(childComplexity, args["question"].(string), args["planIds"].([]string), args["year"].(int)), true
 	case "Mutation.attachPhoto":
 		if e.ComplexityRoot.Mutation.AttachPhoto == nil {
 			break
@@ -5872,6 +5906,81 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PlantingAnnualPeriod.Season(childComplexity), true
+
+	case "PlantingAssistantCitation.fact":
+		if e.ComplexityRoot.PlantingAssistantCitation.Fact == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantCitation.Fact(childComplexity), true
+	case "PlantingAssistantCitation.planId":
+		if e.ComplexityRoot.PlantingAssistantCitation.PlanID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantCitation.PlanID(childComplexity), true
+	case "PlantingAssistantCitation.planName":
+		if e.ComplexityRoot.PlantingAssistantCitation.PlanName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantCitation.PlanName(childComplexity), true
+	case "PlantingAssistantCitation.ref":
+		if e.ComplexityRoot.PlantingAssistantCitation.Ref == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantCitation.Ref(childComplexity), true
+
+	case "PlantingAssistantNote.expectedRevision":
+		if e.ComplexityRoot.PlantingAssistantNote.ExpectedRevision == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantNote.ExpectedRevision(childComplexity), true
+	case "PlantingAssistantNote.planId":
+		if e.ComplexityRoot.PlantingAssistantNote.PlanID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantNote.PlanID(childComplexity), true
+	case "PlantingAssistantNote.text":
+		if e.ComplexityRoot.PlantingAssistantNote.Text == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantNote.Text(childComplexity), true
+
+	case "PlantingAssistantReply.answer":
+		if e.ComplexityRoot.PlantingAssistantReply.Answer == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantReply.Answer(childComplexity), true
+	case "PlantingAssistantReply.isAI":
+		if e.ComplexityRoot.PlantingAssistantReply.IsAi == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantReply.IsAi(childComplexity), true
+	case "PlantingAssistantReply.note":
+		if e.ComplexityRoot.PlantingAssistantReply.Note == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantReply.Note(childComplexity), true
+	case "PlantingAssistantReply.planIds":
+		if e.ComplexityRoot.PlantingAssistantReply.PlanIds == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantReply.PlanIds(childComplexity), true
+	case "PlantingAssistantReply.sources":
+		if e.ComplexityRoot.PlantingAssistantReply.Sources == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingAssistantReply.Sources(childComplexity), true
 
 	case "PlantingBoardConnection.items":
 		if e.ComplexityRoot.PlantingBoardConnection.Items == nil {
@@ -10938,6 +11047,21 @@ extend type Mutation {
 }
 
 type PlantingBoardRow { plan: PlantingPlan!, schedule: PlantingScheduleConnection! }
+type PlantingAssistantCitation { ref: ID!, planId: ID!, planName: String!, fact: PlantingGuidanceFact! }
+type PlantingAssistantNote { planId: ID!, expectedRevision: Int!, text: String! }
+type PlantingAssistantReply {
+  answer: String!
+  "False for a deterministic manual-planning explanation when no current evidence exists."
+  isAI: Boolean!
+  planIds: [ID!]!
+  sources: [PlantingAssistantCitation!]!
+  "A reviewable note only. Applying it never saves, creates an action or changes a date."
+  note: PlantingAssistantNote
+}
+extend type Mutation {
+  "One bounded Garden-AI question about 1–20 explicitly selected workspace plans. Never writes."
+  askPlantingPlanner(question: String!, planIds: [ID!]!, year: Int!): PlantingAssistantReply!
+}
 input AddPlantingToGardenInput {
   planId: ID!
   expectedRevision: Int!
@@ -13280,6 +13404,48 @@ func (ec *executionContext) childFields_PlantingAnnualPeriod(ctx context.Context
 	return nil, fmt.Errorf("no field named %q was found under type PlantingAnnualPeriod", field.Name)
 }
 
+func (ec *executionContext) childFields_PlantingAssistantCitation(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "ref":
+		return ec.fieldContext_PlantingAssistantCitation_ref(ctx, field)
+	case "planId":
+		return ec.fieldContext_PlantingAssistantCitation_planId(ctx, field)
+	case "planName":
+		return ec.fieldContext_PlantingAssistantCitation_planName(ctx, field)
+	case "fact":
+		return ec.fieldContext_PlantingAssistantCitation_fact(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PlantingAssistantCitation", field.Name)
+}
+
+func (ec *executionContext) childFields_PlantingAssistantNote(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "planId":
+		return ec.fieldContext_PlantingAssistantNote_planId(ctx, field)
+	case "expectedRevision":
+		return ec.fieldContext_PlantingAssistantNote_expectedRevision(ctx, field)
+	case "text":
+		return ec.fieldContext_PlantingAssistantNote_text(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PlantingAssistantNote", field.Name)
+}
+
+func (ec *executionContext) childFields_PlantingAssistantReply(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "answer":
+		return ec.fieldContext_PlantingAssistantReply_answer(ctx, field)
+	case "isAI":
+		return ec.fieldContext_PlantingAssistantReply_isAI(ctx, field)
+	case "planIds":
+		return ec.fieldContext_PlantingAssistantReply_planIds(ctx, field)
+	case "sources":
+		return ec.fieldContext_PlantingAssistantReply_sources(ctx, field)
+	case "note":
+		return ec.fieldContext_PlantingAssistantReply_note(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PlantingAssistantReply", field.Name)
+}
+
 func (ec *executionContext) childFields_PlantingBoardConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "timezone":
@@ -14693,6 +14859,36 @@ func (ec *executionContext) field_Mutation_askGarden_args(ctx context.Context, r
 		return nil, err
 	}
 	args["year"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_askPlantingPlanner_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "question",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["question"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "planIds",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalNID2ᚕstringᚄ(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["planIds"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "year",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNInt2int(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["year"] = arg2
 	return args, nil
 }
 
@@ -30616,6 +30812,50 @@ func (ec *executionContext) fieldContext_Mutation_confirmPlantingSchedule(ctx co
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_askPlantingPlanner(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_askPlantingPlanner(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().AskPlantingPlanner(ctx, fc.Args["question"].(string), fc.Args["planIds"].([]string), fc.Args["year"].(int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingAssistantReply) graphql.Marshaler {
+			return ec.marshalNPlantingAssistantReply2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingAssistantReply(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_askPlantingPlanner(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingAssistantReply(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_askPlantingPlanner_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_addPlantingToGarden(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -33740,6 +33980,309 @@ func (ec *executionContext) _PlantingAnnualPeriod_season(ctx context.Context, fi
 }
 func (ec *executionContext) fieldContext_PlantingAnnualPeriod_season(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("PlantingAnnualPeriod", field, false, false, "PlantingSeason")
+}
+
+func (ec *executionContext) _PlantingAssistantCitation_ref(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantCitation) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantCitation_ref(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Ref, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantCitation_ref(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantCitation", field, false, false, "ID")
+}
+
+func (ec *executionContext) _PlantingAssistantCitation_planId(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantCitation) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantCitation_planId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PlanID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantCitation_planId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantCitation", field, false, false, "ID")
+}
+
+func (ec *executionContext) _PlantingAssistantCitation_planName(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantCitation) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantCitation_planName(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PlanName, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantCitation_planName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantCitation", field, false, false, "String")
+}
+
+func (ec *executionContext) _PlantingAssistantCitation_fact(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantCitation) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantCitation_fact(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Fact, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingGuidanceFact) graphql.Marshaler {
+			return ec.marshalNPlantingGuidanceFact2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingGuidanceFact(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantCitation_fact(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlantingAssistantCitation",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingGuidanceFact(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlantingAssistantNote_planId(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantNote) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantNote_planId(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PlanID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantNote_planId(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantNote", field, false, false, "ID")
+}
+
+func (ec *executionContext) _PlantingAssistantNote_expectedRevision(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantNote) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantNote_expectedRevision(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ExpectedRevision, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantNote_expectedRevision(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantNote", field, false, false, "Int")
+}
+
+func (ec *executionContext) _PlantingAssistantNote_text(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantNote) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantNote_text(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Text, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantNote_text(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantNote", field, false, false, "String")
+}
+
+func (ec *executionContext) _PlantingAssistantReply_answer(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantReply) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantReply_answer(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Answer, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantReply_answer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantReply", field, false, false, "String")
+}
+
+func (ec *executionContext) _PlantingAssistantReply_isAI(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantReply) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantReply_isAI(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.IsAi, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantReply_isAI(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantReply", field, false, false, "Boolean")
+}
+
+func (ec *executionContext) _PlantingAssistantReply_planIds(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantReply) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantReply_planIds(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PlanIds, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNID2ᚕstringᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantReply_planIds(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingAssistantReply", field, false, false, "ID")
+}
+
+func (ec *executionContext) _PlantingAssistantReply_sources(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantReply) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantReply_sources(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Sources, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*PlantingAssistantCitation) graphql.Marshaler {
+			return ec.marshalNPlantingAssistantCitation2ᚕᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingAssistantCitationᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantReply_sources(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlantingAssistantReply",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingAssistantCitation(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlantingAssistantReply_note(ctx context.Context, field graphql.CollectedField, obj *PlantingAssistantReply) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingAssistantReply_note(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Note, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingAssistantNote) graphql.Marshaler {
+			return ec.marshalOPlantingAssistantNote2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingAssistantNote(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingAssistantReply_note(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlantingAssistantReply",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingAssistantNote(ctx, field)
+		},
+	}
+	return fc, nil
 }
 
 func (ec *executionContext) _PlantingBoardConnection_timezone(ctx context.Context, field graphql.CollectedField, obj *PlantingBoardConnection) (ret graphql.Marshaler) {
@@ -58418,6 +58961,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "askPlantingPlanner":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_askPlantingPlanner(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "addPlantingToGarden":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addPlantingToGarden(ctx, field)
@@ -59624,6 +60174,150 @@ func (ec *executionContext) _PlantingAnnualPeriod(ctx context.Context, sel ast.S
 			}
 		case "season":
 			out.Values[i] = ec._PlantingAnnualPeriod_season(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var plantingAssistantCitationImplementors = []string{"PlantingAssistantCitation"}
+
+func (ec *executionContext) _PlantingAssistantCitation(ctx context.Context, sel ast.SelectionSet, obj *PlantingAssistantCitation) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, plantingAssistantCitationImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PlantingAssistantCitation")
+		case "ref":
+			out.Values[i] = ec._PlantingAssistantCitation_ref(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "planId":
+			out.Values[i] = ec._PlantingAssistantCitation_planId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "planName":
+			out.Values[i] = ec._PlantingAssistantCitation_planName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "fact":
+			out.Values[i] = ec._PlantingAssistantCitation_fact(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var plantingAssistantNoteImplementors = []string{"PlantingAssistantNote"}
+
+func (ec *executionContext) _PlantingAssistantNote(ctx context.Context, sel ast.SelectionSet, obj *PlantingAssistantNote) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, plantingAssistantNoteImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PlantingAssistantNote")
+		case "planId":
+			out.Values[i] = ec._PlantingAssistantNote_planId(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "expectedRevision":
+			out.Values[i] = ec._PlantingAssistantNote_expectedRevision(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "text":
+			out.Values[i] = ec._PlantingAssistantNote_text(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var plantingAssistantReplyImplementors = []string{"PlantingAssistantReply"}
+
+func (ec *executionContext) _PlantingAssistantReply(ctx context.Context, sel ast.SelectionSet, obj *PlantingAssistantReply) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, plantingAssistantReplyImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PlantingAssistantReply")
+		case "answer":
+			out.Values[i] = ec._PlantingAssistantReply_answer(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "isAI":
+			out.Values[i] = ec._PlantingAssistantReply_isAI(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "planIds":
+			out.Values[i] = ec._PlantingAssistantReply_planIds(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "sources":
+			out.Values[i] = ec._PlantingAssistantReply_sources(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "note":
+			out.Values[i] = ec._PlantingAssistantReply_note(ctx, field, obj)
 			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
@@ -66136,6 +66830,38 @@ func (ec *executionContext) marshalNPlantingAnnualPrecision2canopyᚋserverᚋin
 	return v
 }
 
+func (ec *executionContext) marshalNPlantingAssistantCitation2ᚕᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingAssistantCitationᚄ(ctx context.Context, sel ast.SelectionSet, v []*PlantingAssistantCitation) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNPlantingAssistantCitation2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingAssistantCitation(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPlantingAssistantCitation2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingAssistantCitation(ctx context.Context, sel ast.SelectionSet, v *PlantingAssistantCitation) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "PlantingAssistantCitation!")
+		return graphql.Null
+	}
+	return ec._PlantingAssistantCitation(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPlantingAssistantReply2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingAssistantReply(ctx context.Context, sel ast.SelectionSet, v *PlantingAssistantReply) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "PlantingAssistantReply!")
+		return graphql.Null
+	}
+	return ec._PlantingAssistantReply(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNPlantingBoardConnection2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingBoardConnection(ctx context.Context, sel ast.SelectionSet, v *PlantingBoardConnection) graphql.Marshaler {
 	if v == nil {
 		graphql.AddInvalidNullError(ctx, "PlantingBoardConnection!")
@@ -68498,6 +69224,13 @@ func (ec *executionContext) marshalOPlantingAnnualPeriod2ᚖcanopyᚋserverᚋin
 		return graphql.Null
 	}
 	return ec._PlantingAnnualPeriod(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOPlantingAssistantNote2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingAssistantNote(ctx context.Context, sel ast.SelectionSet, v *PlantingAssistantNote) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._PlantingAssistantNote(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOPlantingBudgetInput2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingBudgetInput(ctx context.Context, v any) (*PlantingBudgetInput, error) {

@@ -5,6 +5,13 @@ fragment PlantingPeriodFields on PlantingPeriod {
   season { season year }
   year
 }
+mutation AskPlantingPlanner($question: String!, $planIds: [ID!]!, $year: Int!) {
+  askPlantingPlanner(question: $question, planIds: $planIds, year: $year) {
+    answer isAI planIds
+    sources { ref planId planName fact { id phase label summary conditions sourceTitle sourceUrl publisher sourceRegion retrievedAt contentSha256 windows { precision label } } }
+    note { planId expectedRevision text }
+  }
+}
 mutation AddPlantingToGarden($input: AddPlantingToGardenInput!, $clientMutationId: String) {
   addPlantingToGarden(input: $input, clientMutationId: $clientMutationId) {
     plan { ...PlantingPlanFields }

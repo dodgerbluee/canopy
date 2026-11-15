@@ -384,6 +384,11 @@ func (r *mutationResolver) ConfirmPlantingSchedule(ctx context.Context, input Co
 	panic("not implemented")
 }
 
+// AskPlantingPlanner is the resolver for the askPlantingPlanner field.
+func (r *mutationResolver) AskPlantingPlanner(ctx context.Context, question string, planIds []string, year int) (*PlantingAssistantReply, error) {
+	panic("not implemented")
+}
+
 // AddPlantingToGarden is the resolver for the addPlantingToGarden field.
 func (r *mutationResolver) AddPlantingToGarden(ctx context.Context, input AddPlantingToGardenInput, clientMutationID *string) (*PlantingPlanPayload, error) {
 	panic("not implemented")

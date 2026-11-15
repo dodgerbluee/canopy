@@ -1,0 +1,117 @@
+<ui-entry-dialog
+  #entry
+  [open]="open()"
+  title="Help me plan"
+  description="A little perspective on your next growing season."
+  [dirty]="dirty()"
+  (dismissed)="dismissed.emit()"
+>
+  <form (ngSubmit)="ask()" novalidate>
+    <p class="planning-note">
+      Uses your selected plans, current garden records and available cited guidance through your
+      Garden AI connection. Future intentions stay separate from owned plants and actual spending.
+    </p>
+    <fieldset
+      class="form-section"
+      [disabled]="asking() || reviewing()"
+      style="border: 0; padding: 0; margin: 0"
+    >
+      @if (plans().length > 1) {
+        <details class="planning-form-fold">
+          <summary>
+            Plans in this question
+            <span>{{ selected().size }} selected · up to 20 · this loaded view</span>
+          </summary>
+          <div class="assistant-plans">
+            @for (plan of plans(); track plan.id) {
+              <label
+                ><input
+                  type="checkbox"
+                  [checked]="selected().has(plan.id)"
+                  (change)="toggle(plan.id)"
+                />{{ plan.name }}</label
+              >
+            }
+          </div>
+        </details>
+      } @else if (plans()[0]; as plan) {
+        <p class="assistant-scope"><ui-icon name="sprout" [size]="18" />{{ plan.name }}</p>
+      }
+      <div class="field">
+        <label class="field-label" for="planning-question">What would you like to work out?</label
+        ><textarea
+          class="input"
+          id="planning-question"
+          name="question"
+          rows="3"
+          maxlength="2000"
+          [ngModel]="question()"
+          (ngModelChange)="question.set($event); reply.set(null)"
+          required
+        ></textarea>
+      </div>
+    </fieldset>
+    @if (message()) {
+      <p class="form-error" role="alert">{{ message() }}</p>
+    }
+    @if (asking()) {
+      <p class="planning-note" role="status">Reading the selected plans and cited guidance…</p>
+    }
+    @if (reply(); as answer) {
+      <section class="assistant-answer" aria-label="Planning answer">
+        <p class="kicker">{{ answer.isAI ? 'GARDEN ASSISTANT' : 'MANUAL PLANNING' }}</p>
+        <p class="assistant-copy">{{ answer.answer }}</p>
+        @if (answer.sources.length) {
+          <details class="planning-form-fold">
+            <summary>
+              Why this advice?<span>{{ answer.sources.length }} supporting references</span>
+            </summary>
+            @for (source of answer.sources; track source.ref) {
+              <div class="assistant-source">
+                <a [href]="source.fact.sourceUrl" target="_blank" rel="noopener noreferrer">{{
+                  source.fact.sourceTitle
+                }}</a
+                ><small
+                  >{{ source.planName }} · {{ source.fact.publisher }} ·
+                  {{ source.fact.sourceRegion }}</small
+                >
+                <p>{{ source.fact.summary }}</p>
+                @for (condition of source.fact.conditions; track $index) {
+                  <small>{{ condition }}</small>
+                }
+              </div>
+            }
+          </details>
+        }
+        @if (answer.note; as note) {
+          <div class="planning-choice">
+            <strong>A note to consider</strong>
+            <p class="assistant-copy">{{ note.text }}</p>
+            <small
+              >Review this in the plan editor. Your existing notes are kept, and saving is a
+              separate action.</small
+            >
+            <div>
+              <button
+                class="btn btn-primary"
+                type="button"
+                [disabled]="reviewing()"
+                (click)="reviewNote()"
+              >
+                {{ reviewing() ? 'Checking current plan…' : 'Review note in plan' }}
+              </button>
+            </div>
+          </div>
+        }
+      </section>
+    }
+    <div class="form-actions">
+      <button class="btn" type="button" (click)="entry.requestClose()">Close</button
+      ><button class="btn" type="submit" [disabled]="asking() || reviewing() || !plans().length">
+        <ui-icon name="sparkles" [size]="16" />{{
+          asking() ? 'Thinking…' : reply() ? 'Ask again' : 'Ask about these plans'
+        }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>

@@ -33,6 +33,7 @@ import (
 	"canopy/server/internal/knowledge"
 	"canopy/server/internal/media"
 	"canopy/server/internal/planning"
+	"canopy/server/internal/planninggarden"
 	"canopy/server/internal/portability"
 	"canopy/server/internal/purchases"
 	"canopy/server/internal/transport/graphql/gql"
@@ -76,10 +77,12 @@ func NewResolverFromPool(pool *pgxpool.Pool, log *slog.Logger) *Resolver {
 	knowledgeSvc := knowledge.New(pool)
 	planner := planning.New(pool, log)
 	planner.Guidance = knowledge.PlanningProvider{Service: knowledgeSvc}
+	coll := collection.New(pool, log, care.CollectionHook{Svc: careSvc})
+	planner.Garden = planninggarden.New(coll)
 	return &Resolver{
 		DB:        dbgen.New(pool),
 		Knowledge: knowledgeSvc,
-		Coll:      collection.New(pool, log, care.CollectionHook{Svc: careSvc}),
+		Coll:      coll,
 		Purch:     purchases.New(pool, log),
 		Journal:   journal.New(pool),
 		Care:      careSvc,

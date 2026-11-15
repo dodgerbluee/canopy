@@ -676,6 +676,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		AcceptSuggestion            func(childComplexity int, input AcceptSuggestionInput, clientMutationID *string) int
+		AddPlantingToGarden         func(childComplexity int, input AddPlantingToGardenInput, clientMutationID *string) int
 		ArchivePlant                func(childComplexity int, input ArchivePlantInput, clientMutationID *string) int
 		ArchiveTag                  func(childComplexity int, input ArchiveTagInput, clientMutationID *string) int
 		AskGarden                   func(childComplexity int, question string, year int) int
@@ -685,6 +686,7 @@ type ComplexityRoot struct {
 		CancelPlantingPlan          func(childComplexity int, input CancelPlantingPlanInput, clientMutationID *string) int
 		ChangePlantingPlanState     func(childComplexity int, input ChangePlantingPlanStateInput, clientMutationID *string) int
 		CompleteOccurrence          func(childComplexity int, input CompleteOccurrenceInput, clientMutationID *string) int
+		CompletePlantingAction      func(childComplexity int, input CompletePlantingActionInput, clientMutationID *string) int
 		ConfirmPlantingSchedule     func(childComplexity int, input ConfirmPlantingScheduleInput, clientMutationID *string) int
 		CorrectOccurrenceCompletion func(childComplexity int, input CorrectOccurrenceCompletionInput, clientMutationID *string) int
 		CreateCarePlan              func(childComplexity int, input CreateCarePlanInput, clientMutationID *string) int
@@ -703,6 +705,7 @@ type ComplexityRoot struct {
 		DeletePhoto                 func(childComplexity int, input DeletePhotoInput, clientMutationID *string) int
 		DeletePlantingAction        func(childComplexity int, input DeletePlantingActionInput, clientMutationID *string) int
 		DetachReceipt               func(childComplexity int, input DetachReceiptInput, clientMutationID *string) int
+		DismissPlantingAction       func(childComplexity int, input DismissPlantingActionInput, clientMutationID *string) int
 		DismissSuggestion           func(childComplexity int, input DismissSuggestionInput, clientMutationID *string) int
 		FinalizeUpload              func(childComplexity int, input FinalizeUploadInput, clientMutationID *string) int
 		MarkNotificationRead        func(childComplexity int, input MarkNotificationReadInput, clientMutationID *string) int
@@ -1671,6 +1674,9 @@ type MutationResolver interface {
 	DeletePlantingAction(ctx context.Context, input DeletePlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error)
 	RefreshPlantingGuidance(ctx context.Context, input RefreshPlantingGuidanceInput, clientMutationID *string) (*PlantingPlanPayload, error)
 	ConfirmPlantingSchedule(ctx context.Context, input ConfirmPlantingScheduleInput, clientMutationID *string) (*PlantingPlanPayload, error)
+	AddPlantingToGarden(ctx context.Context, input AddPlantingToGardenInput, clientMutationID *string) (*PlantingPlanPayload, error)
+	CompletePlantingAction(ctx context.Context, input CompletePlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error)
+	DismissPlantingAction(ctx context.Context, input DismissPlantingActionInput, clientMutationID *string) (*PlantingPlanPayload, error)
 }
 type QueryResolver interface {
 	Session(ctx context.Context) (*Session, error)
@@ -4278,6 +4284,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.AcceptSuggestion(childComplexity, args["input"].(AcceptSuggestionInput), args["clientMutationId"].(*string)), true
+	case "Mutation.addPlantingToGarden":
+		if e.ComplexityRoot.Mutation.AddPlantingToGarden == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addPlantingToGarden_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.AddPlantingToGarden(childComplexity, args["input"].(AddPlantingToGardenInput), args["clientMutationId"].(*string)), true
 	case "Mutation.archivePlant":
 		if e.ComplexityRoot.Mutation.ArchivePlant == nil {
 			break
@@ -4377,6 +4394,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CompleteOccurrence(childComplexity, args["input"].(CompleteOccurrenceInput), args["clientMutationId"].(*string)), true
+	case "Mutation.completePlantingAction":
+		if e.ComplexityRoot.Mutation.CompletePlantingAction == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_completePlantingAction_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.CompletePlantingAction(childComplexity, args["input"].(CompletePlantingActionInput), args["clientMutationId"].(*string)), true
 	case "Mutation.confirmPlantingSchedule":
 		if e.ComplexityRoot.Mutation.ConfirmPlantingSchedule == nil {
 			break
@@ -4575,6 +4603,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DetachReceipt(childComplexity, args["input"].(DetachReceiptInput), args["clientMutationId"].(*string)), true
+	case "Mutation.dismissPlantingAction":
+		if e.ComplexityRoot.Mutation.DismissPlantingAction == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_dismissPlantingAction_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.DismissPlantingAction(childComplexity, args["input"].(DismissPlantingActionInput), args["clientMutationId"].(*string)), true
 	case "Mutation.dismissSuggestion":
 		if e.ComplexityRoot.Mutation.DismissSuggestion == nil {
 			break
@@ -8564,6 +8603,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("AIFeatureBindingInput", ec.unmarshalInputAIFeatureBindingInput),
 			graphql.NewInputUnmarshaler("AcceptSuggestionInput", ec.unmarshalInputAcceptSuggestionInput),
 			graphql.NewInputUnmarshaler("AcquisitionInput", ec.unmarshalInputAcquisitionInput),
+			graphql.NewInputUnmarshaler("AddPlantingToGardenInput", ec.unmarshalInputAddPlantingToGardenInput),
 			graphql.NewInputUnmarshaler("AnnualWindowInput", ec.unmarshalInputAnnualWindowInput),
 			graphql.NewInputUnmarshaler("ArchivePlantInput", ec.unmarshalInputArchivePlantInput),
 			graphql.NewInputUnmarshaler("ArchiveTagInput", ec.unmarshalInputArchiveTagInput),
@@ -8577,6 +8617,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("ChangeAgentCredentialInput", ec.unmarshalInputChangeAgentCredentialInput),
 			graphql.NewInputUnmarshaler("ChangePlantingPlanStateInput", ec.unmarshalInputChangePlantingPlanStateInput),
 			graphql.NewInputUnmarshaler("CompleteOccurrenceInput", ec.unmarshalInputCompleteOccurrenceInput),
+			graphql.NewInputUnmarshaler("CompletePlantingActionInput", ec.unmarshalInputCompletePlantingActionInput),
 			graphql.NewInputUnmarshaler("ConfirmPlantingScheduleInput", ec.unmarshalInputConfirmPlantingScheduleInput),
 			graphql.NewInputUnmarshaler("CorrectOccurrenceCompletionInput", ec.unmarshalInputCorrectOccurrenceCompletionInput),
 			graphql.NewInputUnmarshaler("CreateCarePlanInput", ec.unmarshalInputCreateCarePlanInput),
@@ -8595,6 +8636,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("DeletePhotoInput", ec.unmarshalInputDeletePhotoInput),
 			graphql.NewInputUnmarshaler("DeletePlantingActionInput", ec.unmarshalInputDeletePlantingActionInput),
 			graphql.NewInputUnmarshaler("DetachReceiptInput", ec.unmarshalInputDetachReceiptInput),
+			graphql.NewInputUnmarshaler("DismissPlantingActionInput", ec.unmarshalInputDismissPlantingActionInput),
 			graphql.NewInputUnmarshaler("DismissSuggestionInput", ec.unmarshalInputDismissSuggestionInput),
 			graphql.NewInputUnmarshaler("EveryNDaysInput", ec.unmarshalInputEveryNDaysInput),
 			graphql.NewInputUnmarshaler("FinalizeUploadInput", ec.unmarshalInputFinalizeUploadInput),
@@ -10896,6 +10938,32 @@ extend type Mutation {
 }
 
 type PlantingBoardRow { plan: PlantingPlan!, schedule: PlantingScheduleConnection! }
+input AddPlantingToGardenInput {
+  planId: ID!
+  expectedRevision: Int!
+  "Exactly one reviewed actual plant input or existing plant id. Never defaults from the plan on the server."
+  newPlant: CreatePlantInput
+  existingPlantId: ID
+  "Optional: simultaneously confirm sowing/planting. Acquisition alone leaves actions open."
+  actionId: ID
+  completedOn: LocalDate
+  expectedPlantRevision: Int
+}
+input CompletePlantingActionInput {
+  planId: ID!
+  id: ID!
+  expectedRevision: Int!
+  completedOn: LocalDate!
+  "Required for a sowing/planting action that updates its linked actual plant."
+  expectedPlantRevision: Int
+  actualContext: PlantContextInput
+}
+input DismissPlantingActionInput { planId: ID!, id: ID!, expectedRevision: Int! }
+extend type Mutation {
+  addPlantingToGarden(input: AddPlantingToGardenInput!, clientMutationId: String): PlantingPlanPayload!
+  completePlantingAction(input: CompletePlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
+  dismissPlantingAction(input: DismissPlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
+}
 "A chosen planning action day, separate from recorded garden history."
 type PlantingEvent {
   id: ID!
@@ -14540,6 +14608,28 @@ func (ec *executionContext) field_Mutation_acceptSuggestion_args(ctx context.Con
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_addPlantingToGarden_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (AddPlantingToGardenInput, error) {
+			return ec.unmarshalNAddPlantingToGardenInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐAddPlantingToGardenInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "clientMutationId",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["clientMutationId"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_archivePlant_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -14722,6 +14812,28 @@ func (ec *executionContext) field_Mutation_completeOccurrence_args(ctx context.C
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (CompleteOccurrenceInput, error) {
 			return ec.unmarshalNCompleteOccurrenceInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐCompleteOccurrenceInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "clientMutationId",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["clientMutationId"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_completePlantingAction_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (CompletePlantingActionInput, error) {
+			return ec.unmarshalNCompletePlantingActionInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐCompletePlantingActionInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -15110,6 +15222,28 @@ func (ec *executionContext) field_Mutation_detachReceipt_args(ctx context.Contex
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (DetachReceiptInput, error) {
 			return ec.unmarshalNDetachReceiptInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDetachReceiptInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "clientMutationId",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["clientMutationId"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_dismissPlantingAction_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (DismissPlantingActionInput, error) {
+			return ec.unmarshalNDismissPlantingActionInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissPlantingActionInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -30476,6 +30610,138 @@ func (ec *executionContext) fieldContext_Mutation_confirmPlantingSchedule(ctx co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_confirmPlantingSchedule_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addPlantingToGarden(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_addPlantingToGarden(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().AddPlantingToGarden(ctx, fc.Args["input"].(AddPlantingToGardenInput), fc.Args["clientMutationId"].(*string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingPlanPayload) graphql.Marshaler {
+			return ec.marshalNPlantingPlanPayload2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingPlanPayload(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_addPlantingToGarden(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingPlanPayload(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addPlantingToGarden_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_completePlantingAction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_completePlantingAction(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().CompletePlantingAction(ctx, fc.Args["input"].(CompletePlantingActionInput), fc.Args["clientMutationId"].(*string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingPlanPayload) graphql.Marshaler {
+			return ec.marshalNPlantingPlanPayload2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingPlanPayload(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_completePlantingAction(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingPlanPayload(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_completePlantingAction_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_dismissPlantingAction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_dismissPlantingAction(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().DismissPlantingAction(ctx, fc.Args["input"].(DismissPlantingActionInput), fc.Args["clientMutationId"].(*string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingPlanPayload) graphql.Marshaler {
+			return ec.marshalNPlantingPlanPayload2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingPlanPayload(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_dismissPlantingAction(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingPlanPayload(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_dismissPlantingAction_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -46120,6 +46386,90 @@ func UnmarshalAcquisitionInput(ctx context.Context, raw any) (AcquisitionInput, 
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputAddPlantingToGardenInput(ctx context.Context, obj any) (AddPlantingToGardenInput, error) {
+	var it AddPlantingToGardenInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"planId", "expectedRevision", "newPlant", "existingPlantId", "actionId", "completedOn", "expectedPlantRevision"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "planId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("planId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PlanID = data
+		case "expectedRevision":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expectedRevision"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ExpectedRevision = data
+		case "newPlant":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("newPlant"))
+			data, err := ec.unmarshalOCreatePlantInput2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐCreatePlantInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.NewPlant = data
+		case "existingPlantId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("existingPlantId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ExistingPlantID = data
+		case "actionId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("actionId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ActionID = data
+		case "completedOn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("completedOn"))
+			data, err := ec.unmarshalOLocalDate2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋscalarsᚐDate(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CompletedOn = data
+		case "expectedPlantRevision":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expectedPlantRevision"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ExpectedPlantRevision = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalAddPlantingToGardenInput unmarshals raw into the AddPlantingToGardenInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalAddPlantingToGardenInput(ctx context.Context, raw any) (AddPlantingToGardenInput, error) {
+	var out AddPlantingToGardenInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "AddPlantingToGardenInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputAnnualWindowInput(ctx context.Context, obj any) (AnnualWindowInput, error) {
 	var it AnnualWindowInput
 	if obj == nil {
@@ -46908,6 +47258,83 @@ func (ec *executionContext) unmarshalInputCompleteOccurrenceInput(ctx context.Co
 func UnmarshalCompleteOccurrenceInput(ctx context.Context, raw any) (CompleteOccurrenceInput, error) {
 	var out CompleteOccurrenceInput
 	err := graphql.UnmarshalNamedInputFromContext(ctx, "CompleteOccurrenceInput", raw, &out)
+	return out, err
+}
+
+func (ec *executionContext) unmarshalInputCompletePlantingActionInput(ctx context.Context, obj any) (CompletePlantingActionInput, error) {
+	var it CompletePlantingActionInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"planId", "id", "expectedRevision", "completedOn", "expectedPlantRevision", "actualContext"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "planId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("planId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PlanID = data
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "expectedRevision":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expectedRevision"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ExpectedRevision = data
+		case "completedOn":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("completedOn"))
+			data, err := ec.unmarshalNLocalDate2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋscalarsᚐDate(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.CompletedOn = data
+		case "expectedPlantRevision":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expectedPlantRevision"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ExpectedPlantRevision = data
+		case "actualContext":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("actualContext"))
+			data, err := ec.unmarshalOPlantContextInput2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantContextInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ActualContext = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalCompletePlantingActionInput unmarshals raw into the CompletePlantingActionInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalCompletePlantingActionInput(ctx context.Context, raw any) (CompletePlantingActionInput, error) {
+	var out CompletePlantingActionInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "CompletePlantingActionInput", raw, &out)
 	return out, err
 }
 
@@ -48259,6 +48686,62 @@ func (ec *executionContext) unmarshalInputDetachReceiptInput(ctx context.Context
 func UnmarshalDetachReceiptInput(ctx context.Context, raw any) (DetachReceiptInput, error) {
 	var out DetachReceiptInput
 	err := graphql.UnmarshalNamedInputFromContext(ctx, "DetachReceiptInput", raw, &out)
+	return out, err
+}
+
+func (ec *executionContext) unmarshalInputDismissPlantingActionInput(ctx context.Context, obj any) (DismissPlantingActionInput, error) {
+	var it DismissPlantingActionInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"planId", "id", "expectedRevision"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "planId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("planId"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.PlanID = data
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "expectedRevision":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("expectedRevision"))
+			data, err := ec.unmarshalNInt2int(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ExpectedRevision = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalDismissPlantingActionInput unmarshals raw into the DismissPlantingActionInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalDismissPlantingActionInput(ctx context.Context, raw any) (DismissPlantingActionInput, error) {
+	var out DismissPlantingActionInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "DismissPlantingActionInput", raw, &out)
 	return out, err
 }
 
@@ -57935,6 +58418,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "addPlantingToGarden":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addPlantingToGarden(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "completePlantingAction":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_completePlantingAction(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "dismissPlantingAction":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_dismissPlantingAction(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -64052,6 +64556,11 @@ func (ec *executionContext) marshalNActivityKind2canopyᚋserverᚋinternalᚋtr
 	return v
 }
 
+func (ec *executionContext) unmarshalNAddPlantingToGardenInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐAddPlantingToGardenInput(ctx context.Context, v any) (AddPlantingToGardenInput, error) {
+	res, err := ec.unmarshalInputAddPlantingToGardenInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNAgentAction2ᚕᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐAgentActionᚄ(ctx context.Context, sel ast.SelectionSet, v []*AgentAction) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
@@ -64550,6 +65059,11 @@ func (ec *executionContext) marshalNCompleteOccurrencePayload2ᚖcanopyᚋserver
 	return ec._CompleteOccurrencePayload(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNCompletePlantingActionInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐCompletePlantingActionInput(ctx context.Context, v any) (CompletePlantingActionInput, error) {
+	res, err := ec.unmarshalInputCompletePlantingActionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNConfidence2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐConfidence(ctx context.Context, v any) (Confidence, error) {
 	var res Confidence
 	err := res.UnmarshalGQL(v)
@@ -64814,6 +65328,11 @@ func (ec *executionContext) marshalNDetachReceiptPayload2ᚖcanopyᚋserverᚋin
 		return graphql.Null
 	}
 	return ec._DetachReceiptPayload(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNDismissPlantingActionInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissPlantingActionInput(ctx context.Context, v any) (DismissPlantingActionInput, error) {
+	res, err := ec.unmarshalInputDismissPlantingActionInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNDismissSuggestionInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐDismissSuggestionInput(ctx context.Context, v any) (DismissSuggestionInput, error) {
@@ -67468,6 +67987,14 @@ func (ec *executionContext) marshalOContextPlacement2ᚖcanopyᚋserverᚋintern
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalOCreatePlantInput2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐCreatePlantInput(ctx context.Context, v any) (*CreatePlantInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCreatePlantInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalODateTime2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋscalarsᚐDateTime(ctx context.Context, v any) (*scalars.DateTime, error) {

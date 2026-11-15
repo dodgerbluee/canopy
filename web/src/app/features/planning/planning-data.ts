@@ -6,6 +6,7 @@ import {
   PlantingBoardDocument,
   PlantingPlanDetailDocument,
   PlantingScheduleDocument,
+  PlantDetailDocument,
   type PlantingBoardQuery,
   type PlantingPlanDetailQuery,
   type PlantingPlanFilter,
@@ -31,6 +32,11 @@ export type CommandPayload = { plan: Plan | null; problems: PayloadProblem[] };
 @Injectable()
 export class PlanningApi {
   private readonly gql = inject(GraphQLClient);
+  async actualPlant(id: string, signal?: AbortSignal) {
+    const plant = resultData(await this.gql.query(PlantDetailDocument, { id }, signal)).plant;
+    if (!plant) throw new Error('The linked plant is no longer available. Reload this plan.');
+    return plant;
+  }
   async context(signal?: AbortSignal) {
     const [session, places] = await Promise.all([
       this.gql.query(SessionDocument, {}, signal),

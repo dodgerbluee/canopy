@@ -528,7 +528,7 @@
         "PLAN02",
         "PLAN03",
         "PLAN04",
-        "PLAN06"
+        "PLAN07"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -1068,6 +1068,14 @@
         "PLAN05"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN07": {
+      "title": "Atomic garden conversion and explicit planning action completion",
+      "dependsOn": [
+        "PLAN06"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

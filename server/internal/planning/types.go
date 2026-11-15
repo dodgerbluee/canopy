@@ -85,6 +85,7 @@ type DeleteActionInput struct {
 type Result struct {
 	ID       string `json:"id"`
 	Revision int32  `json:"revision"`
+	PlantID  string `json:"plantId,omitempty"` // privacy tombstones promotion receipts
 }
 
 type Plan struct {
@@ -113,6 +114,7 @@ type Service struct {
 	Clock    platform.Clock
 	IDs      platform.IDs
 	Guidance GuidanceProvider
+	Garden   GardenWriter
 }
 
 func New(pool *pgxpool.Pool, log *slog.Logger) *Service {

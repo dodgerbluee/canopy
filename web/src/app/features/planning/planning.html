@@ -522,6 +522,30 @@
       [attr.aria-labelledby]="'tab-' + detailTab()"
     >
       @if (detailTab() === 'planning-overview') {
+        @if (plan.fulfillment; as link) {
+          <div class="planning-choice">
+            <strong>{{ link.plant ? 'In your garden' : 'Original plant removed' }}</strong>
+            @if (link.plant; as plant) {
+              <a class="btn btn-ghost" [routerLink]="['/plants', plant.id]"
+                >{{ plant.name }} <ui-icon name="arrow" [size]="16" /></a
+              ><small>Ownership is linked. Complete remaining actions separately.</small>
+            } @else {
+              <p>This plan keeps its history. Make a new plan to start again.</p>
+            }
+          </div>
+        } @else if (active(plan)) {
+          <div class="planning-choice">
+            <strong>Ready to start growing?</strong>
+            <p>
+              Add the living plant or group you actually have. Future planting work can stay open.
+            </p>
+            <div>
+              <button class="btn btn-primary" type="button" (click)="openGarden()">
+                <ui-icon name="plus" [size]="16" />Add to garden
+              </button>
+            </div>
+          </div>
+        }
         <dl class="planning-dl">
           <dt>Progress</dt>
           <dd>
@@ -673,12 +697,28 @@
                   action.state === 'OPEN'
                     ? 'Planned'
                     : action.state === 'DONE'
-                      ? 'Complete'
+                      ? 'Completed ' + dateLabel(action.completedOn!)
                       : 'Dismissed'
                 }}</small
               >
             </div>
             @if (active(plan) && action.state === 'OPEN') {
+              <button
+                class="icon-button"
+                type="button"
+                [attr.aria-label]="'Complete action ' + action.title"
+                (click)="completeAction(action)"
+              >
+                <ui-icon name="check" [size]="18" />
+              </button>
+              <button
+                class="icon-button"
+                type="button"
+                [attr.aria-label]="'Dismiss action ' + action.title"
+                (click)="completeAction(action, true)"
+              >
+                <ui-icon name="close" [size]="16" />
+              </button>
               <button
                 class="icon-button"
                 type="button"
@@ -757,3 +797,24 @@
     </button>
   </div></ui-entry-dialog
 >
+
+<planning-garden-editor
+  [open]="gardenOpen()"
+  [plan]="detail()"
+  [action]="completingAction()"
+  [timezone]="context()?.workspace?.timezone ?? 'UTC'"
+  [currency]="context()?.workspace?.defaultCurrency ?? 'USD'"
+  [locations]="context()?.locations ?? []"
+  (dismissed)="gardenOpen.set(false)"
+  (saved)="saved($event)"
+/>
+<planning-action-completion
+  [open]="completionOpen()"
+  [plan]="detail()"
+  [action]="completingAction()"
+  [dismissOnly]="dismissingAction()"
+  [timezone]="context()?.workspace?.timezone ?? 'UTC'"
+  [locations]="context()?.locations ?? []"
+  (dismissed)="completionOpen.set(false)"
+  (saved)="saved($event)"
+/>

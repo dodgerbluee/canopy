@@ -24,6 +24,8 @@ import { UiTabs, UiTab } from '../../ui/tabs';
 import { UiToasts } from '../../ui/toast';
 import { fmtMinor } from '../purchases/money';
 import { PlanEditor } from './plan-editor';
+import { GardenEditor } from './garden-editor';
+import { ActionCompletion, needsLivingPlant } from './action-completion';
 import { ActionEditor } from './action-editor';
 import { WindowChooser } from './window-chooser';
 import {
@@ -66,6 +68,8 @@ type Lifecycle = {
     UiTab,
     PlanEditor,
     ActionEditor,
+    GardenEditor,
+    ActionCompletion,
     WindowChooser,
   ],
   providers: [PlanningApi],
@@ -186,6 +190,10 @@ export class PlanningPage {
   readonly detailDialog = viewChild<UiEntryDialog>('detailDialog');
   readonly actionOpen = signal(false);
   readonly selectedAction = signal<Plan['actions'][number] | null>(null);
+  readonly gardenOpen = signal(false);
+  readonly completionOpen = signal(false);
+  readonly completingAction = signal<Plan['actions'][number] | null>(null);
+  readonly dismissingAction = signal(false);
   readonly chooserOpen = signal(false);
   readonly selectedWindow = signal<ProjectedWindow | null>(null);
   readonly lifecycle = signal<Lifecycle | null>(null);
@@ -306,6 +314,8 @@ export class PlanningPage {
         !this.editorOpen() &&
         !this.actionOpen() &&
         !this.chooserOpen() &&
+        !this.gardenOpen() &&
+        !this.completionOpen() &&
         !this.detailLoading() &&
         (row.schedule.guidanceState !== this.detailSchedule()?.guidanceState ||
           row.schedule.guidanceGeneration !== this.detailSchedule()?.guidanceGeneration)
@@ -458,10 +468,23 @@ export class PlanningPage {
   hasOpenActions(plan: Plan): boolean {
     return plan.actions.some((action) => action.state === 'OPEN');
   }
+  openGarden(action: Plan['actions'][number] | null = null): void {
+    this.completingAction.set(action);
+    this.gardenOpen.set(true);
+  }
+  completeAction(action: Plan['actions'][number], dismiss = false): void {
+    this.completingAction.set(action);
+    this.dismissingAction.set(dismiss);
+    if (!dismiss && needsLivingPlant(action.kind) && !this.detail()?.fulfillment)
+      this.gardenOpen.set(true);
+    else this.completionOpen.set(true);
+  }
   async saved(plan: Plan, reveal = false): Promise<void> {
     this.editorOpen.set(false);
     this.actionOpen.set(false);
     this.chooserOpen.set(false);
+    this.gardenOpen.set(false);
+    this.completionOpen.set(false);
     this.toasts.ok('Planting plan saved.');
     if (this.detailOpen()) void this.fetchDetail(plan.id);
     if (reveal && !this.editPlan() && this.filterCount()) {

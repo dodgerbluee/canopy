@@ -169,6 +169,18 @@ type ActivityEntry struct {
 
 func (ActivityEntry) IsJournalEntry() {}
 
+type AddPlantingToGardenInput struct {
+	PlanID           string `json:"planId"`
+	ExpectedRevision int    `json:"expectedRevision"`
+	// Exactly one reviewed actual plant input or existing plant id. Never defaults from the plan on the server.
+	NewPlant        *CreatePlantInput `json:"newPlant,omitempty"`
+	ExistingPlantID *string           `json:"existingPlantId,omitempty"`
+	// Optional: simultaneously confirm sowing/planting. Acquisition alone leaves actions open.
+	ActionID              *string       `json:"actionId,omitempty"`
+	CompletedOn           *scalars.Date `json:"completedOn,omitempty"`
+	ExpectedPlantRevision *int          `json:"expectedPlantRevision,omitempty"`
+}
+
 type AgentAction struct {
 	ID          string           `json:"id"`
 	GrantID     string           `json:"grantId"`
@@ -618,6 +630,16 @@ type CompleteOccurrencePayload struct {
 	ClientMutationID *string            `json:"clientMutationId,omitempty"`
 }
 
+type CompletePlantingActionInput struct {
+	PlanID           string       `json:"planId"`
+	ID               string       `json:"id"`
+	ExpectedRevision int          `json:"expectedRevision"`
+	CompletedOn      scalars.Date `json:"completedOn"`
+	// Required for a sowing/planting action that updates its linked actual plant.
+	ExpectedPlantRevision *int               `json:"expectedPlantRevision,omitempty"`
+	ActualContext         *PlantContextInput `json:"actualContext,omitempty"`
+}
+
 type ConfirmPlantingScheduleInput struct {
 	PlanID           string                            `json:"planId"`
 	ExpectedRevision int                               `json:"expectedRevision"`
@@ -851,6 +873,12 @@ type DetachReceiptPayload struct {
 	DetachedReceiptID *string            `json:"detachedReceiptId,omitempty"`
 	Problems          []*MutationProblem `json:"problems"`
 	ClientMutationID  *string            `json:"clientMutationId,omitempty"`
+}
+
+type DismissPlantingActionInput struct {
+	PlanID           string `json:"planId"`
+	ID               string `json:"id"`
+	ExpectedRevision int    `json:"expectedRevision"`
 }
 
 type DismissSuggestionInput struct {

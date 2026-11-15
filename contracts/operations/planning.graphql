@@ -5,6 +5,27 @@ fragment PlantingPeriodFields on PlantingPeriod {
   season { season year }
   year
 }
+mutation AddPlantingToGarden($input: AddPlantingToGardenInput!, $clientMutationId: String) {
+  addPlantingToGarden(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation CompletePlantingAction($input: CompletePlantingActionInput!, $clientMutationId: String) {
+  completePlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation DismissPlantingAction($input: DismissPlantingActionInput!, $clientMutationId: String) {
+  dismissPlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
 query PlantingEvents($from: LocalDate!, $to: LocalDate!, $first: Int, $after: String) {
   plantingEvents(from: $from, to: $to, first: $first, after: $after) {
     timezone today

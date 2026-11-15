@@ -89,6 +89,14 @@ func plannerRows(t *testing.T, e *env, table string) []byte {
 func TestPlanningPopulatedBackupRestorePreservesCycleAndPurgeMarker(t *testing.T) {
 	e := newEnv(t)
 	plan, idea := seedPlanner(t, e)
+	// Past preparation and dismissed buying remain alongside the open future plant-out.
+	completed, dismissed := platform.UUIDv4{}.New(), platform.UUIDv4{}.New()
+	if _, err := e.pool.Exec(e.ctx, `INSERT INTO planting_actions(id,workspace_id,plan_id,kind,title,scheduled_on,state,completed_on,completed_at) VALUES($1,$2,$3,'PREPARE','Prepared space','2026-11-01','DONE','2026-10-31','2026-11-01T12:00:00Z')`, completed, e.ws, plan); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := e.pool.Exec(e.ctx, `INSERT INTO planting_actions(id,workspace_id,plan_id,kind,title,scheduled_on,state,dismissed_at) VALUES($1,$2,$3,'BUY','Supplies not needed','2026-11-02','DISMISSED','2026-11-01T12:00:00Z')`, dismissed, e.ws, plan); err != nil {
+		t.Fatal(err)
+	}
 	before := map[string][]byte{}
 	for _, table := range plannerTables {
 		before[table] = plannerRows(t, e, table)
@@ -120,7 +128,7 @@ func TestPlanningPopulatedBackupRestorePreservesCycleAndPurgeMarker(t *testing.T
 	var state, kind string
 	var linkedPlant *string
 	var targetMonth string
-	if err = b.pool.QueryRow(b.ctx, `SELECT p.state::text,a.state::text,p.target_from_month FROM planting_plans p JOIN planting_actions a ON a.plan_id=p.id WHERE p.id=$1`, plan).Scan(&state, &kind, &targetMonth); err != nil || state != "IN_PROGRESS" || kind != "OPEN" || targetMonth != "2027-12" {
+	if err = b.pool.QueryRow(b.ctx, `SELECT p.state::text,a.state::text,p.target_from_month FROM planting_plans p JOIN planting_actions a ON a.plan_id=p.id WHERE p.id=$1 AND a.kind='PLANT_OUT'`, plan).Scan(&state, &kind, &targetMonth); err != nil || state != "IN_PROGRESS" || kind != "OPEN" || targetMonth != "2027-12" {
 		t.Fatal("ownership completed future work", state, kind, targetMonth, err)
 	}
 	if err = b.pool.QueryRow(b.ctx, `SELECT plant_id::text FROM planting_fulfillments WHERE plan_id=$1`, idea).Scan(&linkedPlant); err != nil || linkedPlant != nil {

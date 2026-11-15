@@ -729,57 +729,12 @@ func (m mutationResolver) CreatePlant(ctx context.Context, in gql.CreatePlantInp
 		return nil, err
 	}
 	a := actor(p)
-	din := collection.CreatePlantInput{
-		Name:           in.Name,
-		ScientificName: in.ScientificName,
-		Cultivar:       in.Cultivar,
-		Rootstock:      in.Rootstock,
-		Type:           string(in.Type),
-		Category:       string(in.Category),
-		TagIDs:         in.TagIds,
-	}
-	if in.Count != nil {
-		cnt := int32(*in.Count)
-		din.Count = &cnt
-	}
-	var probs []*gql.MutationProblem
-	var prob *gql.MutationProblem
-	plantedOn, prob := dateIn(in.PlantedOn)
-	if prob != nil {
-		probs = append(probs, prob)
-	}
-	din.PlantedOn = plantedOn
-	if din.EstimatedAgeYears, prob = decimalIn(in.EstimatedAgeYears); prob != nil {
-		probs = append(probs, prob)
-	}
-	if in.InitialPurchase != nil {
-		ip, ipProbs := initialPurchaseIn(*in.InitialPurchase)
-		if len(ipProbs) > 0 {
-			probs = append(probs, ipProbs...)
-		} else {
-			din.InitialPurchase = ip
-		}
+	din, probs, err := createPlantInput(ctx, in)
+	if err != nil {
+		return nil, err
 	}
 	if len(probs) > 0 {
 		return problemPayload(c, probs), nil
-	}
-	if in.InitialContext != nil {
-		ci, cprobs, err := contextInput(ctx, in.InitialContext)
-		if err != nil {
-			return nil, err
-		} else if len(cprobs) > 0 {
-			return problemPayload(c, cprobs), nil
-		}
-		din.InitialContext = ci
-	}
-	if in.Acquisition != nil {
-		acq, aprobs, err := acquisitionInput(ctx, in.Acquisition)
-		if err != nil {
-			return nil, err
-		} else if len(aprobs) > 0 {
-			return problemPayload(c, aprobs), nil
-		}
-		din.Acquisition = acq
 	}
 	res, problems, err := m.r.Coll.CreatePlant(ctx, a, din, c)
 	if err != nil {
@@ -1153,4 +1108,66 @@ func (m mutationResolver) UpdateAcquisition(ctx context.Context, in gql.UpdateAc
 		return &gql.UpdateAcquisitionPayload{Problems: mapProblems(problems), ClientMutationID: c}, nil
 	}
 	return &gql.UpdateAcquisitionPayload{Acquisition: m.acquisitionPayload(ctx, a, res.ID), Problems: []*gql.MutationProblem{}, ClientMutationID: c}, nil
+}
+
+// createPlantInput is shared by collection creation and atomic planning conversion.
+func createPlantInput(ctx context.Context, in gql.CreatePlantInput) (collection.CreatePlantInput, []*gql.MutationProblem, error) {
+	din := collection.CreatePlantInput{
+		Name:           in.Name,
+		ScientificName: in.ScientificName,
+		Cultivar:       in.Cultivar,
+		Rootstock:      in.Rootstock,
+		Type:           string(in.Type),
+		Category:       string(in.Category),
+		TagIDs:         in.TagIds,
+	}
+	var probs []*gql.MutationProblem
+	if in.Count != nil {
+		if *in.Count < 1 || *in.Count > 2147483647 {
+			probs = append(probs, &gql.MutationProblem{Code: gql.ProblemCodeValidation, Field: strPtr("input.count"), Message: "Count must be a positive whole number within the supported range."})
+		} else {
+			cnt := int32(*in.Count)
+			din.Count = &cnt
+		}
+	}
+	var prob *gql.MutationProblem
+	plantedOn, prob := dateIn(in.PlantedOn)
+	if prob != nil {
+		probs = append(probs, prob)
+	}
+	din.PlantedOn = plantedOn
+	if din.EstimatedAgeYears, prob = decimalIn(in.EstimatedAgeYears); prob != nil {
+		probs = append(probs, prob)
+	}
+	if in.InitialPurchase != nil {
+		ip, ipProbs := initialPurchaseIn(*in.InitialPurchase)
+		if len(ipProbs) > 0 {
+			probs = append(probs, ipProbs...)
+		} else {
+			din.InitialPurchase = ip
+		}
+	}
+	if len(probs) > 0 {
+		return din, probs, nil
+	}
+	if in.InitialContext != nil {
+		ci, cprobs, err := contextInput(ctx, in.InitialContext)
+		if err != nil {
+			return din, nil, err
+		} else if len(cprobs) > 0 {
+			return din, cprobs, nil
+		}
+		din.InitialContext = ci
+	}
+	if in.Acquisition != nil {
+		acq, aprobs, err := acquisitionInput(ctx, in.Acquisition)
+		if err != nil {
+			return din, nil, err
+		} else if len(aprobs) > 0 {
+			return din, aprobs, nil
+		}
+		din.Acquisition = acq
+	}
+
+	return din, nil, nil
 }

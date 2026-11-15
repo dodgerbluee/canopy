@@ -180,6 +180,48 @@ func (q *Queries) ClaimPlanningGuidance(ctx context.Context, arg ClaimPlanningGu
 	return i, err
 }
 
+const completePlantingActionRow = `-- name: CompletePlantingActionRow :one
+UPDATE planting_actions SET state='DONE',completed_on=$4,completed_at=$5
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND state='OPEN' RETURNING id, workspace_id, plan_id, kind, title, scheduled_on, reminder_on, schedule_revision, notes, state, completed_on, completed_at, dismissed_at, created_at, updated_at
+`
+
+type CompletePlantingActionRowParams struct {
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	ID          pgtype.UUID
+	CompletedOn pgtype.Date
+	CompletedAt pgtype.Timestamptz
+}
+
+func (q *Queries) CompletePlantingActionRow(ctx context.Context, arg CompletePlantingActionRowParams) (PlantingAction, error) {
+	row := q.db.QueryRow(ctx, completePlantingActionRow,
+		arg.WorkspaceID,
+		arg.PlanID,
+		arg.ID,
+		arg.CompletedOn,
+		arg.CompletedAt,
+	)
+	var i PlantingAction
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.PlanID,
+		&i.Kind,
+		&i.Title,
+		&i.ScheduledOn,
+		&i.ReminderOn,
+		&i.ScheduleRevision,
+		&i.Notes,
+		&i.State,
+		&i.CompletedOn,
+		&i.CompletedAt,
+		&i.DismissedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const confirmPlanningSchedule = `-- name: ConfirmPlanningSchedule :one
 UPDATE planting_plans SET target_precision=$1,target_from=$2,target_to=$3,
  target_from_month=$4,target_to_month=$5,
@@ -299,6 +341,46 @@ func (q *Queries) DeletePlantingAction(ctx context.Context, arg DeletePlantingAc
 	return err
 }
 
+const dismissPlantingActionRow = `-- name: DismissPlantingActionRow :one
+UPDATE planting_actions SET state='DISMISSED',dismissed_at=$4
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND state='OPEN' RETURNING id, workspace_id, plan_id, kind, title, scheduled_on, reminder_on, schedule_revision, notes, state, completed_on, completed_at, dismissed_at, created_at, updated_at
+`
+
+type DismissPlantingActionRowParams struct {
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	ID          pgtype.UUID
+	DismissedAt pgtype.Timestamptz
+}
+
+func (q *Queries) DismissPlantingActionRow(ctx context.Context, arg DismissPlantingActionRowParams) (PlantingAction, error) {
+	row := q.db.QueryRow(ctx, dismissPlantingActionRow,
+		arg.WorkspaceID,
+		arg.PlanID,
+		arg.ID,
+		arg.DismissedAt,
+	)
+	var i PlantingAction
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.PlanID,
+		&i.Kind,
+		&i.Title,
+		&i.ScheduledOn,
+		&i.ReminderOn,
+		&i.ScheduleRevision,
+		&i.Notes,
+		&i.State,
+		&i.CompletedOn,
+		&i.CompletedAt,
+		&i.DismissedAt,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const finishPlanningGuidance = `-- name: FinishPlanningGuidance :execrows
 UPDATE planting_guidance_snapshots SET state=$1,message=$2,facts=$3,
  assumptions=$4,retrieved_at=$5,next_check_at=now()+interval '15 minutes'
@@ -398,6 +480,30 @@ func (q *Queries) GetPlantingAction(ctx context.Context, arg GetPlantingActionPa
 		&i.DismissedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getPlantingFulfillment = `-- name: GetPlantingFulfillment :one
+SELECT id, workspace_id, plan_id, plant_id, action_id, mode, linked_at FROM planting_fulfillments WHERE workspace_id=$1 AND plan_id=$2
+`
+
+type GetPlantingFulfillmentParams struct {
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+}
+
+func (q *Queries) GetPlantingFulfillment(ctx context.Context, arg GetPlantingFulfillmentParams) (PlantingFulfillment, error) {
+	row := q.db.QueryRow(ctx, getPlantingFulfillment, arg.WorkspaceID, arg.PlanID)
+	var i PlantingFulfillment
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.PlanID,
+		&i.PlantID,
+		&i.ActionID,
+		&i.Mode,
+		&i.LinkedAt,
 	)
 	return i, err
 }
@@ -570,6 +676,42 @@ func (q *Queries) InsertPlantingAction(ctx context.Context, arg InsertPlantingAc
 		&i.DismissedAt,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const insertPlantingFulfillment = `-- name: InsertPlantingFulfillment :one
+INSERT INTO planting_fulfillments(id,workspace_id,plan_id,plant_id,action_id,mode)
+VALUES($1,$2,$3,$4,$5,$6) RETURNING id, workspace_id, plan_id, plant_id, action_id, mode, linked_at
+`
+
+type InsertPlantingFulfillmentParams struct {
+	ID          pgtype.UUID
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	PlantID     pgtype.UUID
+	ActionID    pgtype.UUID
+	Mode        PlantingLinkMode
+}
+
+func (q *Queries) InsertPlantingFulfillment(ctx context.Context, arg InsertPlantingFulfillmentParams) (PlantingFulfillment, error) {
+	row := q.db.QueryRow(ctx, insertPlantingFulfillment,
+		arg.ID,
+		arg.WorkspaceID,
+		arg.PlanID,
+		arg.PlantID,
+		arg.ActionID,
+		arg.Mode,
+	)
+	var i PlantingFulfillment
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.PlanID,
+		&i.PlantID,
+		&i.ActionID,
+		&i.Mode,
+		&i.LinkedAt,
 	)
 	return i, err
 }
@@ -1056,6 +1198,39 @@ func (q *Queries) ListPlantingPlansUpdatedDesc(ctx context.Context, arg ListPlan
 	return items, nil
 }
 
+const lockPlanningActualPlant = `-- name: LockPlanningActualPlant :one
+SELECT id, workspace_id, name, scientific_name, cultivar, rootstock, type, count, category, acquired_on, planted_on, estimated_age_years, status, revision, created_at, updated_at FROM plants WHERE workspace_id=$1 AND id=$2 FOR UPDATE
+`
+
+type LockPlanningActualPlantParams struct {
+	WorkspaceID pgtype.UUID
+	ID          pgtype.UUID
+}
+
+func (q *Queries) LockPlanningActualPlant(ctx context.Context, arg LockPlanningActualPlantParams) (Plant, error) {
+	row := q.db.QueryRow(ctx, lockPlanningActualPlant, arg.WorkspaceID, arg.ID)
+	var i Plant
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.Name,
+		&i.ScientificName,
+		&i.Cultivar,
+		&i.Rootstock,
+		&i.Type,
+		&i.Count,
+		&i.Category,
+		&i.AcquiredOn,
+		&i.PlantedOn,
+		&i.EstimatedAgeYears,
+		&i.Status,
+		&i.Revision,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const lockPlanningReminderWorkspace = `-- name: LockPlanningReminderWorkspace :one
 SELECT owner_id,timezone FROM workspace WHERE id=$1 FOR SHARE
 `
@@ -1375,6 +1550,54 @@ func (q *Queries) SetPlantingPlanState(ctx context.Context, arg SetPlantingPlanS
 		arg.WorkspaceID,
 		arg.ID,
 	)
+	var i PlantingPlan
+	err := row.Scan(
+		&i.ID,
+		&i.WorkspaceID,
+		&i.Name,
+		&i.ScientificName,
+		&i.Cultivar,
+		&i.Category,
+		&i.DesiredQuantity,
+		&i.Method,
+		&i.IntendedLocationID,
+		&i.IntendedPlacement,
+		&i.TargetPrecision,
+		&i.TargetFrom,
+		&i.TargetTo,
+		&i.TargetFromMonth,
+		&i.TargetToMonth,
+		&i.TargetYear,
+		&i.TargetSeason,
+		&i.BudgetMinor,
+		&i.BudgetCurrency,
+		&i.Notes,
+		&i.State,
+		&i.ResumeState,
+		&i.CancelledAt,
+		&i.CompletedAt,
+		&i.Revision,
+		&i.GuidanceGeneration,
+		&i.AcceptedGuidanceID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.AcceptedSchedule,
+	)
+	return i, err
+}
+
+const startPlantingPlan = `-- name: StartPlantingPlan :one
+UPDATE planting_plans SET state='IN_PROGRESS',revision=revision+1
+WHERE workspace_id=$1 AND id=$2 RETURNING id, workspace_id, name, scientific_name, cultivar, category, desired_quantity, method, intended_location_id, intended_placement, target_precision, target_from, target_to, target_from_month, target_to_month, target_year, target_season, budget_minor, budget_currency, notes, state, resume_state, cancelled_at, completed_at, revision, guidance_generation, accepted_guidance_id, created_at, updated_at, accepted_schedule
+`
+
+type StartPlantingPlanParams struct {
+	WorkspaceID pgtype.UUID
+	ID          pgtype.UUID
+}
+
+func (q *Queries) StartPlantingPlan(ctx context.Context, arg StartPlantingPlanParams) (PlantingPlan, error) {
+	row := q.db.QueryRow(ctx, startPlantingPlan, arg.WorkspaceID, arg.ID)
 	var i PlantingPlan
 	err := row.Scan(
 		&i.ID,

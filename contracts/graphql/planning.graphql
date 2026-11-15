@@ -342,6 +342,32 @@ extend type Mutation {
 }
 
 type PlantingBoardRow { plan: PlantingPlan!, schedule: PlantingScheduleConnection! }
+input AddPlantingToGardenInput {
+  planId: ID!
+  expectedRevision: Int!
+  "Exactly one reviewed actual plant input or existing plant id. Never defaults from the plan on the server."
+  newPlant: CreatePlantInput
+  existingPlantId: ID
+  "Optional: simultaneously confirm sowing/planting. Acquisition alone leaves actions open."
+  actionId: ID
+  completedOn: LocalDate
+  expectedPlantRevision: Int
+}
+input CompletePlantingActionInput {
+  planId: ID!
+  id: ID!
+  expectedRevision: Int!
+  completedOn: LocalDate!
+  "Required for a sowing/planting action that updates its linked actual plant."
+  expectedPlantRevision: Int
+  actualContext: PlantContextInput
+}
+input DismissPlantingActionInput { planId: ID!, id: ID!, expectedRevision: Int! }
+extend type Mutation {
+  addPlantingToGarden(input: AddPlantingToGardenInput!, clientMutationId: String): PlantingPlanPayload!
+  completePlantingAction(input: CompletePlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
+  dismissPlantingAction(input: DismissPlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
+}
 "A chosen planning action day, separate from recorded garden history."
 type PlantingEvent {
   id: ID!

@@ -2,7 +2,8 @@
 
 Status: steps 1–6 of 8 accepted, including the Planning page and shared modal flows. An isolated Docker preview is available at
 http://127.0.0.1:7082/planning. Calendar/Year/Today integrations and opt-in reminders are implemented in step 6;
-garden promotion and agent/assistant work follow in steps 7–8; the user authorized continuing through all.
+atomic garden promotion and action completion are implemented in step 7;
+agent/assistant work follows in step 8; the user authorized continuing through all.
 Existing production deployments are unchanged.
 
 ## Product direction
@@ -291,7 +292,7 @@ PLAN03's additive refresh/research contract is recorded in
 | 4 — complete | Schedule engine | `server/internal/planning/schedule.go` and scoped query/confirmation commands | Pure civil projections, twelve-month per-plan pagination and explicit acceptance with portable assumptions. Distinct/overlapping windows, Gregorian leap cycle, hemispheres, missing/wrong anchors, first-harvest uncertainty, conflicts/replay/rollback and preserved choices verified. Populated/legacy restore, migration CLI 21→20→21, race checks, full Go regression and GitHub CI passed. |
 | 5 — complete | Angular page and shared modals | `web/src/app/features/planning/`, data layer, routes/shell/More, batched board composition | Complete ideas/plans/edit/actions/source-choice flows on desktop/phone with shared modal guards, hidden URL filters and both themes. 504 Angular tests/build, real API/race/regression checks, 20 authenticated browser/accessibility scenarios and paired Docker preview and full GitHub CI passed. |
 | 6 — complete | Calendar, Year, Today and reminders | Existing calendar/seasons/today/inbox modules; scoped planner projections and worker | Planning stays visually distinct and filterable, with no fake real-plant events. Only explicit dates create markers/reminders. Separate explicit-day projection, optional Year overlay, Today actions and opt-in in-app Inbox reminders verified with scope/date/cancellation/concurrency/timezone tests, 32 browser scenarios, full Go regression and GitHub CI. |
-| 7 | Add to garden | Planning promotion command, narrow collection transaction interface, existing plant form | One atomic conversion to one plant/group, with confirmed actual values and origin link. Test retry after lost response, concurrent different keys, stale revisions, conflicts, rollback, unknown actual count, linking an existing plant and buying early while a later plant-out action stays open. |
+| 7 — verifying | Add to garden | Planning promotion command, narrow collection transaction interface, existing plant form | One atomic conversion to one plant/group, with confirmed actual values and origin link. Actual create/link, acquisition-only and sow/plant completion flows implemented. Lost-response retry, 12 competing clients, full audit rollback, purge replay, real/unknown price/count, early acquisition then later planting and populated restore pass; final CI pending. |
 | 8 | Agent integration and release gate | Agent catalog/context, remaining browser/portability tests, release/deployment tooling | Scoped MCP read/write/promote behavior, complete round-trip portability, full end-to-end journey and no planning leakage into actual totals. Verify deployed API/worker compatibility and queued jobs before release. |
 
 Run one packet at a time. Each finishes with evidence, tests appropriate to the

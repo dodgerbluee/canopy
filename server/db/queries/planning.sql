@@ -1,6 +1,28 @@
 -- name: GetPlantingPlan :one
 SELECT * FROM planting_plans WHERE workspace_id=$1 AND id=$2;
 
+-- name: GetPlantingFulfillment :one
+SELECT * FROM planting_fulfillments WHERE workspace_id=$1 AND plan_id=$2;
+
+-- name: LockPlanningActualPlant :one
+SELECT * FROM plants WHERE workspace_id=$1 AND id=$2 FOR UPDATE;
+
+-- name: InsertPlantingFulfillment :one
+INSERT INTO planting_fulfillments(id,workspace_id,plan_id,plant_id,action_id,mode)
+VALUES($1,$2,$3,$4,$5,$6) RETURNING *;
+
+-- name: StartPlantingPlan :one
+UPDATE planting_plans SET state='IN_PROGRESS',revision=revision+1
+WHERE workspace_id=$1 AND id=$2 RETURNING *;
+
+-- name: CompletePlantingActionRow :one
+UPDATE planting_actions SET state='DONE',completed_on=$4,completed_at=$5
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND state='OPEN' RETURNING *;
+
+-- name: DismissPlantingActionRow :one
+UPDATE planting_actions SET state='DISMISSED',dismissed_at=$4
+WHERE workspace_id=$1 AND plan_id=$2 AND id=$3 AND state='OPEN' RETURNING *;
+
 -- name: ListPlantingEvents :many
 SELECT a.*, p.name AS plan_name, p.revision AS plan_revision
 FROM planting_actions a JOIN planting_plans p ON (p.workspace_id,p.id)=(a.workspace_id,a.plan_id)

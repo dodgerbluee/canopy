@@ -7,7 +7,7 @@ export default defineConfig({
   fullyParallel: false,
   retries: 0,
   timeout: 45000,
-  outputDir: '../.artifacts/agents/PLAN06/browser-output',
+  outputDir: '../.artifacts/agents/PLAN07/browser-output',
   reporter: [['list']],
   use: {
     baseURL: process.env.PLANNING_BASE_URL ?? 'http://host.docker.internal:7082',

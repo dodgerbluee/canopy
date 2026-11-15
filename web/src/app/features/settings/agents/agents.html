@@ -175,7 +175,7 @@
       <label class="check"
         ><input type="checkbox" name="restricted" [(ngModel)]="restricted" /><span
           >Limit access to selected plants<small
-            >Financial, receipt and export access requires the whole garden.</small
+            >Planning, financial, receipt and export access requires the whole garden.</small
           ></span
         ></label
       >
@@ -287,7 +287,10 @@
   @if (review(); as action) {
     <div class="agent-form">
       <p>{{ action.grantName }} · {{ action.tool.replaceAll('_', ' ') }}</p>
-      <h3>Current record at request time</h3><pre>{{ pretty(action.before) }}</pre><h3>Requested changes</h3><pre>{{ pretty(action.input) }}</pre>
+      <h3>Current record at request time</h3>
+      <pre>{{ pretty(action.before) }}</pre>
+      <h3>Requested changes</h3>
+      <pre>{{ pretty(action.input) }}</pre>
       @if (formError()) {
         <p role="alert" class="form-error">{{ formError() }}</p>
       }

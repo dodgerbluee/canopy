@@ -71,6 +71,12 @@ func New(access *agentaccess.Manager, engine *gqlx.AgentExecutor, store platform
 	return a, nil
 }
 func Allowed(p agentaccess.Principal, t catalog.Tool) bool {
+	if strings.HasPrefix(t.Scope, "planning:") && len(p.Grant.PlantIDs) > 0 {
+		return false
+	}
+	if t.Root == "addPlantingToGarden" && !p.Grant.Has("plants:write") {
+		return false
+	}
 	if t.Root == "@operation" || t.Root == "@proposals" || t.Root == "@proposal" {
 		return true
 	}
@@ -136,10 +142,14 @@ func (a *API) call(ctx context.Context, p agentaccess.Principal, name string, ar
 	if d.Tool.Mode != "read" {
 		var hash, tool string
 		var cached []byte
-		err = a.Access.Pool.QueryRow(ctx, `SELECT input_hash,tool,response FROM agent_operations WHERE grant_id=$1 AND operation_id=$2`, p.Grant.ID, op).Scan(&hash, &tool, &cached)
+		var gone bool
+		err = a.Access.Pool.QueryRow(ctx, `SELECT input_hash,tool,response,COALESCE(resource->>'gone'='true',false) FROM agent_operations WHERE grant_id=$1 AND operation_id=$2`, p.Grant.ID, op).Scan(&hash, &tool, &cached, &gone)
 		if err == nil {
 			if hash != agentcontext.Hash(input) || tool != name {
 				return failure("IDEMPOTENCY_CONFLICT", "This operation identity was already used for different input.", op)
+			}
+			if gone {
+				return failure("RESOURCE_GONE", "The linked plant was removed. This operation retains only its history.", op)
 			}
 			if len(cached) > 0 {
 				var replay Result
@@ -209,7 +219,7 @@ func (a *API) call(ctx context.Context, p agentaccess.Principal, name string, ar
 	result := Result{Status: "ok", OperationID: op, Data: publicOutput(value), Problems: []Issue{}, AsOf: time.Now().UTC().Format(time.RFC3339), Image: image, MIME: mime}
 	if d.Tool.Mode != "read" {
 		result.Status = "applied"
-		if d.Tool.Root == "requestAnalysis" || d.Tool.Root == "refreshGardenKnowledge" || d.Tool.Root == "finalizeUpload" {
+		if d.Tool.Root == "requestAnalysis" || d.Tool.Root == "refreshGardenKnowledge" || d.Tool.Root == "refreshPlantingGuidance" || d.Tool.Root == "finalizeUpload" {
 			result.Status = "queued"
 		}
 	}
@@ -218,7 +228,13 @@ func (a *API) call(ctx context.Context, p agentaccess.Principal, name string, ar
 		return failure("RESULT_TOO_LARGE", "Use a narrower date/plant filter or a smaller page size. No result was truncated.", op)
 	}
 	if d.Tool.Mode != "read" {
-		_, _ = a.Access.Pool.Exec(ctx, `UPDATE agent_operations SET response=$3 WHERE grant_id=$1 AND operation_id=$2 AND state='APPLIED'`, p.Grant.ID, op, raw)
+		tag, err := a.Access.Pool.Exec(ctx, `UPDATE agent_operations SET response=$3 WHERE grant_id=$1 AND operation_id=$2 AND state='APPLIED' AND resource->>'gone' IS DISTINCT FROM 'true'`, p.Grant.ID, op, raw)
+		if err == nil && tag.RowsAffected() == 0 {
+			var gone bool
+			if a.Access.Pool.QueryRow(ctx, `SELECT COALESCE(resource->>'gone'='true',false) FROM agent_operations WHERE grant_id=$1 AND operation_id=$2`, p.Grant.ID, op).Scan(&gone) == nil && gone {
+				return failure("RESOURCE_GONE", "The linked plant was removed before this reply. This operation retains only its history.", op)
+			}
+		}
 	}
 	_ = a.Access.Q.TouchAgentGrant(ctx, dbgen.TouchAgentGrantParams{WorkspaceID: agentaccess.ID(p.Grant.WorkspaceID), ID: agentaccess.ID(p.Grant.ID), LastTool: pgText(name)})
 	return result
@@ -314,6 +330,9 @@ func scopeOutput(value any, g agentaccess.Grant, plant string) any {
 			return nil
 		}
 		if v["__typename"] == "Plant" {
+			if !g.Has("garden:read") {
+				return map[string]any{"__typename": "Plant", "id": v["id"]}
+			}
 			if !g.Plant(str(v["id"])) || (plant != "" && str(v["id"]) != plant) {
 				return nil
 			}

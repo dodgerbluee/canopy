@@ -14,9 +14,10 @@ import (
 
 // Rain is area context, deliberately independent of activities and care completions.
 type RainInput struct {
-	Day      string
-	AmountMm *string
-	Note     *string
+	Day          string
+	AmountMm     *string
+	Note         *string
+	RainReviewID *string `json:"RainReviewID,omitempty"`
 }
 type RainView struct {
 	ID       string
@@ -55,6 +56,67 @@ func (s *Service) RecordRain(ctx context.Context, a Actor, in RainInput, key *st
 		amount = &n
 	}
 	return mutate(s, ctx, a, "recordRain", key, in, func(ctx context.Context, q *dbgen.Queries) (RainView, []Problem, bool) {
+		ws, err := q.LockRainWorkspace(ctx, a.WorkspaceID)
+		if err != nil {
+			return RainView{}, []Problem{s.internalProblem(err)}, false
+		}
+		var review *dbgen.RainReview
+		if in.RainReviewID != nil {
+			uid, ok := parseUUID(*in.RainReviewID)
+			if !ok {
+				return RainView{}, []Problem{problem(CodeValidation, "input.rainReviewId", "Choose a valid rain review.")}, false
+			}
+			r, err := q.GetRainReviewForUpdate(ctx, dbgen.GetRainReviewForUpdateParams{ID: uid, WorkspaceID: a.WorkspaceID})
+			if isNoRows(err) {
+				return RainView{}, []Problem{problem(CodeNotFound, "input.rainReviewId", "The garden location changed or this rain review is no longer available.")}, false
+			}
+			if err != nil {
+				return RainView{}, []Problem{s.internalProblem(err)}, false
+			}
+			if r.Response == "DISMISSED" {
+				return RainView{}, []Problem{problem(CodeConflict, "input.rainReviewId", "This rain review was dismissed. You can still add rain manually on the calendar.")}, false
+			}
+			if r.EventDate.Time.Format(time.DateOnly) != in.Day {
+				return RainView{}, []Problem{problem(CodeValidation, "input.day", "Use the day shown on the rain review.")}, false
+			}
+			if r.Response == "CONFIRMED" {
+				existing, err := q.GetRainForUpdate(ctx, dbgen.GetRainForUpdateParams{ID: r.RainEventID, WorkspaceID: a.WorkspaceID})
+				if isNoRows(err) || (err == nil && existing.VoidedAt.Valid) {
+					return RainView{}, []Problem{problem(CodeConflict, "input.rainReviewId", "That rain record was removed. Add rain manually if needed.")}, false
+				}
+				if err != nil {
+					return RainView{}, []Problem{s.internalProblem(err)}, false
+				}
+				return rainView(existing), nil, false
+			}
+			zone, err := time.LoadLocation(ws.Timezone)
+			if err != nil {
+				return RainView{}, []Problem{s.internalProblem(err)}, false
+			}
+			now := s.clock.Now()
+			today := now.In(zone)
+			potentialRain := false
+			if r.EstimatedMm != nil {
+				v, e := r.EstimatedMm.Float64Value()
+				potentialRain = e == nil && v.Valid && v.Float64 >= 0.1
+			}
+			if r.CheckedAt.Time.After(now) || now.Sub(r.CheckedAt.Time) > 3*time.Hour || in.Day > today.Format(time.DateOnly) || in.Day < today.AddDate(0, 0, -2).Format(time.DateOnly) || !potentialRain {
+				return RainView{}, []Problem{problem(CodeConflict, "input.rainReviewId", "This weather estimate is out of date. Refresh Today or add rain manually.")}, false
+			}
+			review = &r
+			// A manual record, or another device's confirmation, wins without
+			// another rain event. The workspace lock also serializes manual adds.
+			existing, err := q.ExistingRainOnDay(ctx, dbgen.ExistingRainOnDayParams{WorkspaceID: a.WorkspaceID, EventDate: r.EventDate})
+			if err == nil {
+				if err = s.respondRain(ctx, q, a, r.ID, existing.ID, now); err != nil {
+					return RainView{}, []Problem{s.internalProblem(err)}, false
+				}
+				return rainView(existing), nil, false
+			}
+			if !isNoRows(err) {
+				return RainView{}, []Problem{s.internalProblem(err)}, false
+			}
+		}
 		row, err := q.InsertRain(ctx, dbgen.InsertRainParams{ID: s.uuid.New(), WorkspaceID: a.WorkspaceID, EventDate: pgtype.Date{Time: day, Valid: true}, AmountMm: amount, Note: nullText(in.Note)})
 		if err != nil {
 			return RainView{}, []Problem{s.internalProblem(err)}, false
@@ -62,8 +124,20 @@ func (s *Service) RecordRain(ctx context.Context, a Actor, in RainInput, key *st
 		if err = s.audit(ctx, q, a, "CREATE", "rain", row.ID, row.Revision, nil); err != nil {
 			return RainView{}, []Problem{s.internalProblem(err)}, false
 		}
+		if review != nil {
+			if err = s.respondRain(ctx, q, a, review.ID, row.ID, s.clock.Now()); err != nil {
+				return RainView{}, []Problem{s.internalProblem(err)}, false
+			}
+		}
 		return rainView(row), nil, false
 	})
+}
+
+func (s *Service) respondRain(ctx context.Context, q *dbgen.Queries, a Actor, review, rain pgtype.UUID, now time.Time) error {
+	if err := q.RespondToRainReview(ctx, dbgen.RespondToRainReviewParams{ID: review, WorkspaceID: a.WorkspaceID, Response: "CONFIRMED", RespondedAt: pgtype.Timestamptz{Time: now, Valid: true}, RainEventID: rain}); err != nil {
+		return err
+	}
+	return s.audit(ctx, q, a, "CONFIRM", "rain_review", review, 1, nil)
 }
 func (s *Service) VoidRain(ctx context.Context, a Actor, id string, revision int32, key *string) (string, []Problem, error) {
 	uid, ok := parseUUID(id)

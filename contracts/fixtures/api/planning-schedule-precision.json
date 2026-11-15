@@ -1,0 +1,88 @@
+{
+  "data": {
+    "plantingSchedule": {
+      "planId": "f0000000-0000-4000-8000-000000000001",
+      "revision": 1,
+      "guidanceGeneration": 1,
+      "timezone": "America/Chicago",
+      "today": "2027-03-15",
+      "targetPeriod": {
+        "precision": "YEAR",
+        "dates": null,
+        "months": null,
+        "season": null,
+        "year": 2027
+      },
+      "targetHemisphere": null,
+      "targetStatus": "IN_WINDOW",
+      "targetDisplayMonths": {
+        "from": "2027-01",
+        "to": "2027-12"
+      },
+      "targetVisible": true,
+      "acceptedSchedule": null,
+      "sourceSnapshotId": "f0000000-0000-4000-8000-000000000002",
+      "guidanceState": "READY",
+      "guidanceCurrent": true,
+      "message": "Synthetic contract fixture; not planting advice.",
+      "assumptions": {
+        "hemisphere": null,
+        "anchors": []
+      },
+      "items": [
+        {
+          "id": "fixture-window-0",
+          "factId": "fixture-spring",
+          "windowIndex": 0,
+          "year": 2027,
+          "phase": "PLANT_OUT",
+          "label": "Spring planting",
+          "resolution": "RESOLVED",
+          "message": "",
+          "status": "IN_WINDOW",
+          "period": {
+            "precision": "MONTH_RANGE",
+            "dates": null,
+            "months": {
+              "from": "2027-03",
+              "to": "2027-04"
+            },
+            "season": null,
+            "year": null
+          },
+          "displayMonths": {
+            "from": "2027-03",
+            "to": "2027-04"
+          },
+          "continuesBefore": false,
+          "continuesAfter": false,
+          "estimated": false,
+          "firstHarvestUnknown": false,
+          "selectable": true
+        },
+        {
+          "id": "fixture-window-1",
+          "factId": "fixture-frost",
+          "windowIndex": 0,
+          "year": 2027,
+          "phase": "TRANSPLANT",
+          "label": "After last frost",
+          "resolution": "NEEDS_ANCHOR",
+          "message": "Supply the named anchor date as a planning assumption; no date was guessed.",
+          "status": "NEEDS_REVIEW",
+          "period": null,
+          "displayMonths": null,
+          "continuesBefore": false,
+          "continuesAfter": false,
+          "estimated": true,
+          "firstHarvestUnknown": false,
+          "selectable": false
+        }
+      ],
+      "pageInfo": {
+        "hasNextPage": false,
+        "endCursor": "eyJzY29wZSI6ImFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWFhYWEiLCJvZmZzZXQiOjJ9"
+      }
+    }
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "data": {
+    "plantingPlan": {
+      "id": "f0000000-0000-4000-8000-000000000001",
+      "name": "Future fig",
+      "scientificName": null,
+      "cultivar": null,
+      "category": "FIG",
+      "desiredQuantity": 1,
+      "method": "NURSERY_PLANT",
+      "intendedLocation": null,
+      "intendedPlacement": "GROUND",
+      "targetPeriod": {
+        "precision": "YEAR",
+        "dates": null,
+        "months": null,
+        "season": null,
+        "year": 2027
+      },
+      "budget": null,
+      "notes": null,
+      "state": "PLANNED",
+      "cancelledAt": null,
+      "completedAt": null,
+      "revision": 1,
+      "actions": [],
+      "fulfillment": null,
+      "createdAt": "2026-11-14T12:00:00Z",
+      "updatedAt": "2026-11-14T12:00:00Z",
+      "latestGuidance": null,
+      "acceptedGuidance": null,
+      "guidanceGeneration": 1
+    }
+  }
+}

@@ -24,6 +24,7 @@ type AnswerDraft struct {
 }
 type ChatModel struct {
 	BaseURL, APIKey, Model, Reasoning string
+	planningIdentity                  string
 	HTTP                              *http.Client
 }
 

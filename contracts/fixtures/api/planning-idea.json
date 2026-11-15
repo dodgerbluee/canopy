@@ -1,0 +1,31 @@
+{
+  "data": {
+    "createPlantingPlan": {
+      "plan": {
+        "id": "f0000000-0000-4000-8000-000000000001",
+        "name": "Future fig",
+        "scientificName": null,
+        "cultivar": null,
+        "category": "FIG",
+        "desiredQuantity": null,
+        "method": null,
+        "intendedLocation": null,
+        "intendedPlacement": null,
+        "targetPeriod": null,
+        "budget": null,
+        "notes": null,
+        "state": "IDEA",
+        "cancelledAt": null,
+        "completedAt": null,
+        "revision": 1,
+        "actions": [],
+        "fulfillment": null,
+        "createdAt": "2026-11-14T12:00:00Z",
+        "updatedAt": "2026-11-14T12:00:00Z",
+        "guidanceGeneration": 1
+      },
+      "problems": [],
+      "clientMutationId": "planning-example-idea"
+    }
+  }
+}

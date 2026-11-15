@@ -1,0 +1,201 @@
+fragment PlantingPeriodFields on PlantingPeriod {
+  precision
+  dates { from to }
+  months { from to }
+  season { season year }
+  year
+}
+mutation AskPlantingPlanner($question: String!, $planIds: [ID!]!, $year: Int!) {
+  askPlantingPlanner(question: $question, planIds: $planIds, year: $year) {
+    answer isAI planIds
+    sources { ref planId planName fact { id phase label summary conditions sourceTitle sourceUrl publisher sourceRegion retrievedAt contentSha256 windows { precision label } } }
+    note { planId expectedRevision text }
+  }
+}
+mutation AddPlantingToGarden($input: AddPlantingToGardenInput!, $clientMutationId: String) {
+  addPlantingToGarden(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation CompletePlantingAction($input: CompletePlantingActionInput!, $clientMutationId: String) {
+  completePlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation DismissPlantingAction($input: DismissPlantingActionInput!, $clientMutationId: String) {
+  dismissPlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+query PlantingEvents($from: LocalDate!, $to: LocalDate!, $first: Int, $after: String) {
+  plantingEvents(from: $from, to: $to, first: $first, after: $after) {
+    timezone today
+    items { id planId planName planRevision kind title day state }
+    pageInfo { hasNextPage endCursor }
+  }
+}
+fragment PlantingActionFields on PlantingAction {
+  id kind title scheduledOn reminderOn scheduleRevision notes state
+  completedOn completedAt dismissedAt createdAt updatedAt
+}
+fragment PlantingPlanFields on PlantingPlan {
+  id name scientificName cultivar category desiredQuantity method
+  intendedLocation { id name situation revision }
+  intendedPlacement targetPeriod { ...PlantingPeriodFields }
+  budget { minorUnits currency } notes state cancelledAt completedAt revision guidanceGeneration
+  actions { ...PlantingActionFields }
+  fulfillment { id plant { id name status } actionId mode linkedAt }
+  createdAt updatedAt
+}
+query PlantingPlans($first: Int, $after: String, $filter: PlantingPlanFilter, $order: PlantingPlanOrder) {
+  plantingPlans(first: $first, after: $after, filter: $filter, order: $order) {
+    items { ...PlantingPlanFields }
+    pageInfo { hasNextPage endCursor }
+  }
+}
+fragment PlantingGuidanceFields on PlantingGuidanceSnapshot {
+  id generation state message assumptions retrievedAt createdAt updatedAt
+  facts {
+    id phase label summary conditions sourceTitle sourceUrl publisher sourceRegion retrievedAt contentSha256
+    windows {
+      precision label hemisphere absolute { ...PlantingPeriodFields }
+      annual { precision dates { from { month day } to { month day } } months { from to } season }
+      relative { anchor fromDays toDays }
+    }
+  }
+}
+query PlantingPlanDetail($id: ID!) {
+  plantingPlan(id: $id) {
+    ...PlantingPlanFields
+    latestGuidance { ...PlantingGuidanceFields }
+    acceptedGuidance { ...PlantingGuidanceFields }
+  }
+}
+
+mutation CreatePlantingPlan($input: CreatePlantingPlanInput!, $clientMutationId: String) {
+  createPlantingPlan(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation UpdatePlantingPlan($input: UpdatePlantingPlanInput!, $clientMutationId: String) {
+  updatePlantingPlan(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation ChangePlantingPlanState($input: ChangePlantingPlanStateInput!, $clientMutationId: String) {
+  changePlantingPlanState(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation CancelPlantingPlan($input: CancelPlantingPlanInput!, $clientMutationId: String) {
+  cancelPlantingPlan(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation RestorePlantingPlan($input: RestorePlantingPlanInput!, $clientMutationId: String) {
+  restorePlantingPlan(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation CreatePlantingAction($input: CreatePlantingActionInput!, $clientMutationId: String) {
+  createPlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation UpdatePlantingAction($input: UpdatePlantingActionInput!, $clientMutationId: String) {
+  updatePlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation DeletePlantingAction($input: DeletePlantingActionInput!, $clientMutationId: String) {
+  deletePlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+
+mutation RefreshPlantingGuidance($input: RefreshPlantingGuidanceInput!, $clientMutationId: String) {
+  refreshPlantingGuidance(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields latestGuidance { id generation state message retrievedAt } acceptedGuidance { id generation state } }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+
+fragment PlantingScheduleSelectionFields on PlantingScheduleSelection {
+  version factId windowIndex year
+  assumptions { hemisphere anchors { kind on } }
+  supportedPeriod { ...PlantingPeriodFields }
+  confirmedAt
+}
+query PlantingSchedule($planId: ID!, $input: PlantingScheduleInput!, $first: Int, $after: String) {
+  plantingSchedule(planId: $planId, input: $input, first: $first, after: $after) {
+    planId revision guidanceGeneration timezone today
+    targetPeriod { ...PlantingPeriodFields }
+    targetHemisphere targetStatus targetDisplayMonths { from to } targetVisible
+    acceptedSchedule { ...PlantingScheduleSelectionFields }
+    sourceSnapshotId guidanceState guidanceCurrent message
+    assumptions { hemisphere anchors { kind on } }
+    items {
+      id factId windowIndex year phase label resolution message status
+      period { ...PlantingPeriodFields }
+      displayMonths { from to }
+      continuesBefore continuesAfter estimated firstHarvestUnknown selectable
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}
+mutation ConfirmPlantingSchedule($input: ConfirmPlantingScheduleInput!, $clientMutationId: String) {
+  confirmPlantingSchedule(input: $input, clientMutationId: $clientMutationId) {
+    plan {
+      ...PlantingPlanFields
+      acceptedSchedule { ...PlantingScheduleSelectionFields }
+      acceptedGuidance { id generation state }
+    }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+
+query PlantingBoard($input: PlantingScheduleInput!, $first: Int, $after: String, $filter: PlantingPlanFilter) {
+  plantingBoard(input: $input, first: $first, after: $after, filter: $filter) {
+    timezone today
+    items {
+      plan { ...PlantingPlanFields }
+      schedule {
+        planId revision guidanceGeneration sourceSnapshotId guidanceState guidanceCurrent message
+        targetStatus targetDisplayMonths { from to } targetVisible
+        acceptedSchedule { ...PlantingScheduleSelectionFields }
+        items {
+          id factId windowIndex year phase label resolution message status
+          period { ...PlantingPeriodFields }
+          displayMonths { from to }
+          continuesBefore continuesAfter estimated firstHarvestUnknown selectable
+        }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}

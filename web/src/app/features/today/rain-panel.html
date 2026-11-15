@@ -1,0 +1,129 @@
+<section class="rain-panel" aria-labelledby="rain-heading">
+  <div class="rain-header">
+    <span class="rain-icon"><ui-icon name="rain" [size]="23" /></span>
+    <div class="rain-heading">
+      <h2 id="rain-heading">
+        {{ proposals().length ? 'Did your garden get rain?' : 'Rain watch' }}
+      </h2>
+      <p class="caption">{{ review().areaLabel }}</p>
+    </div>
+  </div>
+  @if (error() && !selected()) {
+    <p class="field-error" role="alert">{{ error() }}</p>
+  }
+  @for (p of proposals(); track p.id) {
+    <div class="rain-proposal">
+      <div>
+        <strong>{{ date(p.day) }}</strong>
+        <p class="caption">
+          Weather estimates {{ +p.estimatedAmountMm / 25.4 | number: '1.0-2' }} in ({{
+            +p.estimatedAmountMm | number: '1.0-1'
+          }}
+          mm) nearby.
+        </p>
+      </div>
+      <div class="rain-actions">
+        <button class="btn" type="button" [disabled]="busy()" (click)="dismiss(p)">
+          No rain here
+        </button>
+        <button class="btn btn-primary" type="button" [disabled]="busy()" (click)="open(p)">
+          Yes, it rained
+        </button>
+      </div>
+    </div>
+  } @empty {
+    <p class="rain-note caption" role="status">
+      @switch (review().status) {
+        @case ('NOT_CONFIGURED') {
+          Set your garden coordinates in <a routerLink="/settings">Settings</a> to check for nearby
+          rain.
+        }
+        @case ('WAITING') {
+          No weather check is available yet. Checks run hourly after you set a garden location. You
+          can add rain manually at any time.
+        }
+        @case ('STALE') {
+          Weather checks are behind. Rain may have been missed — you can still add it manually.
+        }
+        @default {
+          No rain is waiting for confirmation. Local showers can be missed — add rain if you saw it.
+        }
+      }
+    </p>
+  }
+  <div class="rain-footer">
+    @if (review().checkedAt; as checkedAt) {
+      <p class="caption">
+        Checked {{ checkedAt | date: 'MMM d, h:mm a' }} · hourly ·
+        <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer">Open-Meteo</a>
+      </p>
+    }
+    <a class="rain-manual caption" routerLink="/calendar">Add rain manually</a>
+  </div>
+  @if (proposals().length) {
+    <p class="rain-source caption">
+      An estimate for your area, not a rain gauge. Confirmed rain stays separate from watering.
+    </p>
+  }
+</section>
+<ui-entry-dialog
+  #entry
+  [open]="!!selected()"
+  title="Record rain"
+  description="Rainfall in your garden, for your calendar."
+  size="compact"
+  [busy]="busy()"
+  (dismissed)="selected.set(null)"
+>
+  @if (selected(); as p) {
+    <form novalidate (submit)="$event.preventDefault(); confirm()">
+      <div class="form-section">
+        <p>
+          It rained on <strong>{{ date(p.day) }}</strong
+          >.
+        </p>
+        <div class="field">
+          <label for="rain-review-amount" class="field-label"
+            >How much? <span class="caption">Optional</span></label
+          >
+          <div class="rain-amount">
+            <input
+              id="rain-review-amount"
+              class="input"
+              name="amount"
+              inputmode="decimal"
+              placeholder="Leave blank if unsure"
+              [ngModel]="amount()"
+              (ngModelChange)="amount.set($event)"
+              [disabled]="busy()"
+            />
+            <select
+              class="input"
+              name="unit"
+              aria-label="Rain depth unit"
+              [ngModel]="unit()"
+              (ngModelChange)="unit.set($event)"
+              [disabled]="busy()"
+            >
+              <option value="in">inches</option>
+              <option value="mm">mm</option>
+            </select>
+          </div>
+          <p class="field-hint">
+            Enter your estimate or a gauge reading. Leaving this blank records rain with an unknown
+            amount.
+          </p>
+        </div>
+        @if (error()) {
+          <p class="field-error" role="alert">{{ error() }}</p>
+        }
+      </div>
+      <div class="form-actions">
+        <button class="btn" type="button" [disabled]="busy()" (click)="cancel()">Cancel</button
+        ><button class="btn btn-primary" type="submit" [disabled]="busy()">
+          {{ busy() ? 'Saving…' : 'Save rain' }}
+        </button>
+      </div>
+    </form>
+  }
+</ui-entry-dialog>

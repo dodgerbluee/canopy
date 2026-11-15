@@ -40,6 +40,12 @@ function overview(due: unknown[] = [], entries: unknown[] = [], conditions: unkn
         pageInfo: { endCursor: null, hasNextPage: false },
       },
       conditions,
+      rainReview: {
+        status: 'NOT_CONFIGURED',
+        areaLabel: 'Your garden',
+        checkedAt: null,
+        proposals: [],
+      },
     },
   };
 }
@@ -186,7 +192,7 @@ describe('TodayPage', () => {
     expect(fixture.nativeElement.querySelector('.hero-photo img')).toBeNull();
   });
 
-  it('one composition on load: overview + plant names + the suggestions slot, nothing else', async () => {
+  it('loads recorded overview and independent upcoming planning context', async () => {
     const calls = stubFetch({
       Plants: plants(),
       TodayOverview: overview([occurrence()]),
@@ -199,6 +205,7 @@ describe('TodayPage', () => {
     expect(calls.map((c) => c.op).sort()).toEqual([
       'Plants',
       'ProviderCapabilities',
+      'Session',
       'SuggestionsPage',
       'TodayOverview',
     ]);
@@ -206,11 +213,12 @@ describe('TodayPage', () => {
     expect(textOf(fixture)).toContain('Daily soak');
   });
 
-  it('zero provider mode: conditions null says no location, never a placeholder', async () => {
+  it('zero provider mode explains missing rain configuration and forecast separately', async () => {
     const fixture = render({ TodayOverview: overview([occurrence()]) });
     await flush();
     fixture.detectChanges();
-    expect(textOf(fixture)).toContain('No location with coordinates yet');
+    expect(textOf(fixture)).toContain('Set your garden coordinates');
+    expect(textOf(fixture)).toContain('No daily plant-location forecast is available');
     expect(textOf(fixture)).not.toContain('open-meteo');
   });
 

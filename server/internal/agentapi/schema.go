@@ -176,6 +176,15 @@ func selection(s *ast.Schema, t *ast.Type, depth int) string {
 	if d == nil || d.Kind == ast.Scalar || d.Kind == ast.Enum {
 		return ""
 	}
+	// These finite value objects carry precision. A generic depth cutoff must
+	// not discard their dates/offsets or manufacture a coarser timing claim.
+	const period = "{precision dates{from to} months{from to} season{season year} year}"
+	switch d.Name {
+	case "PlantingPeriod":
+		return period
+	case "PlantingGuidanceWindow":
+		return "{precision label hemisphere absolute" + period + " annual{precision dates{from{month day} to{month day}} months{from to} season} relative{anchor fromDays toDays}}"
+	}
 	if depth > 4 {
 		if d.Fields.ForName("id") != nil {
 			return "{id}"
@@ -192,6 +201,10 @@ func selection(s *ast.Schema, t *ast.Type, depth int) string {
 	names := []string{"__typename"}
 	for _, f := range d.Fields {
 		if strings.HasPrefix(f.Name, "__") || forbidden[f.Name] {
+			continue
+		}
+		if d.Name == "PlantingFulfillment" && f.Name == "plant" {
+			names = append(names, "plant{__typename id name status revision}")
 			continue
 		}
 		if d.Name == "Plant" && (f.Name == "acquisition" || f.Name == "carePlan") {
@@ -249,7 +262,25 @@ func document(s *ast.Schema, t catalog.Tool) (string, error) {
 	if len(args) > 0 {
 		arguments = "(" + strings.Join(args, ",") + ")"
 	}
-	return kind + " AgentTool" + decl + " {" + t.Root + arguments + selection(s, f.Type, 0) + "}", nil
+	fields := selection(s, f.Type, 0)
+	if strings.HasPrefix(t.Scope, "planning:") {
+		// Lists and write acknowledgements need intent/state, not duplicate
+		// unpaginated evidence trees. Detailed evidence remains on plan_get.
+		const plan = `{__typename id name scientificName cultivar category desiredQuantity method intendedPlacement intendedLocation{id name situation revision} targetPeriod{precision dates{from to} months{from to} season{season year} year} budget{minorUnits currency} notes state revision guidanceGeneration actions{id kind title scheduledOn reminderOn scheduleRevision state completedOn} fulfillment{id mode linkedAt actionId plant{__typename id name status revision}} latestGuidance{id generation state message retrievedAt} acceptedGuidance{id generation state message retrievedAt} createdAt updatedAt}`
+		const page = `pageInfo{hasNextPage endCursor}`
+		switch t.Root {
+		case "plantingPlans":
+			fields = "{items" + plan + " " + page + "}"
+		case "plantingBoard":
+			schedule := selection(s, ast.NamedType("PlantingScheduleConnection", nil), 0)
+			fields = "{timezone today items{plan" + plan + " schedule" + schedule + "} " + page + "}"
+		default:
+			if t.Mode != "read" {
+				fields = "{plan" + plan + " problems{code field message currentRevision} clientMutationId}"
+			}
+		}
+	}
+	return kind + " AgentTool" + decl + " {" + t.Root + arguments + fields + "}", nil
 }
 func publicOutput(value any) any {
 	switch v := value.(type) {

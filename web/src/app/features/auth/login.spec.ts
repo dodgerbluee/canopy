@@ -60,6 +60,7 @@ describe('LoginPage', () => {
   it('blocks submit and shows a field error without calling the server when empty', async () => {
     const fixture = render();
     const el = fixture.nativeElement as HTMLElement;
+    expect((el.querySelector('#username') as HTMLInputElement).value).toBe('');
     el.querySelector('form')!.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
     expect(fetchMock).not.toHaveBeenCalled();

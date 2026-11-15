@@ -1,0 +1,172 @@
+.planning-track {
+  position: relative;
+  min-width: 0;
+  border-radius: 16px;
+  background: var(--surface-canvas);
+  isolation: isolate;
+}
+
+.planning-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: clip;
+}
+
+.planning-grid > span {
+  border-left: 1px solid var(--border-decorative);
+}
+
+.planning-grid > span:first-child {
+  border: 0;
+}
+
+.planning-grid .current-month {
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+
+.chosen-band,
+.source-band {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  overflow: hidden;
+  min-width: 0;
+  height: 44px;
+  border-radius: var(--radius-pill);
+  font: 500 12px/1.6 var(--font-ui);
+  padding: 6px 11px;
+  cursor: pointer;
+  max-width: 100%;
+  transition: filter var(--dur-control);
+}
+.source-band.narrow {
+  justify-content: center;
+  padding-inline: 4px;
+}
+.source-band.narrow > span {
+  display: none;
+}
+.track-context {
+  position: absolute;
+  inset: 58px 12px auto;
+  min-height: 44px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  color: var(--text-muted);
+  font: 400 12px/1.7 var(--font-ui);
+  cursor: pointer;
+}
+
+.chosen-band > span,
+.source-band > span {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.chosen-band {
+  top: 7px;
+  background: var(--accent);
+  color: var(--accent-fg);
+  border: 1px solid var(--accent);
+  z-index: 1;
+}
+
+.source-band {
+  --kind-color: var(--accent);
+  color: var(--kind-color);
+  border: 1px dashed color-mix(in srgb, var(--kind-color) 80%, var(--surface-base));
+  background: color-mix(in srgb, var(--kind-color) 10%, var(--surface-base));
+}
+
+.source-band.phase-HARVEST,
+.source-band.phase-START_INDOORS {
+  --kind-color: var(--warning);
+}
+
+.source-band.phase-BLOOM,
+.source-band.phase-DORMANCY {
+  --kind-color: var(--season-violet);
+}
+
+.source-band.phase-PROTECT {
+  --kind-color: var(--season-blue);
+}
+
+.chosen-band:hover,
+.source-band:hover {
+  filter: brightness(0.95);
+}
+
+.source-band:focus-visible,
+.chosen-band:focus-visible {
+  z-index: 3;
+  outline-offset: 1px;
+}
+
+.unscheduled-band {
+  position: absolute;
+  inset: 7px 8px auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 44px;
+  border: 1px dashed var(--border);
+  background: var(--surface-base);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  font: 400 12px/1.6 var(--font-ui);
+  cursor: pointer;
+}
+
+.planning-mobile-period {
+  display: none;
+}
+
+.wishlist-board .planning-row {
+  grid-template-columns: minmax(230px, 1fr) minmax(220px, 1fr) 52px;
+  padding: 24px 0;
+}
+
+.wishlist-board .planning-track {
+  display: none;
+}
+
+.wishlist-board .planning-mobile-period {
+  display: grid;
+  padding: 0 24px;
+  justify-items: start;
+  gap: 8px;
+}
+
+.planning-mobile-period > span {
+  font-size: 14px;
+  color: var(--text-primary);
+  font-weight: 500;
+  line-height: 1.7;
+}
+
+.planning-mobile-period small {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+.planning-mobile-period .btn {
+  font-size: 12px;
+  margin-left: -12px;
+}

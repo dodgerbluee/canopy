@@ -27,6 +27,8 @@ type TodayOverview {
   freshness bands (FRESH/STALE/UNAVAILABLE) are the frozen care semantics.
   """
   conditions: TodayConditions
+  "Garden-location weather checks and at most three recent local days awaiting confirmation."
+  rainReview: RainReviewState!
 }
 
 extend type Query {

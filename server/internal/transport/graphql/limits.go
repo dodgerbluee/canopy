@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"canopy/server/internal/planning"
 	"fmt"
 	"strconv"
 	"strings"
@@ -152,6 +153,15 @@ func (w *walker) walkField(f *ast.Field, parent *ast.Definition, depth, connSize
 			}
 			size = n
 		}
+		// A variable first value is unknown here. Planner connections charge
+		// their full allowed page to keep the new nested lists bounded.
+		if typeName == "PlantingPlanConnection" || typeName == "PlantingScheduleConnection" || typeName == "PlantingBoardConnection" || typeName == "PlantingEventConnection" {
+			for _, arg := range f.Arguments {
+				if arg.Name == "first" && arg.Value != nil && arg.Value.Kind == ast.Variable {
+					size = w.lim.MaxPageSize
+				}
+			}
+		}
 		child, err := w.walkSet(f.SelectionSet, w.schema.Types[typeName], depth+1, size)
 		if err != nil {
 			return 0, err
@@ -163,6 +173,28 @@ func (w *walker) walkField(f *ast.Field, parent *ast.Definition, depth, connSize
 		mult := defaultPageSize
 		if connSize > 0 && f.Name == "items" {
 			mult = connSize
+		}
+		// Planner child lists have explicit domain/read bounds. Charge the
+		// actual maximum rather than the generic 25-row estimate.
+		if parent != nil {
+			switch parent.Name + "." + f.Name {
+			case "PlantingPlan.actions":
+				mult = planning.MaxActions
+			case "PlantingGuidanceSnapshot.facts":
+				mult = planning.MaxGuidanceFacts
+			case "PlantingGuidanceSnapshot.assumptions":
+				mult = planning.MaxGuidanceAssumptions
+			case "PlantingAssistantReply.sources":
+				mult = 32
+			case "PlantingAssistantReply.planIds":
+				mult = 20
+			case "PlantingGuidanceFact.windows":
+				mult = planning.MaxGuidanceWindows
+			case "PlantingGuidanceFact.conditions":
+				mult = planning.MaxGuidanceConditions
+			case "PlantingScheduleAssumptions.anchors":
+				mult = planning.MaxScheduleAnchors
+			}
 		}
 		if n, bounded := staticIntArg(f.Arguments, "first"); bounded {
 			if n < 0 || n > w.lim.MaxPageSize {

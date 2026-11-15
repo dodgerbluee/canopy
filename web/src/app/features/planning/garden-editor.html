@@ -1,0 +1,295 @@
+<ui-entry-dialog
+  #entry
+  [open]="open()"
+  title="Add to garden"
+  description="Confirm the living plant or group you actually have."
+  [busy]="saving()"
+  [dirty]="dirty()"
+  (dismissed)="dismissed.emit()"
+>
+  <form (ngSubmit)="save()" novalidate>
+    @if (message()) {
+      <p class="form-error" role="alert">{{ message() }}</p>
+    }
+    <p class="planning-note">
+      One plan links to one plant or tracked group. Buying seed packets alone stays a planning
+      action.
+    </p>
+    <fieldset class="form-section" [disabled]="saving()" style="border: 0; padding: 0; margin: 0">
+      <div class="field planning-modes">
+        <span class="field-label">How would you like to add it?</span
+        ><label
+          ><input
+            type="radio"
+            name="mode"
+            value="new"
+            [ngModel]="draft.mode"
+            (ngModelChange)="chooseMode($event)"
+          />
+          Create a plant or group</label
+        ><label
+          ><input
+            type="radio"
+            name="mode"
+            value="existing"
+            [ngModel]="draft.mode"
+            (ngModelChange)="chooseMode($event)"
+          />
+          Link a plant already in my garden</label
+        >
+      </div>
+      @if (draft.mode === 'existing') {
+        @if (loading()) {
+          <p role="status">Loading your actual plants…</p>
+        }
+        <div class="field">
+          <label class="field-label" for="garden-existing">Existing plant</label
+          ><select
+            class="input"
+            id="garden-existing"
+            name="existing"
+            [(ngModel)]="draft.existingId"
+            [disabled]="loading()"
+          >
+            <option value="">Choose a plant…</option>
+            @for (plant of plants(); track plant.id) {
+              <option [value]="plant.id">{{ plant.name }}</option>
+            }
+          </select>
+          <p class="field-hint">
+            Linking keeps this plant's recorded identity, placement and spending.
+          </p>
+        </div>
+      } @else {
+        <div class="field">
+          <label class="field-label" for="garden-name">Actual plant name</label
+          ><input
+            id="garden-name"
+            class="input"
+            name="name"
+            [(ngModel)]="draft.name"
+            required
+            maxlength="160"
+          />
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="garden-type">Track as</label
+            ><select class="input" id="garden-type" name="type" [(ngModel)]="draft.type">
+              <option value="INDIVIDUAL">Individual plant</option>
+              <option value="GROUP">Group / patch</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label" for="garden-count">Actual count</label
+            ><input
+              id="garden-count"
+              class="input"
+              name="count"
+              inputmode="numeric"
+              [(ngModel)]="draft.count"
+              placeholder="Unknown"
+            />
+            <p class="field-hint">Planned quantity is not an actual count.</p>
+          </div>
+        </div>
+        <details class="planning-form-fold">
+          <summary>Identity details<span>Review the identity carried from your plan</span></summary>
+          <div class="field">
+            <label class="field-label" for="garden-scientific">Scientific name</label
+            ><input
+              class="input"
+              id="garden-scientific"
+              name="scientific"
+              [(ngModel)]="draft.scientificName"
+              maxlength="160"
+            />
+          </div>
+          <div class="field">
+            <label class="field-label" for="garden-cultivar">Cultivar</label
+            ><input
+              class="input"
+              id="garden-cultivar"
+              name="cultivar"
+              [(ngModel)]="draft.cultivar"
+              maxlength="160"
+            />
+          </div>
+          <div class="field">
+            <label class="field-label" for="garden-category">Category</label
+            ><select
+              class="input"
+              id="garden-category"
+              name="category"
+              [(ngModel)]="draft.category"
+            >
+              <option value="CITRUS">Citrus</option>
+              <option value="FIG">Fig</option>
+              <option value="STRAWBERRY">Strawberry</option>
+              <option value="BLACKBERRY">Blackberry</option>
+              <option value="OTHER">Other</option>
+            </select>
+          </div>
+        </details>
+        <details class="planning-form-fold">
+          <summary>
+            Where is it now?<span>Optional actual placement, separate from your future site</span>
+          </summary>
+          <label
+            ><input type="checkbox" name="confirmContext" [(ngModel)]="draft.confirmContext" />
+            Record its actual current placement</label
+          >
+          @if (draft.confirmContext) {
+            <div class="field">
+              <label class="field-label" for="garden-placement">Current placement</label
+              ><select
+                id="garden-placement"
+                class="input"
+                name="placement"
+                [(ngModel)]="draft.placement"
+              >
+                <option value="">Choose placement…</option>
+                <option value="CONTAINER">Container</option>
+                <option value="GROUND">In the ground</option>
+              </select>
+            </div>
+            <div class="field">
+              <label class="field-label" for="garden-location">Current location</label
+              ><select
+                class="input"
+                id="garden-location"
+                name="location"
+                [(ngModel)]="draft.locationId"
+              >
+                <option value="">Not recorded</option>
+                @for (location of locations(); track location.id) {
+                  <option [value]="location.id">{{ location.name }}</option>
+                }
+              </select>
+            </div>
+          }
+        </details>
+        <details class="planning-form-fold">
+          <summary>
+            Acquisition & actual price<span
+              >Optional provenance; your budget stays an estimate</span
+            >
+          </summary>
+          <div class="field">
+            <label class="field-label" for="garden-acquired">Acquired on</label
+            ><input
+              class="input"
+              id="garden-acquired"
+              name="acquired"
+              type="date"
+              [(ngModel)]="draft.acquiredOn"
+              [max]="today()"
+            />
+          </div>
+          <div class="field">
+            <label class="field-label" for="garden-seller">Seller</label
+            ><input
+              class="input"
+              id="garden-seller"
+              name="seller"
+              [(ngModel)]="draft.seller"
+              maxlength="160"
+            />
+          </div>
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="garden-price">Actual total paid</label
+              ><input
+                class="input"
+                id="garden-price"
+                name="price"
+                inputmode="decimal"
+                [(ngModel)]="draft.price"
+                placeholder="Unknown"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="garden-currency">Currency</label
+              ><input
+                class="input"
+                id="garden-currency"
+                name="currency"
+                [(ngModel)]="draft.currency"
+                maxlength="3"
+              />
+            </div>
+          </div>
+          @if (draft.price.trim()) {
+            <div class="form-grid">
+              <div class="field">
+                <label class="field-label" for="garden-tax">Tax included in total</label
+                ><input
+                  class="input"
+                  id="garden-tax"
+                  name="tax"
+                  inputmode="decimal"
+                  [(ngModel)]="draft.tax"
+                />
+              </div>
+              <div class="field">
+                <label class="field-label" for="garden-shipping">Shipping included in total</label
+                ><input
+                  class="input"
+                  id="garden-shipping"
+                  name="shipping"
+                  inputmode="decimal"
+                  [(ngModel)]="draft.shipping"
+                />
+              </div>
+            </div>
+            <p class="field-hint">
+              This records a real purchase. Review the total, tax and shipping; attach a receipt in
+              Purchases later.
+            </p>
+          }
+        </details>
+        @if (!action()) {
+          <div class="field">
+            <label class="field-label" for="garden-planted"
+              >Already planted on <span class="caption">optional</span></label
+            ><input
+              class="input"
+              id="garden-planted"
+              name="planted"
+              type="date"
+              [(ngModel)]="draft.plantedOn"
+              [max]="today()"
+            />
+          </div>
+        }
+      }
+      @if (action(); as action) {
+        <div class="planning-choice">
+          <strong>Complete “{{ action.title }}” at the same time</strong
+          ><label class="field-label" for="garden-completed">Actually sown or planted on</label
+          ><input
+            class="input"
+            id="garden-completed"
+            name="completed"
+            type="date"
+            [(ngModel)]="draft.completedOn"
+            [max]="today()"
+            required
+          /><small>This records the actual planting day. Other future actions stay open.</small>
+        </div>
+      } @else {
+        <p class="planning-note">
+          Adding it starts ownership. Every remaining action stays open until you complete or
+          dismiss it.
+        </p>
+      }
+    </fieldset>
+    <div class="form-actions">
+      <button class="btn" type="button" [disabled]="saving()" (click)="entry.requestClose()">
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="saving() || loading()">
+        {{ saving() ? 'Adding…' : action() ? 'Add & complete action' : 'Add to garden' }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>

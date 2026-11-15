@@ -162,7 +162,7 @@ new service by accident.
 
 ## MCP assistant connections
 
-Canopy exposes named MCP tools for garden records, photos, care, knowledge, purchases, AI runs, notifications and reviewed changes. The endpoint is disabled by default. Enable it locally with these API process environment settings:
+Canopy exposes named MCP tools for garden records, future planting plans, photos, care, knowledge, purchases, AI runs, notifications and reviewed changes. The endpoint is disabled by default. Enable it locally with these API process environment settings:
 
 ```sh
 CANOPY_MCP_ENABLED=true
@@ -184,3 +184,13 @@ The combined `ghcr.io/dodgerbluee/canopy` image includes the frontend, API,
 worker, migrations and photo/receipt tools. Deployment is two Compose services:
 Canopy and PostgreSQL. See [deployment](docs/deployment.md) for Portainer,
 initial-password setup and the existing sandbox mounts.
+
+## Future planting plans
+
+**Planning** keeps wishes and future plantings separate from plants you already own. Start with a name, add an optional exact budget and chosen day/month/season/year window, compare cited regional guidance, and choose explicit actions. Calendar has a separate planning filter; Garden year has an optional dashed overlay; Today lists upcoming actions. Reminders are opt-in Inbox notices at 9 am in the garden timezone, with no implied watering or care completion.
+
+**Add to garden** reviews the actual living plant/group or links an existing plant in one transaction. Actual count, current placement, dates and any real price are confirmed independently. Buying early leaves future planting work open; completing a planting action and completing the plan are separate. Retry identities and revisions prevent duplicates; purging a linked plant retains a non-recreatable history marker and redacts related planner MCP cached copies.
+
+**Help me plan** uses the configured Garden AI connection for timing, source conditions and planning next steps. It separates owned records, proposed additions and estimated budgets. Citations and draft fields are validated; its prose remains reviewable advice. Applying a note opens the normal editor with existing notes preserved and source links attached; saving is explicit. Manual planning works without AI or supported guidance. Current curated guidance covers eight crop families and twelve regional publications, not every crop or country.
+
+Agent permissions `planning:read` and `planning:write` are workspace-wide. Planner changes use owner-reviewed proposals; guidance refresh is bounded and direct. Real garden creation/planting also needs `plants:write`, and a real initial purchase needs `purchases:write`. Planner read access alone exposes only the identifier of an existing ownership link. See [planner behavior and implementation evidence](docs/features/planting-planner.md).

@@ -1,0 +1,13 @@
+# FIX09 — Sign-in identity and rain reviews
+
+Status: ACCEPTED. Implementation and exact-source GitHub CI passed.
+
+### FIX09 — Blank sign-in identity and garden rain confirmation
+
+Depends: PLAN08.
+
+Own: `server/db/migrations/00024_rain_reviews.sql`, `server/db/queries/rain_reviews.sql`, `server/db/generated/` (generator only), `server/internal/journal/`, `server/internal/care/weather/`, `server/internal/transport/graphql/`, `server/internal/portability/`, `server/cmd/worker/main.go`, `contracts/graphql/calendar.graphql`, `contracts/graphql/overview.graphql`, `contracts/operations/calendar.graphql`, `contracts/operations/overview.graphql`, `contracts/generated/` (generator only), `web/src/app/features/auth/`, `web/src/app/features/today/`, `web/src/app/features/seasons/garden-settings.html`, `web/src/app/stories/today.ts`, `web/e2e/rain*.ts`, `web/playwright.rain.config.ts`, `docs/features/rain-reviews.md`, `docs/plan/07-tasks.md`, `docs/plan/tasks/FIX09.md`, `docs/plan/tasks/FIX09-contract-change.md`, `.artifacts/agents/FIX09/`. Integrator owns graph/ledger. Generated code remains generator-only.
+
+Acceptance: Sign-in starts with an empty username; no hardcoded owner identity or replacement of real user accounts. Garden coordinates opt into hourly, bounded Open-Meteo rain checks independently of plant locations/care plans. Only elapsed rain/showers intervals contribute to estimates; future precipitation/snow do not imply rainfall. Today shows a clear, dated confirmation prompt with optional amount, dismissal, last-check/disabled/waiting/stale states and manual Calendar rain access. Confirmation creates one ordinary area-rain event atomically, never watering or completed care. Retries/concurrent confirmations/manual existing rain cannot duplicate a proposal, cross-workspace access is rejected, moved/removed locations fence stale work/results, and workspace-local day/DST behavior is explicit. Preserve backup/restore and existing Calendar/MCP semantics. Refresh matched isolated preview API/worker; do not deploy production. Create and merge the full planner PR after validation.
+
+Verify: Provider fixture tests for elapsed-hour/local-day/DST/null/error/unit/array/time validation. Real PG17 weather opt-in/cache/context fence, review confirmation/dismissal/idempotency/concurrency/isolation/manual-rain/backup integration. Frontend units/build and desktop/phone/light/dark browser review flow, blank-login field and accessible clean layout. Appropriate full Go/PG regression, generation, lint, plan/boundary and exact-head CI; actual queued rain check in the preserved preview.

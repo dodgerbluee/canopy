@@ -23,6 +23,22 @@ func (a *API) authorize(ctx context.Context, p agentaccess.Principal, t catalog.
 	if input == nil {
 		input = args
 	}
+	if t.Root == "addPlantingToGarden" {
+		actual, _ := input["new_plant"].(map[string]any)
+		if actual["initial_purchase"] != nil && !p.Grant.Has("purchases:write") {
+			return agentaccess.ErrDenied
+		}
+	}
+	if t.Root == "completePlantingAction" {
+		var kind string
+		err := a.Access.Pool.QueryRow(ctx, `SELECT kind::text FROM planting_actions WHERE workspace_id=$1 AND plan_id=$2 AND id=$3`, p.Grant.WorkspaceID, str(input["plan_id"]), str(input["id"])).Scan(&kind)
+		if err != nil {
+			return agentaccess.ErrDenied
+		}
+		if kind != "PREPARE" && kind != "BUY" && !p.Grant.Has("plants:write") {
+			return agentaccess.ErrDenied
+		}
+	}
 	plant := str(input["plant_id"])
 	if plant == "" {
 		plant = str(args["plant_id"])
@@ -140,6 +156,20 @@ func (a *API) authorize(ctx context.Context, p agentaccess.Principal, t catalog.
 func (a *API) before(ctx context.Context, p agentaccess.Principal, t catalog.Tool, args map[string]any) []byte {
 	input, _ := args["input"].(map[string]any)
 	id := str(input["id"])
+	if strings.HasPrefix(t.Scope, "planning:") {
+		if plan := str(input["plan_id"]); plan != "" {
+			id = plan
+		}
+		if !agentaccess.ID(id).Valid {
+			return []byte(`{}`)
+		}
+		var body []byte
+		err := a.Access.Pool.QueryRow(ctx, `SELECT jsonb_build_object('plan',to_jsonb(p),'actions',(SELECT coalesce(jsonb_agg(to_jsonb(a) ORDER BY a.scheduled_on,a.id),'[]'::jsonb) FROM planting_actions a WHERE a.workspace_id=p.workspace_id AND a.plan_id=p.id)) FROM planting_plans p WHERE p.workspace_id=$1 AND p.id=$2`, p.Grant.WorkspaceID, id).Scan(&body)
+		if err != nil {
+			return []byte(`{}`)
+		}
+		return body
+	}
 	if id == "" {
 		id = str(input["suggestion_id"])
 	}

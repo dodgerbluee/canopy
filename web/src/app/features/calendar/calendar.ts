@@ -7,6 +7,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { planningEvents, type PlanningEvent } from '../planning/planning-events';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { RecordRainDocument, VoidRainDocument, type PlantFieldsFragment } from '@canopy/contracts';
@@ -51,6 +52,15 @@ export class CalendarPage {
   readonly brokenImages = signal(new Set<string>());
   readonly plants = signal<PlantFieldsFragment[]>([]);
   readonly events = signal<CalendarItem[]>([]);
+  readonly planning = signal<PlanningEvent[]>([]);
+  readonly showPlanning = signal(true);
+  readonly planningError = signal('');
+  readonly dayPlans = computed(() =>
+    this.showPlanning() ? this.planning().filter((e) => e.day === this.selectedDay()) : [],
+  );
+  readonly planningCount = computed(() =>
+    this.showPlanning() ? this.planning().filter((e) => e.day.startsWith(this.month())).length : 0,
+  );
   readonly selectedPlants = signal(new Set<string>());
   readonly month = signal('');
   readonly selectedDay = signal('');
@@ -159,10 +169,22 @@ export class CalendarPage {
     this.loading.set(true);
     this.error.set('');
     this.events.set([]);
+    this.planning.set([]);
+    this.planningError.set('');
     const days = this.days();
     try {
-      const events = await calendarEvents(this.gql, days[0], days[days.length - 1], abort.signal);
-      if (n === this.request && !this.destroyed) this.events.set(events);
+      const [records, plans] = await Promise.allSettled([
+        calendarEvents(this.gql, days[0], days[days.length - 1], abort.signal),
+        planningEvents(this.gql, days[0], days[days.length - 1], abort.signal),
+      ]);
+      if (n !== this.request || this.destroyed) return;
+      if (records.status === 'fulfilled') this.events.set(records.value);
+      else this.error.set(this.message(records.reason));
+      if (plans.status === 'fulfilled') this.planning.set(plans.value);
+      else
+        this.planningError.set(
+          'Planned actions could not be loaded. Recorded history is shown separately.',
+        );
     } catch (e) {
       if (n === this.request && !this.destroyed) this.error.set(this.message(e));
     } finally {
@@ -241,9 +263,12 @@ export class CalendarPage {
         (e) => e.kind !== 'RAIN' && e.kind !== 'PHOTO' && e.activityKind !== 'WATER',
       ],
     ];
-    return kinds
+    const planned = this.showPlanning() ? this.planning().filter((e) => e.day === day).length : 0;
+    const groups = kinds
       .map(([icon, label, match]) => ({ icon, label, count: items.filter(match).length }))
       .filter((g) => g.count);
+    if (planned) groups.push({ icon: 'sprout', label: 'Planned actions', count: planned });
+    return groups;
   }
   addRain(): void {
     this.keys.clear();

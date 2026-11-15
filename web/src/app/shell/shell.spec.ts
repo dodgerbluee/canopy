@@ -148,6 +148,7 @@ describe('AppShell', () => {
       'Today',
       'Plants',
       'Garden year',
+      'Planning',
       'Calendar',
       'Journal',
       'Care',

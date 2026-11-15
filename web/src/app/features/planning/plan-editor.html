@@ -1,0 +1,343 @@
+<ui-entry-dialog
+  #entry
+  [open]="open()"
+  [title]="plan() ? 'Edit planting plan' : idea() ? 'Keep an idea' : 'Plan a planting'"
+  description="Start with a name. Add the details as your plan takes shape."
+  [busy]="saving()"
+  [dirty]="dirty()"
+  (dismissed)="dismissed.emit()"
+>
+  <form (ngSubmit)="save()" novalidate>
+    @if (suggestedNote()) {
+      <p class="planning-note" role="status">
+        Review the proposed note and sources in Budget &amp; notes. Your existing notes are kept;
+        choose Save changes when ready.
+      </p>
+    }
+    @if (message()) {
+      <div class="form-error" role="alert">
+        <p>{{ message() }}</p>
+        @if (conflict()) {
+          <p>Your draft is still here. Reloading replaces it with the latest saved version.</p>
+          <button type="button" class="btn" (click)="reload()">Reload latest version</button>
+        }
+      </div>
+    }
+    <fieldset class="form-section" [disabled]="saving()" style="border: 0; padding: 0; margin: 0">
+      <div class="field">
+        <label class="field-label" for="plan-name">What would you like to grow?</label
+        ><input
+          class="input"
+          id="plan-name"
+          name="name"
+          [(ngModel)]="draft.name"
+          (ngModelChange)="changed()"
+          (blur)="blur('name')"
+          maxlength="160"
+          required
+          placeholder="A fig tree, tomatoes, a strawberry patch…"
+          [attr.aria-invalid]="error('name') ? 'true' : null"
+          [attr.aria-describedby]="error('name') ? 'plan-name-error' : null"
+        />
+        @if (error('name')) {
+          <p class="field-error" id="plan-name-error">{{ error('name') }}</p>
+        }
+      </div>
+      @if (!plan()) {
+        <div class="field">
+          <label class="field-label" for="plan-state">Keep it in</label
+          ><select class="input" id="plan-state" name="state" [(ngModel)]="draft.state">
+            <option value="PLANNED">Planned plantings</option>
+            <option value="IDEA">Wishlist</option>
+          </select>
+        </div>
+      }
+      <div class="form-grid">
+        <div class="field">
+          <label class="field-label" for="plan-method">Starting with</label
+          ><select class="input" id="plan-method" name="method" [(ngModel)]="draft.method">
+            <option value="">Still deciding</option>
+            <option value="NURSERY_PLANT">A nursery plant</option>
+            <option value="START_INDOORS">Seeds indoors</option>
+            <option value="DIRECT_SOW">Seeds sown directly</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label" for="plan-qty">How many?</label
+          ><input
+            class="input"
+            id="plan-qty"
+            name="quantity"
+            inputmode="numeric"
+            [(ngModel)]="draft.quantity"
+            (ngModelChange)="changed()"
+            (blur)="blur('quantity')"
+            placeholder="Unknown"
+            [attr.aria-invalid]="error('quantity') ? 'true' : null"
+            [attr.aria-describedby]="error('quantity') ? 'plan-qty-error' : null"
+          />
+          @if (error('quantity')) {
+            <p class="field-error" id="plan-qty-error">{{ error('quantity') }}</p>
+          }
+        </div>
+      </div>
+    </fieldset>
+    <details class="planning-form-fold" [open]="!!plan()">
+      <summary>Identity &amp; growing place <span>Optional details</span></summary>
+      <fieldset
+        class="form-section"
+        [disabled]="saving()"
+        style="border: 0; padding: 16px 0 0; margin: 0"
+      >
+        <div class="field">
+          <label class="field-label" for="plan-scientific">Scientific name</label
+          ><input
+            class="input"
+            id="plan-scientific"
+            name="scientificName"
+            [(ngModel)]="draft.scientificName"
+            maxlength="160"
+            placeholder="Optional"
+          />
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="plan-cultivar">Cultivar</label
+            ><input
+              class="input"
+              id="plan-cultivar"
+              name="cultivar"
+              [(ngModel)]="draft.cultivar"
+              maxlength="160"
+              placeholder="If known"
+            />
+          </div>
+          <div class="field">
+            <label class="field-label" for="plan-category">Plant group</label
+            ><select class="input" id="plan-category" name="category" [(ngModel)]="draft.category">
+              <option value="OTHER">Other / unsure</option>
+              <option value="CITRUS">Citrus</option>
+              <option value="FIG">Fig</option>
+              <option value="STRAWBERRY">Strawberry</option>
+              <option value="BLACKBERRY">Blackberry</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="plan-location">Intended location</label
+            ><select
+              class="input"
+              id="plan-location"
+              name="locationId"
+              [(ngModel)]="draft.locationId"
+            >
+              <option value="">Not chosen</option>
+              @for (location of locations(); track location.id) {
+                <option [value]="location.id">{{ location.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label" for="plan-placement">Growing in</label
+            ><select
+              class="input"
+              id="plan-placement"
+              name="placement"
+              [(ngModel)]="draft.placement"
+            >
+              <option value="">Not decided</option>
+              <option value="CONTAINER">A container</option>
+              <option value="GROUND">The ground</option>
+            </select>
+          </div>
+        </div>
+      </fieldset>
+    </details>
+    <details class="planning-form-fold" [open]="!!draft.precision">
+      <summary>
+        Your timing <span>{{ draft.precision ? 'A chosen period' : 'No date needed yet' }}</span>
+      </summary>
+      <fieldset
+        class="form-section"
+        [disabled]="saving()"
+        style="border: 0; padding: 16px 0 0; margin: 0"
+      >
+        <div class="field">
+          <label class="field-label" for="plan-precision">How specific is your plan?</label
+          ><select
+            class="input"
+            id="plan-precision"
+            name="precision"
+            [(ngModel)]="draft.precision"
+            (ngModelChange)="changed()"
+          >
+            <option value="">No dates yet</option>
+            <option value="YEAR">A year</option>
+            <option value="SEASON">A season</option>
+            <option value="MONTH_RANGE">A month or range of months</option>
+            <option value="DATE_RANGE">Specific days</option>
+          </select>
+        </div>
+        @if (draft.precision === 'DATE_RANGE') {
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="plan-from-day">From</label
+              ><input
+                type="date"
+                class="input"
+                id="plan-from-day"
+                name="fromDay"
+                [(ngModel)]="draft.fromDay"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="plan-to-day">Through</label
+              ><input
+                type="date"
+                class="input"
+                id="plan-to-day"
+                name="toDay"
+                [(ngModel)]="draft.toDay"
+              />
+            </div>
+          </div>
+        }
+        @if (draft.precision === 'MONTH_RANGE') {
+          <div class="form-grid">
+            <div class="field">
+              <label class="field-label" for="plan-from-month">From month</label
+              ><input
+                type="month"
+                class="input"
+                id="plan-from-month"
+                name="fromMonth"
+                [(ngModel)]="draft.fromMonth"
+              />
+            </div>
+            <div class="field">
+              <label class="field-label" for="plan-to-month">Through month</label
+              ><input
+                type="month"
+                class="input"
+                id="plan-to-month"
+                name="toMonth"
+                [(ngModel)]="draft.toMonth"
+              />
+            </div>
+          </div>
+        }
+        @if (draft.precision === 'SEASON' || draft.precision === 'YEAR') {
+          <div class="form-grid">
+            @if (draft.precision === 'SEASON') {
+              <div class="field">
+                <label class="field-label" for="plan-season">Season</label
+                ><select class="input" id="plan-season" name="season" [(ngModel)]="draft.season">
+                  <option value="SPRING">Spring</option>
+                  <option value="SUMMER">Summer</option>
+                  <option value="AUTUMN">Autumn</option>
+                  <option value="WINTER">Winter</option>
+                </select>
+              </div>
+            }
+            <div class="field">
+              <label class="field-label" for="plan-year">{{
+                draft.precision === 'SEASON' ? 'Starting year' : 'Year'
+              }}</label
+              ><input
+                class="input"
+                id="plan-year"
+                name="year"
+                inputmode="numeric"
+                maxlength="4"
+                [(ngModel)]="draft.year"
+                placeholder="2027"
+              />
+            </div>
+          </div>
+        }
+        @if (error('period')) {
+          <p class="field-error" role="alert">{{ error('period') }}</p>
+        }
+        <p class="field-hint">
+          This is your choice. Regional guidance can help you compare windows after saving.
+        </p>
+      </fieldset>
+    </details>
+    <details class="planning-form-fold" [open]="!!draft.budget || !!suggestedNote()">
+      <summary>Budget &amp; notes <span>Estimates, not spending</span></summary>
+      <fieldset
+        class="form-section"
+        [disabled]="saving()"
+        style="border: 0; padding: 16px 0 0; margin: 0"
+      >
+        <div class="form-grid">
+          <div class="field">
+            <label class="field-label" for="plan-budget">Budget estimate</label
+            ><input
+              class="input"
+              id="plan-budget"
+              name="budget"
+              inputmode="decimal"
+              [(ngModel)]="draft.budget"
+              (ngModelChange)="changed()"
+              placeholder="Unknown"
+            />
+            @if (error('budget')) {
+              <p class="field-error">{{ error('budget') }}</p>
+            }
+          </div>
+          <div class="field">
+            <label class="field-label" for="plan-currency">Currency</label
+            ><input
+              class="input"
+              id="plan-currency"
+              name="currency"
+              maxlength="3"
+              [(ngModel)]="draft.currency"
+            />
+            @if (error('currency')) {
+              <p class="field-error">{{ error('currency') }}</p>
+            }
+          </div>
+        </div>
+        <div class="field">
+          <label class="field-label" for="plan-notes">Notes</label
+          ><textarea
+            class="input"
+            rows="3"
+            id="plan-notes"
+            name="notes"
+            [(ngModel)]="draft.notes"
+            maxlength="20000"
+            placeholder="Space, varieties, a nursery to visit…"
+          ></textarea>
+        </div>
+      </fieldset>
+    </details>
+    @if (plan()) {
+      <details class="planning-options">
+        <summary>Plan options</summary>
+        <p>Cancel this plan while keeping its history. You can restore it later.</p>
+        <button type="button" class="btn btn-ghost" [disabled]="saving()" (click)="cancelPlan()">
+          Cancel this plan
+        </button>
+      </details>
+    }
+    <div class="form-actions">
+      <button type="button" class="btn" [disabled]="saving()" (click)="entry.requestClose()">
+        Cancel</button
+      ><button class="btn btn-primary" type="submit" [disabled]="saving()">
+        {{
+          saving()
+            ? 'Saving…'
+            : plan()
+              ? 'Save changes'
+              : draft.state === 'IDEA'
+                ? 'Save idea'
+                : 'Save plan'
+        }}
+      </button>
+    </div>
+  </form>
+</ui-entry-dialog>

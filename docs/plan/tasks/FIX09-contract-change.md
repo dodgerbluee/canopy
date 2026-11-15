@@ -1,0 +1,7 @@
+# FIX09 — Additive rain review contract
+
+Status: adopted for the user-requested rain-proposal fix; original area-rain and watering semantics remain unchanged.
+
+Add a bounded rainReview field to TodayOverview with configuration/fetch freshness status and at most three recent workspace-local days of potential rain. Estimates use elapsed hourly rain plus showers from Open-Meteo, not the forecast daily total. They remain explicitly model estimates awaiting user confirmation. Coordinates come only from the existing, user-entered workspace coordinates; no geolocation or timezone-derived location. A one-hour background job persists checks and immutable response decisions scoped to the exact coordinates/timezone. Changing/removing coordinates makes prior-context prompts inaccessible and fences late results.
+
+RecordRainInput gains an optional rainReviewId; review-based recording locks the review and creates or returns a single existing area-rain record in the same mutation transaction. Existing manual rainfall for that workspace/day resolves the review without another record. New dismissRainReview mutation persists an explicit rejection. Neither path records a WATER activity, estimates watering sufficiency, or completes a care occurrence. Existing manual RecordRain/VoidRain clients stay compatible. Rain review cache/decisions are included in operator backup/restore; user-confirmed events remain in the existing rain export.

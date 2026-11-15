@@ -68,7 +68,7 @@ func (m mutationResolver) RecordRain(ctx context.Context, in gql.RecordRainInput
 	if err != nil {
 		return nil, err
 	}
-	v, ps, err := m.r.Journal.RecordRain(ctx, jActor(p), journal.RainInput{Day: string(in.Day), AmountMm: decPtr(in.AmountMm), Note: in.Note}, c)
+	v, ps, err := m.r.Journal.RecordRain(ctx, jActor(p), journal.RainInput{Day: string(in.Day), AmountMm: decPtr(in.AmountMm), Note: in.Note, RainReviewID: in.RainReviewID}, c)
 	if err != nil {
 		return nil, internalError(ctx, err)
 	}
@@ -82,6 +82,25 @@ func (m mutationResolver) RecordRain(ctx context.Context, in gql.RecordRainInput
 	}
 	return out, nil
 }
+func (m mutationResolver) DismissRainReview(ctx context.Context, in gql.DismissRainReviewInput, c *string) (*gql.DismissRainReviewPayload, error) {
+	if err := m.requireJournal(); err != nil {
+		return nil, err
+	}
+	p, err := principal(ctx)
+	if err != nil {
+		return nil, err
+	}
+	id, ps, err := m.r.Journal.DismissRainReview(ctx, jActor(p), in.ID, c)
+	if err != nil {
+		return nil, internalError(ctx, err)
+	}
+	out := &gql.DismissRainReviewPayload{Problems: mapJournalProblems(ps), ClientMutationID: c}
+	if len(ps) == 0 {
+		out.DismissedID = &id
+	}
+	return out, nil
+}
+
 func (m mutationResolver) VoidRain(ctx context.Context, in gql.VoidRainInput, c *string) (*gql.VoidRainPayload, error) {
 	if err := m.requireJournal(); err != nil {
 		return nil, err

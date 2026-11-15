@@ -11,58 +11,18 @@ import (
 	"github.com/riverqueue/river"
 
 	dbgen "canopy/server/db/generated"
+	"canopy/server/internal/collection/commands"
 	"canopy/server/internal/media"
 	"canopy/server/internal/money"
 	"canopy/server/internal/portability"
 	"canopy/server/internal/purchases"
 )
 
-// ContextInput mirrors PlantContextInput from the contract.
-type ContextInput struct {
-	EffectiveFrom   *time.Time
-	LocationID      *string
-	Placement       string // CONTAINER | GROUND
-	PotVolumeLiters *pgtype.Numeric
-	MediumNote      *string
-	LightNote       *string
-}
-
-// AcquisitionInput mirrors AcquisitionInput from the contract.
-type AcquisitionInput struct {
-	Seller       *string
-	AcquiredOn   *time.Time
-	PricingState string // UNKNOWN | KNOWN
-}
-
-// InitialPurchaseInput mirrors InitialPurchaseInput with amounts already
-// parsed to minor ints by the transport. When set, createPlant atomically
-// creates a single-line purchase fully allocated to the new plant and
-// prices the acquisition KNOWN against it.
-type InitialPurchaseInput struct {
-	Currency    string
-	Total       int64
-	Tax         int64
-	Shipping    int64
-	Seller      *string
-	PurchasedOn *time.Time
-}
-
-// CreatePlantInput mirrors CreatePlantInput from the contract.
-type CreatePlantInput struct {
-	Name              string
-	ScientificName    *string
-	Cultivar          *string
-	Rootstock         *string
-	Type              string
-	Count             *int32
-	Category          string
-	PlantedOn         *time.Time
-	EstimatedAgeYears *pgtype.Numeric
-	TagIDs            []string
-	InitialContext    *ContextInput
-	Acquisition       *AcquisitionInput
-	InitialPurchase   *InitialPurchaseInput
-}
+// Shared command values are also used by atomic garden-planning transactions.
+type ContextInput = commands.ContextInput
+type AcquisitionInput = commands.AcquisitionInput
+type InitialPurchaseInput = commands.InitialPurchaseInput
+type CreatePlantInput = commands.CreatePlantInput
 
 // UpdatePlantInput mirrors UpdatePlantInput. acquiredOn is NOT editable:
 // it is the acquisition projection.
@@ -102,184 +62,196 @@ type PurgeResult struct {
 // CreatePlant inserts plant + optional context/tags/acquisition(unknown)
 // atomically. Unknowns stay unknown: nulls are stored as nulls.
 func (s *Service) CreatePlant(ctx context.Context, a Actor, in CreatePlantInput, cmid *string) (PlantResult, []Problem, error) {
-	return mutate[PlantResult](s, ctx, a, "createPlant", cmid, in,
-		func(ctx context.Context, q *dbgen.Queries) (PlantResult, []Problem) {
-			var problems []Problem
-			name := strings.TrimSpace(in.Name)
-			if name == "" || len(name) > 160 {
-				problems = append(problems, problem(CodeValidation, "input.name", "name must be 1-160 characters"))
-			}
-			if in.Count != nil && *in.Count <= 0 {
-				problems = append(problems, problem(CodeValidation, "input.count", "count must be positive when known"))
-			}
-			if in.EstimatedAgeYears != nil && numericSign(in.EstimatedAgeYears) < 0 {
-				problems = append(problems, problem(CodeValidation, "input.estimatedAgeYears", "estimatedAgeYears must not be negative"))
-			}
-			if in.InitialPurchase != nil {
-				if in.Acquisition == nil {
-					problems = append(problems, problem(CodeValidation, "input.initialPurchase",
-						"initialPurchase requires an acquisition record"))
-				} else if in.Acquisition.PricingState != "KNOWN" {
-					problems = append(problems, problem(CodeValidation, "input.acquisition.pricingState",
-						"initialPurchase requires pricingState KNOWN"))
-				}
-			} else if in.Acquisition != nil && in.Acquisition.PricingState == "KNOWN" {
-				problems = append(problems, problem(CodeValidation, "input.acquisition.pricingState",
-					"KNOWN pricing requires initialPurchase"))
-			}
-			tagIDs, p := parseTagIDs(ctx, q, a, in.TagIDs, "input.tagIds")
-			if p != nil {
-				problems = append(problems, *p)
-			}
-			var ctxProblems []Problem
-			if in.InitialContext != nil {
-				ctxProblems = validateContext(ctx, q, a, *in.InitialContext)
-				problems = append(problems, ctxProblems...)
-			}
-			if len(problems) > 0 {
-				return PlantResult{}, problems
-			}
+	return mutate[PlantResult](s, ctx, a, "createPlant", cmid, in, func(ctx context.Context, q *dbgen.Queries) (PlantResult, []Problem) {
+		return s.CreatePlantInTransaction(ctx, q, a, in)
+	})
+}
 
-			acquiredOn := pgtype.Date{}
-			if in.Acquisition != nil && in.Acquisition.AcquiredOn != nil {
-				acquiredOn = pgtype.Date{Time: *in.Acquisition.AcquiredOn, Valid: true}
+// CreatePlantInTransaction applies the existing collection rules inside the caller's
+// transaction. The caller owns authorization, receipts, commit and rollback;
+// every nonempty problem result must roll back the entire transaction.
+func (s *Service) CreatePlantInTransaction(ctx context.Context, q *dbgen.Queries, a Actor, in CreatePlantInput) (PlantResult, []Problem) {
+	var problems []Problem
+	name := strings.TrimSpace(in.Name)
+	if name == "" || len(name) > 160 {
+		problems = append(problems, problem(CodeValidation, "input.name", "name must be 1-160 characters"))
+	}
+	if in.Count != nil && *in.Count <= 0 {
+		problems = append(problems, problem(CodeValidation, "input.count", "count must be positive when known"))
+	}
+	if in.EstimatedAgeYears != nil && numericSign(in.EstimatedAgeYears) < 0 {
+		problems = append(problems, problem(CodeValidation, "input.estimatedAgeYears", "estimatedAgeYears must not be negative"))
+	}
+	if in.InitialPurchase != nil {
+		if in.Acquisition == nil {
+			problems = append(problems, problem(CodeValidation, "input.initialPurchase",
+				"initialPurchase requires an acquisition record"))
+		} else if in.Acquisition.PricingState != "KNOWN" {
+			problems = append(problems, problem(CodeValidation, "input.acquisition.pricingState",
+				"initialPurchase requires pricingState KNOWN"))
+		}
+	} else if in.Acquisition != nil && in.Acquisition.PricingState == "KNOWN" {
+		problems = append(problems, problem(CodeValidation, "input.acquisition.pricingState",
+			"KNOWN pricing requires initialPurchase"))
+	}
+	tagIDs, p := parseTagIDs(ctx, q, a, in.TagIDs, "input.tagIds")
+	if p != nil {
+		problems = append(problems, *p)
+	}
+	var ctxProblems []Problem
+	if in.InitialContext != nil {
+		ctxProblems = validateContext(ctx, q, a, *in.InitialContext)
+		problems = append(problems, ctxProblems...)
+	}
+	if len(problems) > 0 {
+		return PlantResult{}, problems
+	}
+
+	acquiredOn := pgtype.Date{}
+	if in.Acquisition != nil && in.Acquisition.AcquiredOn != nil {
+		acquiredOn = pgtype.Date{Time: *in.Acquisition.AcquiredOn, Valid: true}
+	}
+	plant, err := q.InsertPlant(ctx, dbgen.InsertPlantParams{
+		ID:                s.uuid.New(),
+		WorkspaceID:       a.WorkspaceID,
+		Name:              name,
+		ScientificName:    textPtr(in.ScientificName),
+		Cultivar:          textPtr(in.Cultivar),
+		Rootstock:         textPtr(in.Rootstock),
+		Type:              dbgen.PlantType(in.Type),
+		Count:             int4Ptr(in.Count),
+		Category:          dbgen.PlantCategory(in.Category),
+		AcquiredOn:        acquiredOn,
+		PlantedOn:         datePtr(in.PlantedOn),
+		EstimatedAgeYears: in.EstimatedAgeYears,
+	})
+	if err != nil {
+		s.Log.Error("createPlant insert", "err", err)
+		return PlantResult{}, []Problem{problem(CodeValidation, "input", "plant could not be stored")}
+	}
+	if in.InitialContext != nil {
+		if _, err := s.insertContext(ctx, q, a, plant.ID, *in.InitialContext); err != nil {
+			s.Log.Error("createPlant context", "err", err)
+			return PlantResult{}, []Problem{problem(CodeValidation, "input.initialContext", "context could not be stored")}
+		}
+	}
+	for _, tag := range tagIDs {
+		if err := q.InsertPlantTag(ctx, dbgen.InsertPlantTagParams{
+			WorkspaceID: a.WorkspaceID, PlantID: plant.ID, TagID: tag,
+		}); err != nil {
+			s.Log.Error("createPlant tag", "err", err)
+			return PlantResult{}, []Problem{problem(CodeValidation, "input.tagIds", "tag link could not be stored")}
+		}
+	}
+	if in.Acquisition != nil {
+		state := dbgen.PricingStateUNKNOWN
+		var allocID pgtype.UUID
+		if in.InitialPurchase != nil {
+			ip := in.InitialPurchase
+			if ip.Currency == "" || !money.ValidCurrency(ip.Currency) {
+				return PlantResult{}, []Problem{problem(CodeValidation, "input.initialPurchase.currency",
+					"currency must be an ISO-4217 three-letter code")}
 			}
-			plant, err := q.InsertPlant(ctx, dbgen.InsertPlantParams{
-				ID:                s.uuid.New(),
-				WorkspaceID:       a.WorkspaceID,
-				Name:              name,
-				ScientificName:    textPtr(in.ScientificName),
-				Cultivar:          textPtr(in.Cultivar),
-				Rootstock:         textPtr(in.Rootstock),
-				Type:              dbgen.PlantType(in.Type),
-				Count:             int4Ptr(in.Count),
-				Category:          dbgen.PlantCategory(in.Category),
-				AcquiredOn:        acquiredOn,
-				PlantedOn:         datePtr(in.PlantedOn),
-				EstimatedAgeYears: in.EstimatedAgeYears,
+			if ip.Tax+ip.Shipping > ip.Total {
+				return PlantResult{}, []Problem{problem(CodeValidation, "input.initialPurchase.taxMinor",
+					"tax + shipping exceeds total")}
+			}
+			prow, _, alloc, err := purchases.CreateAtomic(ctx, q, a.WorkspaceID, purchases.AtomicSpec{
+				Currency: ip.Currency, Total: ip.Total, Tax: ip.Tax, Shipping: ip.Shipping,
+				Seller: ip.Seller, PurchasedOn: ip.PurchasedOn, LineDesc: name, PlantID: plant.ID,
 			})
 			if err != nil {
-				s.Log.Error("createPlant insert", "err", err)
-				return PlantResult{}, []Problem{problem(CodeValidation, "input", "plant could not be stored")}
+				s.Log.Error("createPlant initialPurchase", "err", err)
+				return PlantResult{}, []Problem{problem(CodeValidation, "input.initialPurchase",
+					"purchase could not be stored")}
 			}
-			if in.InitialContext != nil {
-				if _, err := s.insertContext(ctx, q, a, plant.ID, *in.InitialContext); err != nil {
-					s.Log.Error("createPlant context", "err", err)
-					return PlantResult{}, []Problem{problem(CodeValidation, "input.initialContext", "context could not be stored")}
-				}
-			}
-			for _, tag := range tagIDs {
-				if err := q.InsertPlantTag(ctx, dbgen.InsertPlantTagParams{
-					WorkspaceID: a.WorkspaceID, PlantID: plant.ID, TagID: tag,
-				}); err != nil {
-					s.Log.Error("createPlant tag", "err", err)
-					return PlantResult{}, []Problem{problem(CodeValidation, "input.tagIds", "tag link could not be stored")}
-				}
-			}
-			if in.Acquisition != nil {
-				state := dbgen.PricingStateUNKNOWN
-				var allocID pgtype.UUID
-				if in.InitialPurchase != nil {
-					ip := in.InitialPurchase
-					if ip.Currency == "" || !money.ValidCurrency(ip.Currency) {
-						return PlantResult{}, []Problem{problem(CodeValidation, "input.initialPurchase.currency",
-							"currency must be an ISO-4217 three-letter code")}
-					}
-					if ip.Tax+ip.Shipping > ip.Total {
-						return PlantResult{}, []Problem{problem(CodeValidation, "input.initialPurchase.taxMinor",
-							"tax + shipping exceeds total")}
-					}
-					prow, _, alloc, err := purchases.CreateAtomic(ctx, q, a.WorkspaceID, purchases.AtomicSpec{
-						Currency: ip.Currency, Total: ip.Total, Tax: ip.Tax, Shipping: ip.Shipping,
-						Seller: ip.Seller, PurchasedOn: ip.PurchasedOn, LineDesc: name, PlantID: plant.ID,
-					})
-					if err != nil {
-						s.Log.Error("createPlant initialPurchase", "err", err)
-						return PlantResult{}, []Problem{problem(CodeValidation, "input.initialPurchase",
-							"purchase could not be stored")}
-					}
-					allocID = alloc.ID
-					state = dbgen.PricingStateKNOWN
-					if err := s.audit(ctx, q, a, "createPlant.initialPurchase", "purchase", prow.ID, prow.Revision, nil); err != nil {
-						return PlantResult{}, []Problem{problem(CodeValidation, "", "audit write failed")}
-					}
-				}
-				if _, err := q.InsertAcquisition(ctx, dbgen.InsertAcquisitionParams{
-					ID:                          s.uuid.New(),
-					WorkspaceID:                 a.WorkspaceID,
-					PlantID:                     plant.ID,
-					Seller:                      textPtr(in.Acquisition.Seller),
-					AcquiredOn:                  acquiredOn,
-					PricingState:                state,
-					InitialPurchaseAllocationID: allocID,
-				}); err != nil {
-					s.Log.Error("createPlant acquisition", "err", err)
-					return PlantResult{}, []Problem{problem(CodeValidation, "input.acquisition", "acquisition could not be stored")}
-				}
-			}
-			if err := s.audit(ctx, q, a, "createPlant", "plant", plant.ID, plant.Revision, nil); err != nil {
+			allocID = alloc.ID
+			state = dbgen.PricingStateKNOWN
+			if err := s.audit(ctx, q, a, "createPlant.initialPurchase", "purchase", prow.ID, prow.Revision, nil); err != nil {
 				return PlantResult{}, []Problem{problem(CodeValidation, "", "audit write failed")}
 			}
-			return PlantResult{ID: uuidString(plant.ID), Revision: plant.Revision}, nil
-		})
+		}
+		if _, err := q.InsertAcquisition(ctx, dbgen.InsertAcquisitionParams{
+			ID:                          s.uuid.New(),
+			WorkspaceID:                 a.WorkspaceID,
+			PlantID:                     plant.ID,
+			Seller:                      textPtr(in.Acquisition.Seller),
+			AcquiredOn:                  acquiredOn,
+			PricingState:                state,
+			InitialPurchaseAllocationID: allocID,
+		}); err != nil {
+			s.Log.Error("createPlant acquisition", "err", err)
+			return PlantResult{}, []Problem{problem(CodeValidation, "input.acquisition", "acquisition could not be stored")}
+		}
+	}
+	if err := s.audit(ctx, q, a, "createPlant", "plant", plant.ID, plant.Revision, nil); err != nil {
+		return PlantResult{}, []Problem{problem(CodeValidation, "", "audit write failed")}
+	}
+	return PlantResult{ID: uuidString(plant.ID), Revision: plant.Revision}, nil
 }
 
 // UpdatePlant applies a guarded revision bump; stale writes answer CONFLICT
 // with the current revision and never a partial write.
 func (s *Service) UpdatePlant(ctx context.Context, a Actor, in UpdatePlantInput, cmid *string) (PlantResult, []Problem, error) {
-	return mutate[PlantResult](s, ctx, a, "updatePlant", cmid, in,
-		func(ctx context.Context, q *dbgen.Queries) (PlantResult, []Problem) {
-			id, ok := parseUUID(in.ID)
-			if !ok {
-				return PlantResult{}, []Problem{problem(CodeValidation, "input.id", "malformed id")}
-			}
-			plant, err := q.GetPlant(ctx, dbgen.GetPlantParams{ID: id, WorkspaceID: a.WorkspaceID})
-			if err != nil {
-				return PlantResult{}, notFound("input.id", "plant not found")
-			}
-			var problems []Problem
-			if in.Name != nil {
-				name := strings.TrimSpace(*in.Name)
-				if name == "" || len(name) > 160 {
-					problems = append(problems, problem(CodeValidation, "input.name", "name must be 1-160 characters"))
-				} else {
-					in.Name = &name
-				}
-			}
-			if in.Count != nil && *in.Count <= 0 {
-				problems = append(problems, problem(CodeValidation, "input.count", "count must be positive when known"))
-			}
-			if in.EstimatedAgeYears != nil && numericSign(in.EstimatedAgeYears) < 0 {
-				problems = append(problems, problem(CodeValidation, "input.estimatedAgeYears", "estimatedAgeYears must not be negative"))
-			}
-			if len(problems) > 0 {
-				return PlantResult{}, problems
-			}
-			params := dbgen.UpdatePlantParams{
-				ID: id, WorkspaceID: a.WorkspaceID, ExpectedRevision: in.ExpectedRevision,
-				Name:              textPtr(in.Name),
-				ScientificName:    textPtr(in.ScientificName),
-				Cultivar:          textPtr(in.Cultivar),
-				Rootstock:         textPtr(in.Rootstock),
-				Count:             int4Ptr(in.Count),
-				PlantedOn:         datePtr(in.PlantedOn),
-				EstimatedAgeYears: in.EstimatedAgeYears,
-			}
-			if in.Type != nil {
-				params.Type = dbgen.NullPlantType{PlantType: dbgen.PlantType(*in.Type), Valid: true}
-			}
-			if in.Category != nil {
-				params.Category = dbgen.NullPlantCategory{PlantCategory: dbgen.PlantCategory(*in.Category), Valid: true}
-			}
-			updated, err := q.UpdatePlant(ctx, params)
-			if err != nil {
-				return PlantResult{}, s.conflictProblem(ctx, q, "plants", id, a.WorkspaceID, err)
-			}
-			if err := s.audit(ctx, q, a, "updatePlant", "plant", id, updated.Revision, plant); err != nil {
-				return PlantResult{}, []Problem{problem(CodeValidation, "", "audit write failed")}
-			}
-			return PlantResult{ID: uuidString(id), Revision: updated.Revision}, nil
-		})
+	return mutate[PlantResult](s, ctx, a, "updatePlant", cmid, in, func(ctx context.Context, q *dbgen.Queries) (PlantResult, []Problem) {
+		return s.UpdatePlantInTransaction(ctx, q, a, in)
+	})
+}
+
+// UpdatePlantInTransaction applies the existing collection rules inside the caller's
+// transaction. The caller owns authorization, receipts, commit and rollback;
+// every nonempty problem result must roll back the entire transaction.
+func (s *Service) UpdatePlantInTransaction(ctx context.Context, q *dbgen.Queries, a Actor, in UpdatePlantInput) (PlantResult, []Problem) {
+	id, ok := parseUUID(in.ID)
+	if !ok {
+		return PlantResult{}, []Problem{problem(CodeValidation, "input.id", "malformed id")}
+	}
+	plant, err := q.GetPlant(ctx, dbgen.GetPlantParams{ID: id, WorkspaceID: a.WorkspaceID})
+	if err != nil {
+		return PlantResult{}, notFound("input.id", "plant not found")
+	}
+	var problems []Problem
+	if in.Name != nil {
+		name := strings.TrimSpace(*in.Name)
+		if name == "" || len(name) > 160 {
+			problems = append(problems, problem(CodeValidation, "input.name", "name must be 1-160 characters"))
+		} else {
+			in.Name = &name
+		}
+	}
+	if in.Count != nil && *in.Count <= 0 {
+		problems = append(problems, problem(CodeValidation, "input.count", "count must be positive when known"))
+	}
+	if in.EstimatedAgeYears != nil && numericSign(in.EstimatedAgeYears) < 0 {
+		problems = append(problems, problem(CodeValidation, "input.estimatedAgeYears", "estimatedAgeYears must not be negative"))
+	}
+	if len(problems) > 0 {
+		return PlantResult{}, problems
+	}
+	params := dbgen.UpdatePlantParams{
+		ID: id, WorkspaceID: a.WorkspaceID, ExpectedRevision: in.ExpectedRevision,
+		Name:              textPtr(in.Name),
+		ScientificName:    textPtr(in.ScientificName),
+		Cultivar:          textPtr(in.Cultivar),
+		Rootstock:         textPtr(in.Rootstock),
+		Count:             int4Ptr(in.Count),
+		PlantedOn:         datePtr(in.PlantedOn),
+		EstimatedAgeYears: in.EstimatedAgeYears,
+	}
+	if in.Type != nil {
+		params.Type = dbgen.NullPlantType{PlantType: dbgen.PlantType(*in.Type), Valid: true}
+	}
+	if in.Category != nil {
+		params.Category = dbgen.NullPlantCategory{PlantCategory: dbgen.PlantCategory(*in.Category), Valid: true}
+	}
+	updated, err := q.UpdatePlant(ctx, params)
+	if err != nil {
+		return PlantResult{}, s.conflictProblem(ctx, q, "plants", id, a.WorkspaceID, err)
+	}
+	if err := s.audit(ctx, q, a, "updatePlant", "plant", id, updated.Revision, plant); err != nil {
+		return PlantResult{}, []Problem{problem(CodeValidation, "", "audit write failed")}
+	}
+	return PlantResult{ID: uuidString(id), Revision: updated.Revision}, nil
 }
 
 // ArchivePlant marks ACTIVE/DEAD plants ARCHIVED; read history (contexts,
@@ -567,49 +539,54 @@ type SetPlantTagsInput struct {
 // SetPlantContext appends a context entry (history, never overwrite) and
 // bumps the plant revision under one guard.
 func (s *Service) SetPlantContext(ctx context.Context, a Actor, in SetPlantContextInput, cmid *string) (ContextResult, []Problem, error) {
-	res, problems, err := mutate[ContextResult](s, ctx, a, "setPlantContext", cmid, in,
-		func(ctx context.Context, q *dbgen.Queries) (ContextResult, []Problem) {
-			pid, ok := parseUUID(in.PlantID)
-			if !ok {
-				return ContextResult{}, []Problem{problem(CodeValidation, "input.plantId", "malformed id")}
-			}
-			if _, err := q.GetPlant(ctx, dbgen.GetPlantParams{ID: pid, WorkspaceID: a.WorkspaceID}); err != nil {
-				return ContextResult{}, notFound("input.plantId", "plant not found")
-			}
-			if in.Context == nil {
-				return ContextResult{}, []Problem{problem(CodeValidation, "input.context", "context is required")}
-			}
-			if problems := validateContext(ctx, q, a, *in.Context); len(problems) > 0 {
-				return ContextResult{}, problems
-			}
-			plant, err := q.BumpPlantRevision(ctx, dbgen.BumpPlantRevisionParams{
-				ID: pid, WorkspaceID: a.WorkspaceID, ExpectedRevision: in.ExpectedRevision,
-			})
-			if err != nil {
-				return ContextResult{}, s.conflictProblem(ctx, q, "plants", pid, a.WorkspaceID, err)
-			}
-			row, err := s.insertContext(ctx, q, a, pid, *in.Context)
-			if err != nil {
-				return ContextResult{}, []Problem{problem(CodeValidation, "input.context", "context could not be stored")}
-			}
-			if err := s.audit(ctx, q, a, "setPlantContext", "plant", pid, plant.Revision, nil); err != nil {
-				return ContextResult{}, []Problem{problem(CodeValidation, "", "audit write failed")}
-			}
-			// Care invalidation rides this transaction (T24): future advice
-			// is cancelled and regenerated against the new context, or the
-			// context edit rolls back with it.
-			if herr := s.Hooks.PlantContextChanged(ctx, q, a.WorkspaceID, pid, row.EffectiveFrom.Time); herr != nil {
-				if s.Log != nil {
-					s.Log.Error("care hook: PlantContextChanged", "plant", uuidString(pid), "err", herr)
-				}
-				return ContextResult{}, []Problem{problem(CodeValidation, "", "care integration failed")}
-			}
-			return ContextResult{
-				PlantID: uuidString(pid), ContextID: uuidString(row.ID),
-				Revision: plant.Revision, Effective: row.EffectiveFrom.Time,
-			}, nil
-		})
-	return res, problems, err
+	return mutate[ContextResult](s, ctx, a, "setPlantContext", cmid, in, func(ctx context.Context, q *dbgen.Queries) (ContextResult, []Problem) {
+		return s.SetPlantContextInTransaction(ctx, q, a, in)
+	})
+}
+
+// SetPlantContextInTransaction applies the existing collection rules inside the caller's
+// transaction. The caller owns authorization, receipts, commit and rollback;
+// every nonempty problem result must roll back the entire transaction.
+func (s *Service) SetPlantContextInTransaction(ctx context.Context, q *dbgen.Queries, a Actor, in SetPlantContextInput) (ContextResult, []Problem) {
+	pid, ok := parseUUID(in.PlantID)
+	if !ok {
+		return ContextResult{}, []Problem{problem(CodeValidation, "input.plantId", "malformed id")}
+	}
+	if _, err := q.GetPlant(ctx, dbgen.GetPlantParams{ID: pid, WorkspaceID: a.WorkspaceID}); err != nil {
+		return ContextResult{}, notFound("input.plantId", "plant not found")
+	}
+	if in.Context == nil {
+		return ContextResult{}, []Problem{problem(CodeValidation, "input.context", "context is required")}
+	}
+	if problems := validateContext(ctx, q, a, *in.Context); len(problems) > 0 {
+		return ContextResult{}, problems
+	}
+	plant, err := q.BumpPlantRevision(ctx, dbgen.BumpPlantRevisionParams{
+		ID: pid, WorkspaceID: a.WorkspaceID, ExpectedRevision: in.ExpectedRevision,
+	})
+	if err != nil {
+		return ContextResult{}, s.conflictProblem(ctx, q, "plants", pid, a.WorkspaceID, err)
+	}
+	row, err := s.insertContext(ctx, q, a, pid, *in.Context)
+	if err != nil {
+		return ContextResult{}, []Problem{problem(CodeValidation, "input.context", "context could not be stored")}
+	}
+	if err := s.audit(ctx, q, a, "setPlantContext", "plant", pid, plant.Revision, nil); err != nil {
+		return ContextResult{}, []Problem{problem(CodeValidation, "", "audit write failed")}
+	}
+	// Care invalidation rides this transaction (T24): future advice
+	// is cancelled and regenerated against the new context, or the
+	// context edit rolls back with it.
+	if herr := s.Hooks.PlantContextChanged(ctx, q, a.WorkspaceID, pid, row.EffectiveFrom.Time); herr != nil {
+		if s.Log != nil {
+			s.Log.Error("care hook: PlantContextChanged", "plant", uuidString(pid), "err", herr)
+		}
+		return ContextResult{}, []Problem{problem(CodeValidation, "", "care integration failed")}
+	}
+	return ContextResult{
+		PlantID: uuidString(pid), ContextID: uuidString(row.ID),
+		Revision: plant.Revision, Effective: row.EffectiveFrom.Time,
+	}, nil
 }
 
 // SetPlantContextInput is the domain mirror of the contract input.

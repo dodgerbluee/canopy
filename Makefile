@@ -56,10 +56,10 @@ lint: contracts/node_modules/.installed web/node_modules/.installed
 test-unit: contracts/node_modules/.installed web/node_modules/.installed
 	$(NODE) sh -c "cd /w/contracts && node validate.mjs"
 	$(NODE) sh -c "cd /w/web && npx ng test --watch=false"
-	cd server && go test ./...
+	cd server && go test -p 2 ./...
 
 test-integration: media-image
-	cd server && PGTEST_DSN="$(PGTEST_DSN)" go test ./db/ ./internal/... -count=1
+	cd server && PGTEST_DSN="$(PGTEST_DSN)" go test -p 2 ./db/ ./internal/... -count=1
 
 # T14 codec sandbox runtime image: pinned digest, decode-only tooling.
 MEDIA_IMAGE := canopy-media:r2

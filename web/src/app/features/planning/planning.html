@@ -1,0 +1,854 @@
+<div class="planning-page">
+  <header class="planning-heading">
+    <div>
+      <p class="eyebrow">MAKE ROOM FOR WHAT’S NEXT</p>
+      <h1>Your next <em>growing season.</em></h1>
+      <p class="planning-intro">A little space for ideas. A clear path to getting them growing.</p>
+    </div>
+    <div class="planning-heading-actions">
+      <button
+        class="btn btn-ghost"
+        type="button"
+        [disabled]="!board()?.items?.length"
+        (click)="askPlan()"
+      >
+        <ui-icon name="sparkles" [size]="17" />Help me plan
+      </button>
+      <button class="btn btn-primary" type="button" [disabled]="!context()" (click)="create()">
+        <ui-icon name="plus" [size]="18" />{{
+          view() === 'wishlist' ? 'Add an idea' : 'Plan a planting'
+        }}
+      </button>
+    </div>
+  </header>
+  <section class="planning-summary" aria-label="Planning at a glance">
+    <div>
+      <ui-icon name="sprout" [size]="21" /><span
+        ><strong>{{ board()?.items?.length ?? '—' }}</strong
+        ><small>{{ view() === 'wishlist' ? 'ideas' : 'plans' }} in this view</small></span
+      >
+    </div>
+    <div>
+      <ui-icon name="calendar" [size]="21" /><span
+        ><strong>{{ rangeLabel() }}</strong
+        ><small>A twelve-month perspective</small></span
+      >
+    </div>
+    <div>
+      @if (nextAction(); as next) {
+        <ui-icon name="check" [size]="21" /><span
+          ><strong>{{ next.action.title }}</strong
+          ><small>{{ dateLabel(next.action.scheduledOn) }} · {{ next.plan.name }}</small></span
+        >
+      } @else {
+        <ui-icon name="leaf" [size]="21" /><span
+          ><strong>At your pace</strong><small>Ideas can stay without a date.</small></span
+        >
+      }
+    </div>
+  </section>
+  <div class="planning-toolbar">
+    <ui-tabs [selectedValue]="'planning-' + view()" (selectionChange)="selectView($event)"
+      ><button type="button" uiTab value="planning-planned">Planned</button
+      ><button type="button" uiTab value="planning-wishlist">Wishlist</button></ui-tabs
+    >
+    <div class="planning-controls">
+      <div class="planning-range">
+        <button
+          type="button"
+          class="icon-button"
+          aria-label="Previous twelve months"
+          [disabled]="from() <= '0001-01'"
+          (click)="move(-12)"
+        >
+          <ui-icon name="back" [size]="17" /></button
+        ><button
+          type="button"
+          class="range-label"
+          (click)="openRange()"
+          [attr.aria-label]="'Choose planning horizon: ' + rangeLabel()"
+        >
+          {{ rangeLabel() }}</button
+        ><button
+          type="button"
+          class="icon-button"
+          aria-label="Next twelve months"
+          [disabled]="from() >= '9998-01'"
+          (click)="move(12)"
+        >
+          <ui-icon name="arrow" [size]="17" />
+        </button>
+      </div>
+      <button type="button" class="btn filter-button" (click)="openFilters()">
+        <ui-icon name="filter" [size]="17" />Filters
+        @if (filterCount()) {
+          <span class="filter-count">{{ filterCount() }}</span>
+        }
+      </button>
+    </div>
+  </div>
+  @if (filterCount()) {
+    <div class="planning-filter-note">
+      <span
+        >{{ query() ? 'Matching “' + query() + '” · ' : ''
+        }}{{
+          history() === 'current'
+            ? 'Filtered view'
+            : history() === 'all'
+              ? 'All plan states'
+              : history() === 'cancelled'
+                ? 'Cancelled plans'
+                : 'Completed plans'
+        }}{{ method() ? ' · ' + methodLabels[method()] : '' }}</span
+      ><button type="button" (click)="clearFilters()">Clear filters</button>
+    </div>
+  }
+  @if (error()) {
+    <div class="planning-error" role="alert">
+      <strong>Planning could not load</strong>
+      <p>{{ error() }}</p>
+      <button class="btn" type="button" (click)="context() ? load() : bootstrap()">
+        Retry loading
+      </button>
+    </div>
+  }
+  <section
+    [id]="'tabpanel-planning-' + view()"
+    role="tabpanel"
+    [attr.aria-labelledby]="'tab-planning-' + view()"
+    [attr.aria-busy]="loading()"
+  >
+    @if (loading() && !board()) {
+      <div class="planning-loading" role="status">
+        <span class="loading-orbit"><ui-icon name="sprout" [size]="28" /></span>
+        <p>Making space for your plans…</p>
+      </div>
+    }
+    @if (board(); as b) {
+      @if (b.items.length) {
+        <div class="planning-legend">
+          <span><i class="chosen-key"></i>Your chosen period</span
+          ><span><i class="source-key"></i>Regional source window</span
+          ><small>Windows guide decisions; they don’t guarantee growth or harvest.</small>
+        </div>
+        <div class="planning-board" [class.wishlist-board]="view() === 'wishlist'">
+          @if (view() === 'planned') {
+            <div class="planning-axis" aria-hidden="true">
+              <span>YOUR FUTURE GARDEN</span>
+              <div>
+                @for (month of months(); track month.value) {
+                  <span [class.current-month]="month.value === b.today.slice(0, 7)"
+                    >{{ month.label }}
+                    @if (month.value.endsWith('-01') || $first) {
+                      <small>{{ month.year }}</small>
+                    }
+                  </span>
+                }
+              </div>
+              <span></span>
+            </div>
+          }
+          @for (item of rows(); track item.row.plan.id) {
+            <article class="planning-row">
+              <div class="planning-identity">
+                <button class="plan-identity" type="button" (click)="openDetail(item.row.plan)">
+                  <span class="plan-avatar"
+                    ><ui-icon
+                      [name]="item.row.plan.method === 'START_INDOORS' ? 'sprout' : 'leaf'"
+                      [size]="23" /></span
+                  ><span
+                    ><strong>{{ item.row.plan.name }}</strong
+                    ><small>{{
+                      item.row.plan.cultivar ||
+                        (item.row.plan.method
+                          ? methodLabels[item.row.plan.method]
+                          : 'An idea to grow')
+                    }}</small></span
+                  >
+                </button>
+                <div class="plan-subline">
+                  <span [class]="'plan-state state-' + item.row.plan.state">{{
+                    item.row.plan.state === 'IDEA'
+                      ? 'Wishlist'
+                      : item.row.plan.state === 'IN_PROGRESS'
+                        ? 'In progress'
+                        : item.row.plan.state === 'CANCELLED'
+                          ? 'Cancelled'
+                          : item.row.plan.state === 'COMPLETED'
+                            ? 'Complete'
+                            : 'Planned'
+                  }}</span>
+                  @if (item.row.plan.desiredQuantity) {
+                    <span
+                      >{{ item.row.plan.desiredQuantity }}
+                      {{ item.row.plan.desiredQuantity === 1 ? 'plant' : 'plants' }}</span
+                    >
+                  }
+                </div>
+                <button
+                  type="button"
+                  class="plan-guidance-link"
+                  (click)="openDetail(item.row.plan, 'planning-windows')"
+                >
+                  {{
+                    item.row.schedule.guidanceCurrent
+                      ? 'Explore source windows'
+                      : stateLabels[item.row.schedule.guidanceState]
+                  }}
+                  @if (item.more || item.row.schedule.pageInfo.hasNextPage) {
+                    · More windows
+                  }
+                </button>
+              </div>
+              <div class="planning-track" [style.height.px]="trackHeight(item.row)">
+                <div class="planning-grid" aria-hidden="true">
+                  @for (month of months(); track month.value) {
+                    <span [class.current-month]="month.value === b.today.slice(0, 7)"></span>
+                  }
+                </div>
+                @if (item.row.schedule.targetDisplayMonths) {
+                  <button
+                    type="button"
+                    class="chosen-band"
+                    [style.left]="targetStyle(item.row).left"
+                    [style.width]="targetStyle(item.row).width"
+                    (click)="openDetail(item.row.plan)"
+                    [attr.aria-label]="
+                      item.row.plan.name + ': chosen ' + periodLabel(item.row.plan.targetPeriod)
+                    "
+                  >
+                    <ui-icon name="check" [size]="15" /><span>{{
+                      periodLabel(item.row.plan.targetPeriod)
+                    }}</span>
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="unscheduled-band"
+                    (click)="openDetail(item.row.plan)"
+                  >
+                    {{
+                      item.row.plan.targetPeriod
+                        ? 'Chosen period outside this view'
+                        : 'Choose your own timing'
+                    }}<ui-icon name="arrow-up-right" [size]="14" />
+                  </button>
+                }
+                @for (band of item.bands; track band.window.id) {
+                  <button
+                    type="button"
+                    [class]="'source-band phase-' + band.window.phase"
+                    [class.narrow]="band.width === 1"
+                    [style.left.%]="(band.start / 12) * 100"
+                    [style.width.%]="(band.width / 12) * 100"
+                    [style.top.px]="58 + band.lane * 48"
+                    (click)="
+                      band.count > 1
+                        ? openDetail(item.row.plan, 'planning-windows')
+                        : inspect(item.row, band.window)
+                    "
+                    [attr.aria-label]="
+                      item.row.plan.name +
+                      ': ' +
+                      (band.window.firstHarvestUnknown
+                        ? 'Typical harvest'
+                        : phaseLabels[band.window.phase]) +
+                      ', ' +
+                      periodLabel(band.window.period)
+                    "
+                    [title]="
+                      band.window.label +
+                      ' · ' +
+                      periodLabel(band.window.period) +
+                      (band.count > 1 ? ' · ' + band.count + ' supporting notes' : '')
+                    "
+                  >
+                    <ui-icon [name]="phaseIcon(band.window.phase)" [size]="15" /><span>{{
+                      band.window.firstHarvestUnknown
+                        ? 'Typical harvest'
+                        : phaseLabels[band.window.phase]
+                    }}</span>
+                  </button>
+                }
+                @if (!item.bands.length && item.row.schedule.guidanceCurrent) {
+                  <button
+                    type="button"
+                    class="track-context"
+                    (click)="openDetail(item.row.plan, 'planning-windows')"
+                  >
+                    <ui-icon name="clock" [size]="15" />Review the context needed to place these
+                    windows
+                  </button>
+                }
+              </div>
+              <div class="planning-mobile-period">
+                <span>{{ periodLabel(item.row.plan.targetPeriod) }}</span>
+                @if (item.row.plan.intendedLocation) {
+                  <small
+                    ><ui-icon name="location" [size]="14" />{{
+                      item.row.plan.intendedLocation.name
+                    }}</small
+                  >
+                }
+                <button
+                  type="button"
+                  class="btn btn-ghost"
+                  (click)="openDetail(item.row.plan, 'planning-windows')"
+                >
+                  Review windows<ui-icon name="arrow-up-right" [size]="15" />
+                </button>
+              </div>
+              <div class="plan-row-actions">
+                @if (active(item.row.plan)) {
+                  <button
+                    type="button"
+                    class="icon-button"
+                    [attr.aria-label]="'Edit ' + item.row.plan.name"
+                    (click)="edit(item.row.plan)"
+                  >
+                    <ui-icon name="pencil" [size]="16" />
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="icon-button"
+                    [attr.aria-label]="'View ' + item.row.plan.name"
+                    (click)="openDetail(item.row.plan)"
+                  >
+                    <ui-icon name="arrow-up-right" [size]="16" />
+                  </button>
+                }
+              </div>
+            </article>
+          }
+        </div>
+        <footer class="planning-pagination">
+          <span
+            >{{ b.items.length }} {{ b.items.length === 1 ? 'plan' : 'plans' }} in this view</span
+          >
+          <div>
+            @if (after()) {
+              <button class="btn btn-ghost" type="button" (click)="page(null)">First page</button>
+            }
+            @if (b.pageInfo.hasNextPage) {
+              <button class="btn" type="button" (click)="page(b.pageInfo.endCursor)">
+                Next plans<ui-icon name="arrow" [size]="16" />
+              </button>
+            }
+          </div>
+        </footer>
+      } @else if (!error()) {
+        <div class="planning-empty-state">
+          <span class="empty-garden-mark"><ui-icon name="sprout" [size]="40" /></span>
+          <p class="eyebrow">GOOD THINGS BEGIN WITH AN IDEA</p>
+          <h2>
+            {{
+              filterCount()
+                ? 'A little more room to search.'
+                : view() === 'wishlist'
+                  ? 'What would you love to grow?'
+                  : 'Your next season starts here.'
+            }}
+          </h2>
+          <p>
+            {{
+              filterCount()
+                ? 'No plans match these filters. Try a different search or make room for a new idea.'
+                : 'Keep a name, compare growing windows, then choose your timing. You can fill in the details along the way.'
+            }}
+          </p>
+          <button
+            class="btn btn-primary"
+            type="button"
+            (click)="filterCount() ? clearFilters() : create()"
+          >
+            <ui-icon [name]="filterCount() ? 'filter' : 'plus'" [size]="17" />{{
+              filterCount()
+                ? 'Clear filters'
+                : view() === 'wishlist'
+                  ? 'Keep your first idea'
+                  : 'Plan your first planting'
+            }}
+          </button>
+        </div>
+      }
+    }
+  </section>
+</div>
+
+<ui-entry-dialog
+  #filters
+  [open]="filtersOpen()"
+  title="Find your plans"
+  description="Keep the view focused on what matters next."
+  [dirty]="false"
+  (dismissed)="filtersOpen.set(false)"
+  ><form (ngSubmit)="applyFilters()" class="form-section">
+    <div class="field">
+      <label class="field-label" for="planning-search">Plant, cultivar or scientific name</label
+      ><input
+        class="input"
+        id="planning-search"
+        type="search"
+        name="query"
+        [(ngModel)]="filterDraft.query"
+        maxlength="200"
+        placeholder="Search your plans…"
+      />
+    </div>
+    <div class="form-grid">
+      <div class="field">
+        <label class="field-label" for="planning-method-filter">Starting method</label
+        ><select
+          class="input"
+          id="planning-method-filter"
+          name="method"
+          [(ngModel)]="filterDraft.method"
+        >
+          <option value="">All methods</option>
+          <option value="NURSERY_PLANT">Nursery plants</option>
+          <option value="START_INDOORS">Seeds indoors</option>
+          <option value="DIRECT_SOW">Direct sowing</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="field-label" for="planning-history">Plan history</label
+        ><select
+          class="input"
+          id="planning-history"
+          name="history"
+          [(ngModel)]="filterDraft.history"
+        >
+          <option value="current">Current view</option>
+          <option value="completed">Completed</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="all">All states</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label" for="planning-location-filter">Intended location</label
+      ><select
+        class="input"
+        id="planning-location-filter"
+        name="location"
+        [(ngModel)]="filterDraft.location"
+      >
+        <option value="">All locations</option>
+        @for (location of context()?.locations ?? []; track location.id) {
+          <option [value]="location.id">{{ location.name }}</option>
+        }
+      </select>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="btn" (click)="filters.requestClose()">Cancel</button
+      ><button type="submit" class="btn btn-primary">Apply filters</button>
+    </div>
+  </form></ui-entry-dialog
+>
+<ui-entry-dialog
+  #horizon
+  [open]="rangeOpen()"
+  title="Your planning horizon"
+  description="Choose the first month of a twelve-month view."
+  [dirty]="false"
+  (dismissed)="rangeOpen.set(false)"
+  ><form (ngSubmit)="applyRange()">
+    <div class="field">
+      <label class="field-label" for="planning-from-month">Starting month</label
+      ><input
+        class="input"
+        type="month"
+        id="planning-from-month"
+        name="from"
+        [(ngModel)]="rangeDraft"
+        min="0001-01"
+        max="9999-01"
+      />
+    </div>
+    <div class="form-actions">
+      <button class="btn" type="button" (click)="horizon.requestClose()">Cancel</button
+      ><button class="btn btn-primary" type="submit">Show this horizon</button>
+    </div>
+  </form></ui-entry-dialog
+>
+
+<ui-entry-dialog
+  #detailDialog
+  [open]="detailOpen()"
+  [title]="detail()?.name ?? 'Planting plan'"
+  description="Your intentions, source windows and next steps in one place."
+  size="wide"
+  [dirty]="false"
+  (dismissed)="closeDetail()"
+>
+  <button
+    class="btn btn-ghost planning-detail-back"
+    type="button"
+    (click)="detailDialog.requestClose()"
+  >
+    <ui-icon name="back" [size]="16" />Back to planning
+  </button>
+  @if (detailError()) {
+    <div class="form-error" role="alert">
+      {{ detailError() }}
+      @if (detail()) {
+        <button class="btn" type="button" (click)="fetchDetail(detail()!.id)">
+          Reload this plan
+        </button>
+      }
+    </div>
+  }
+  @if (detailLoading() && !detail()) {
+    <p class="planning-empty" role="status">Gathering this plan…</p>
+  }
+  @if (detail(); as plan) {
+    <div class="planning-modal-heading">
+      <div>
+        <h3>{{ periodLabel(plan.targetPeriod) }}</h3>
+        <p>
+          {{ plan.method ? methodLabels[plan.method] : 'Starting method to choose'
+          }}{{ plan.intendedLocation ? ' · ' + plan.intendedLocation.name : '' }}
+        </p>
+      </div>
+      @if (active(plan)) {
+        <div class="planning-detail-tools">
+          <button
+            class="icon-button"
+            type="button"
+            aria-label="Ask about this plan"
+            (click)="askPlan(plan)"
+          >
+            <ui-icon name="sparkles" [size]="18" />
+          </button>
+          <button
+            class="icon-button"
+            type="button"
+            aria-label="Edit this plan"
+            (click)="edit(plan)"
+          >
+            <ui-icon name="pencil" [size]="18" />
+          </button>
+        </div>
+      }
+    </div>
+    <ui-tabs
+      class="planning-modal-tabs"
+      appearance="sections"
+      [selectedValue]="detailTab()"
+      (selectionChange)="detailTab.set($event)"
+      ><button type="button" uiTab value="planning-overview">The plan</button
+      ><button type="button" uiTab value="planning-windows">Windows</button
+      ><button type="button" uiTab value="planning-actions">Actions</button></ui-tabs
+    >
+    <section
+      role="tabpanel"
+      [id]="'tabpanel-' + detailTab()"
+      [attr.aria-labelledby]="'tab-' + detailTab()"
+    >
+      @if (detailTab() === 'planning-overview') {
+        @if (plan.fulfillment; as link) {
+          <div class="planning-choice">
+            <strong>{{ link.plant ? 'In your garden' : 'Original plant removed' }}</strong>
+            @if (link.plant; as plant) {
+              <a class="btn btn-ghost" [routerLink]="['/plants', plant.id]"
+                >{{ plant.name }} <ui-icon name="arrow" [size]="16" /></a
+              ><small>Ownership is linked. Complete remaining actions separately.</small>
+            } @else {
+              <p>This plan keeps its history. Make a new plan to start again.</p>
+            }
+          </div>
+        } @else if (active(plan)) {
+          <div class="planning-choice">
+            <strong>Ready to start growing?</strong>
+            <p>
+              Add the living plant or group you actually have. Future planting work can stay open.
+            </p>
+            <div>
+              <button class="btn btn-primary" type="button" (click)="openGarden()">
+                <ui-icon name="plus" [size]="16" />Add to garden
+              </button>
+            </div>
+          </div>
+        }
+        <dl class="planning-dl">
+          <dt>Progress</dt>
+          <dd>
+            {{
+              plan.state === 'IDEA'
+                ? 'Wishlist'
+                : plan.state === 'IN_PROGRESS'
+                  ? 'In progress'
+                  : plan.state === 'COMPLETED'
+                    ? 'Complete'
+                    : plan.state === 'CANCELLED'
+                      ? 'Cancelled'
+                      : 'Planned'
+            }}
+          </dd>
+          <dt>Cultivar</dt>
+          <dd>{{ plan.cultivar || 'Not known yet' }}</dd>
+          <dt>Quantity</dt>
+          <dd>{{ plan.desiredQuantity ?? 'Not chosen' }}</dd>
+          <dt>Growing in</dt>
+          <dd>
+            {{
+              plan.intendedPlacement === 'CONTAINER'
+                ? 'A container'
+                : plan.intendedPlacement === 'GROUND'
+                  ? 'The ground'
+                  : 'Not decided'
+            }}
+          </dd>
+          <dt>Budget estimate</dt>
+          <dd>
+            {{
+              plan.budget ? fmtMinor(plan.budget.minorUnits, plan.budget.currency) : 'Not estimated'
+            }}
+          </dd>
+        </dl>
+        @if (plan.notes) {
+          <div class="planning-choice">
+            <strong>Your notes</strong>
+            <p style="white-space: pre-wrap">{{ plan.notes }}</p>
+          </div>
+        }
+        @if (detailSchedule()?.acceptedSchedule; as selected) {
+          <p class="planning-note">
+            You chose this period from regional guidance on
+            {{ dateLabel(selected.confirmedAt.slice(0, 10)) }}. Later research does not change your
+            dates.
+          </p>
+        }
+        <div class="form-actions">
+          @if (plan.state === 'IDEA') {
+            <button type="button" class="btn" (click)="requestLifecycle(plan, 'PLANNED')">
+              Move to planned
+            </button>
+          }
+          @if (plan.state === 'PLANNED') {
+            <button type="button" class="btn" (click)="requestLifecycle(plan, 'IDEA')">
+              Keep in wishlist</button
+            ><button
+              type="button"
+              class="btn btn-primary"
+              (click)="requestLifecycle(plan, 'IN_PROGRESS')"
+            >
+              Start this plan
+            </button>
+          }
+          @if (plan.state === 'IN_PROGRESS' && !hasOpenActions(plan)) {
+            <button type="button" class="btn" (click)="requestLifecycle(plan, 'COMPLETED')">
+              Mark complete
+            </button>
+          }
+          @if (plan.state === 'CANCELLED') {
+            <button
+              type="button"
+              class="btn btn-primary"
+              (click)="requestLifecycle(plan, 'restore')"
+            >
+              Restore plan
+            </button>
+          }
+        </div>
+      }
+      @if (detailTab() === 'planning-windows') {
+        <div class="planning-choice">
+          <strong>{{ stateLabels[detailSchedule()?.guidanceState ?? 'PENDING'] }}</strong>
+          <p>{{ detailSchedule()?.message }}</p>
+          @if (active(plan)) {
+            <button type="button" class="btn" [disabled]="refreshing()" (click)="refreshGuidance()">
+              <ui-icon name="sparkles" [size]="16" />{{
+                refreshing() ? 'Requesting…' : 'Refresh regional guidance'
+              }}
+            </button>
+          }
+          @if (
+            plan.latestGuidance?.state === 'DISABLED' ||
+            plan.latestGuidance?.state === 'NEEDS_LOCATION'
+          ) {
+            <small
+              >Choose a growing region in <a routerLink="/year">Garden year</a> and your garden AI
+              connection in <a routerLink="/settings">Settings</a>. You can also set dates yourself
+              in Edit.</small
+            >
+          }
+        </div>
+        <div class="planning-facts">
+          @for (window of detailSchedule()?.items ?? []; track window.id) {
+            <article class="planning-fact">
+              <h3>
+                <ui-icon [name]="phaseIcon(window.phase)" [size]="17" />
+                {{ phaseLabels[window.phase] }}
+              </h3>
+              <p>{{ window.period ? periodLabel(window.period) : window.message }}</p>
+              @if (window.firstHarvestUnknown) {
+                <p class="planning-note">
+                  Seasonal guidance. First harvest of a new planting is unknown.
+                </p>
+              }
+              <button class="btn" type="button" (click)="choose(window)">
+                {{ window.selectable ? 'Review & choose' : 'View source & conditions'
+                }}<ui-icon name="arrow-up-right" [size]="15" />
+              </button>
+            </article>
+          } @empty {
+            <p class="planning-empty">
+              No supported windows in this horizon yet. Your plan and any dates you chose are kept.
+            </p>
+          }
+        </div>
+        @if (detailSchedule()?.pageInfo?.hasNextPage) {
+          <button class="btn" type="button" [disabled]="detailLoading()" (click)="moreWindows()">
+            Load more windows
+          </button>
+        }
+      }
+      @if (detailTab() === 'planning-actions') {
+        @for (action of plan.actions; track action.id) {
+          <div class="planning-action-row">
+            <ui-icon
+              [name]="
+                action.kind === 'BUY' ? 'receipt' : action.kind === 'PREPARE' ? 'check' : 'sprout'
+              "
+              [size]="20"
+            />
+            <div>
+              <strong>{{ action.title }}</strong
+              ><small
+                >{{ dateLabel(action.scheduledOn) }} ·
+                {{
+                  action.state === 'OPEN'
+                    ? 'Planned'
+                    : action.state === 'DONE'
+                      ? 'Completed ' + dateLabel(action.completedOn!)
+                      : 'Dismissed'
+                }}</small
+              >
+            </div>
+            @if (active(plan) && action.state === 'OPEN') {
+              <button
+                class="icon-button"
+                type="button"
+                [attr.aria-label]="'Complete action ' + action.title"
+                (click)="completeAction(action)"
+              >
+                <ui-icon name="check" [size]="18" />
+              </button>
+              <button
+                class="icon-button"
+                type="button"
+                [attr.aria-label]="'Dismiss action ' + action.title"
+                (click)="completeAction(action, true)"
+              >
+                <ui-icon name="close" [size]="16" />
+              </button>
+              <button
+                class="icon-button"
+                type="button"
+                [attr.aria-label]="'Edit action ' + action.title"
+                (click)="openAction(action)"
+              >
+                <ui-icon name="pencil" [size]="16" />
+              </button>
+            }
+          </div>
+        } @empty {
+          <p class="planning-empty">
+            One small next step can make a plan feel real. Add a day for preparing, buying, sowing
+            or planting.
+          </p>
+        }
+        @if (active(plan)) {
+          <div class="form-actions">
+            <button class="btn btn-primary" type="button" (click)="openAction()">
+              <ui-icon name="plus" [size]="16" />Add action
+            </button>
+          </div>
+        }
+      }
+    </section>
+  }
+</ui-entry-dialog>
+<planning-plan-editor
+  [open]="editorOpen()"
+  [plan]="editPlan()"
+  [currency]="context()?.workspace?.defaultCurrency ?? 'USD'"
+  [idea]="view() === 'wishlist'"
+  [suggestedNote]="suggestedNote()"
+  [locations]="context()?.locations ?? []"
+  (dismissed)="editorOpen.set(false)"
+  (saved)="saved($event, true)"
+  (cancelRequested)="requestLifecycle($event, 'cancel')"
+/>
+<planning-action-editor
+  [open]="actionOpen()"
+  [plan]="detail()"
+  [action]="selectedAction()"
+  (dismissed)="actionOpen.set(false)"
+  (saved)="saved($event)"
+/>
+<planning-window-chooser
+  [open]="chooserOpen()"
+  [plan]="detail()"
+  [window]="selectedWindow()"
+  [priorAssumptions]="detailSchedule()?.assumptions ?? null"
+  [fromMonth]="from()"
+  [toMonth]="to()"
+  (dismissed)="chooserOpen.set(false)"
+  (saved)="saved($event)"
+/>
+<ui-entry-dialog
+  [open]="!!lifecycle()"
+  [title]="lifecycle()?.title ?? 'Update plan'"
+  [dirty]="false"
+  [busy]="commandBusy()"
+  size="compact"
+  (dismissed)="lifecycle.set(null)"
+  ><p>{{ lifecycle()?.copy }}</p>
+  @if (commandError()) {
+    <p class="form-error" role="alert">{{ commandError() }}</p>
+  }
+  <div class="form-actions">
+    <button type="button" class="btn" [disabled]="commandBusy()" (click)="lifecycle.set(null)">
+      Keep as it is</button
+    ><button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="commandBusy()"
+      (click)="applyLifecycle()"
+    >
+      {{ commandBusy() ? 'Saving…' : 'Confirm' }}
+    </button>
+  </div></ui-entry-dialog
+>
+
+<planning-garden-editor
+  [open]="gardenOpen()"
+  [plan]="detail()"
+  [action]="completingAction()"
+  [timezone]="context()?.workspace?.timezone ?? 'UTC'"
+  [currency]="context()?.workspace?.defaultCurrency ?? 'USD'"
+  [locations]="context()?.locations ?? []"
+  (dismissed)="gardenOpen.set(false)"
+  (saved)="saved($event)"
+/>
+<planning-action-completion
+  [open]="completionOpen()"
+  [plan]="detail()"
+  [action]="completingAction()"
+  [dismissOnly]="dismissingAction()"
+  [timezone]="context()?.workspace?.timezone ?? 'UTC'"
+  [locations]="context()?.locations ?? []"
+  (dismissed)="completionOpen.set(false)"
+  (saved)="saved($event)"
+/>
+
+<planning-assistant
+  [open]="assistantOpen()"
+  [plans]="assistantPlans()"
+  [year]="+from().slice(0, 4)"
+  (dismissed)="assistantOpen.set(false)"
+  (reviewed)="reviewPlanningNote($event)"
+/>

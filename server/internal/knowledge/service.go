@@ -204,6 +204,9 @@ func (s *Service) SaveSettings(ctx context.Context, a Actor, in SettingsInput, k
 		if _, err = q.RefreshKnowledge(ctx, dbgen.RefreshKnowledgeParams{WorkspaceID: a.WorkspaceID}); err != nil {
 			return cur, err
 		}
+		if err = q.InvalidateWorkspacePlanningGuidance(ctx, a.WorkspaceID); err != nil {
+			return cur, err
+		}
 		prior, _ := json.Marshal(cur)
 		_, err = q.InsertAuditRevision(ctx, dbgen.InsertAuditRevisionParams{ID: platform.UUIDv4{}.New(), WorkspaceID: a.WorkspaceID, ActorID: a.OwnerID, Action: "UPDATE", AggregateType: "garden_knowledge_settings", AggregateID: a.WorkspaceID, Revision: cur.Revision + 1, RequestID: uid(a.SessionID), PriorValues: prior})
 		if err != nil {
@@ -299,21 +302,9 @@ func (s *Service) Ask(ctx context.Context, ws pgtype.UUID, question string, year
 	if model == nil {
 		return AnswerDraft{}, nil, errors.New("garden chat requires a configured AI model")
 	}
-	s.chatMu.Lock()
-	now := time.Now()
-	key := uid(ws)
-	recent := []time.Time{}
-	for _, t := range s.chatUsage[key] {
-		if t.After(now.Add(-time.Hour)) {
-			recent = append(recent, t)
-		}
+	if err := s.reserveChat(ws); err != nil {
+		return AnswerDraft{}, nil, err
 	}
-	if len(recent) >= 12 {
-		s.chatMu.Unlock()
-		return AnswerDraft{}, nil, &Problem{Code: "RATE_LIMITED", Message: "Please wait before asking more garden questions."}
-	}
-	s.chatUsage[key] = append(recent, now)
-	s.chatMu.Unlock()
 	garden, err := s.Garden(ctx, ws, year)
 	if err != nil {
 		return AnswerDraft{}, nil, errors.New("Your garden could not be loaded.")

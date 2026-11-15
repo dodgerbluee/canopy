@@ -24,7 +24,7 @@ export class LoginPage {
   private readonly route = inject(ActivatedRoute);
 
   protected readonly form = inject(NonNullableFormBuilder).group({
-    username: ['owner'],
+    username: [''],
     password: ['', [Validators.required, Validators.maxLength(1024)]],
   });
   protected readonly options = signal<SignInOptions | null>(null);

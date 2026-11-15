@@ -7,7 +7,8 @@
 # schema at T24, when the care resolvers landed; analysis.graphql joined at T29
 # with the run-lifecycle resolvers (suggestion surfaces stay CAPABILITY_UNAVAILABLE
 # until T33). Contract validation and TS codegen consume the full
-# contracts/graphql/ directory.
+# contracts/graphql/ directory. Planning joins at PLAN02 with real CRUD and
+# populated portability coverage.
 schema:
   - ../contracts/graphql/agents.graphql
   - ../contracts/graphql/ai-connections.graphql
@@ -19,6 +20,7 @@ schema:
   - ../contracts/graphql/journal.graphql
   - ../contracts/graphql/media.graphql
   - ../contracts/graphql/overview.graphql
+  - ../contracts/graphql/planning.graphql
   - ../contracts/graphql/portability.graphql
   - ../contracts/graphql/purchases.graphql
   - ../contracts/graphql/schema.graphql

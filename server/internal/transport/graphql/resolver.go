@@ -32,6 +32,8 @@ import (
 	"canopy/server/internal/journal"
 	"canopy/server/internal/knowledge"
 	"canopy/server/internal/media"
+	"canopy/server/internal/planning"
+	"canopy/server/internal/planninggarden"
 	"canopy/server/internal/portability"
 	"canopy/server/internal/purchases"
 	"canopy/server/internal/transport/graphql/gql"
@@ -42,13 +44,14 @@ import (
 // Resolver is the hand-written ResolverRoot. The generated stub file
 // (resolvers_gen.go) is scaffolding and is never hand-edited.
 type Resolver struct {
-	DB      *dbgen.Queries
-	Coll    *collection.Service
-	Purch   *purchases.Service
-	Media   *media.Service
-	Journal *journal.Service
-	Care    *care.Service
-	Port    *portability.Service
+	DB       *dbgen.Queries
+	Coll     *collection.Service
+	Purch    *purchases.Service
+	Media    *media.Service
+	Journal  *journal.Service
+	Care     *care.Service
+	Port     *portability.Service
+	Planning *planning.Service
 	// Insights is the AI analysis lane (T29). It is wired only when the
 	// operator config warrants it (provider + queue); nil means the
 	// analysis surfaces answer honestly, never fake data.
@@ -71,13 +74,20 @@ func NewResolver(db *dbgen.Queries, log *slog.Logger) *Resolver {
 // plant archive/restore/context edits drive the care plan in the same tx.
 func NewResolverFromPool(pool *pgxpool.Pool, log *slog.Logger) *Resolver {
 	careSvc := care.New(pool, log)
+	knowledgeSvc := knowledge.New(pool)
+	planner := planning.New(pool, log)
+	planner.Guidance = knowledge.PlanningProvider{Service: knowledgeSvc}
+	planner.Assistant = knowledge.PlanningAssistant{Service: knowledgeSvc}
+	coll := collection.New(pool, log, care.CollectionHook{Svc: careSvc})
+	planner.Garden = planninggarden.New(coll)
 	return &Resolver{
 		DB:        dbgen.New(pool),
-		Knowledge: knowledge.New(pool),
-		Coll:      collection.New(pool, log, care.CollectionHook{Svc: careSvc}),
+		Knowledge: knowledgeSvc,
+		Coll:      coll,
 		Purch:     purchases.New(pool, log),
 		Journal:   journal.New(pool),
 		Care:      careSvc,
+		Planning:  planner,
 		Log:       log,
 	}
 }

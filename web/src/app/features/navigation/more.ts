@@ -80,6 +80,12 @@ import { UiIcon, type UiIconName } from '../../ui/icon';
 export class MorePage {
   readonly items: { path: string; label: string; description: string; icon: UiIconName }[] = [
     {
+      path: '/planning',
+      label: 'Planning',
+      description: 'Keep growing ideas and choose your next planting windows.',
+      icon: 'sprout',
+    },
+    {
       path: '/insights',
       label: 'AI assistant',
       description: 'Ask about your garden and review plant photos.',

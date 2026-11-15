@@ -22,7 +22,10 @@ import (
 // set (re-request after restore).
 var dumpTables = []string{
 	"owner", "auth_users", "oidc_connections", "oidc_identities", "workspace", "agent_grants", "agent_credentials", "agent_operations", "agent_actions", "locations", "tags", "plants", "plant_contexts",
-	"ai_connections", "ai_feature_bindings", "garden_knowledge_settings", "knowledge_profiles", "rain_events", "plant_tags", "activities", "measurements", "purchases", "purchase_lines",
+	// accepted_guidance_id is INITIALLY DEFERRED; the restore transaction
+	// loads snapshots before commit, preserving the parent/provenance cycle.
+	"planting_plans", "planting_actions", "planting_guidance_snapshots", "planting_fulfillments",
+	"ai_connections", "ai_feature_bindings", "garden_knowledge_settings", "knowledge_profiles", "rain_events", "rain_reviews", "plant_tags", "activities", "measurements", "purchases", "purchase_lines",
 	"purchase_allocations", "acquisitions", "assets", "asset_variants",
 	"plant_photos", "purchase_receipts", "journal_entries", "audit_revisions",
 	"mutation_receipts", "deletion_tombstones",

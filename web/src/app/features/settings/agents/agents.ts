@@ -194,7 +194,7 @@ export class AgentConnections {
       if (!p.grant) throw Error('Connection could not be changed.');
       if (this.abort.signal.aborted) return;
       this.credentialAction.set(null);
-      this.showToken('token' in p && typeof p.token==='string' ? p.token : null);
+      this.showToken('token' in p && typeof p.token === 'string' ? p.token : null);
       this.notice.set(
         action.revoke
           ? 'Connection revoked. Future agent calls are denied.'
@@ -263,6 +263,8 @@ export class AgentConnections {
     return (
       (
         {
+          'planning:read': 'Future plans & planting windows',
+          'planning:write': 'Propose planning changes',
           'garden:read': 'Garden & history',
           'knowledge:read': 'Regional knowledge',
           'photos:read': 'Photo previews',

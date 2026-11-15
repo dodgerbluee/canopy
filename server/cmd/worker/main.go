@@ -15,9 +15,11 @@ import (
 	"canopy/server/internal/care/weather"
 	"canopy/server/internal/email"
 	"canopy/server/internal/insights"
+	"canopy/server/internal/journal"
 	"canopy/server/internal/knowledge"
 	"canopy/server/internal/media"
 	"canopy/server/internal/media/processor"
+	"canopy/server/internal/planning"
 	"canopy/server/internal/platform"
 	platformmedia "canopy/server/internal/platform/media"
 	"canopy/server/internal/portability"
@@ -113,6 +115,10 @@ func main() {
 	}
 	knowledgeSvc.UseConnections(aiConnections)
 	river.AddWorker(workers, &knowledge.Worker{Service: knowledgeSvc})
+	plannerSvc := planning.New(pool, log)
+	plannerSvc.Guidance = knowledge.PlanningProvider{Service: knowledgeSvc}
+	river.AddWorker(workers, &planning.GuidanceWorker{Service: plannerSvc})
+	river.AddWorker(workers, &planning.ReminderWorker{Service: plannerSvc})
 	river.AddWorker(workers, &care.CareTickWorker{Svc: careSvc, Log: log})
 
 	// AI analysis runs (T29): claim → bounded provider attempt → validate
@@ -155,12 +161,14 @@ func main() {
 	// gate care, and the 6h cadence doubles as the cache window
 	careSvc.Weather = weather.New(cfg.WeatherBaseURL, cfg.WeatherTimeout)
 	river.AddWorker(workers, &care.WeatherFetchWorker{Svc: careSvc, Log: log})
+	river.AddWorker(workers, &journal.RainCheckWorker{Svc: journal.New(pool), Weather: careSvc.Weather, Log: log})
 
 	// email delivery (T27): daily digest intents over SMTP with bounded
 	// retry; empty CANOPY_SMTP_HOST means the deployment opted out and
 	// EMAIL intents stay pending (in-app notification unaffected)
 	periodics := []*river.PeriodicJob{
-		care.CarePeriodicJob(), care.WeatherFetchPeriodicJob(), knowledge.PeriodicJob(), processor.CoverQualityPeriodicJob(),
+		care.CarePeriodicJob(), care.WeatherFetchPeriodicJob(), knowledge.PeriodicJob(), planning.GuidancePeriodicJob(), planning.ReminderPeriodicJob(), processor.CoverQualityPeriodicJob(),
+		journal.RainCheckPeriodicJob(),
 		insights.SuggestionExpiryPeriodicJob(),
 	}
 	if cfg.SMTPHost != "" {

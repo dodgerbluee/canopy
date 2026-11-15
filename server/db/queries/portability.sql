@@ -178,3 +178,15 @@ SELECT v.storage_key FROM asset_variants v
 JOIN assets a ON a.id = v.asset_id
 WHERE a.workspace_id = $1 AND a.state = 'READY'
 ORDER BY storage_key;
+
+-- name: ExportPlantingPlans :many
+SELECT to_jsonb(p) AS row FROM planting_plans p WHERE p.workspace_id=$1 ORDER BY p.id;
+
+-- name: ExportPlantingActions :many
+SELECT to_jsonb(a) AS row FROM planting_actions a WHERE a.workspace_id=$1 ORDER BY a.plan_id,a.scheduled_on,a.id;
+
+-- name: ExportPlantingGuidance :many
+SELECT to_jsonb(g) AS row FROM planting_guidance_snapshots g WHERE g.workspace_id=$1 ORDER BY g.plan_id,g.generation;
+
+-- name: ExportPlantingFulfillments :many
+SELECT to_jsonb(f) AS row FROM planting_fulfillments f WHERE f.workspace_id=$1 ORDER BY f.plan_id;

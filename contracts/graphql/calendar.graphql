@@ -14,10 +14,16 @@ type CalendarEvent {
 enum CalendarEventKind { ACTIVITY PHOTO PURCHASE MEASUREMENT CARE INSIGHT RAIN }
 type CalendarEventConnection { items: [CalendarEvent!]!, pageInfo: PageInfo! }
 type RainEvent { id: ID!, day: LocalDate!, amountMm: Decimal, note: String, revision: Int! }
-input RecordRainInput { day: LocalDate!, amountMm: Decimal, note: String }
+input RecordRainInput { day: LocalDate!, amountMm: Decimal, note: String, rainReviewId: ID }
 input VoidRainInput { id: ID!, expectedRevision: Int! }
 type RecordRainPayload { rain: RainEvent, problems: [MutationProblem!]!, clientMutationId: String }
 type VoidRainPayload { removedId: ID, problems: [MutationProblem!]!, clientMutationId: String }
+enum RainReviewStatus { NOT_CONFIGURED WAITING READY STALE }
+"Rain estimates cover elapsed hourly rain and showers only. Confirm to record actual area rain."
+type RainProposal { id: ID!, day: LocalDate!, estimatedAmountMm: Decimal!, checkedAt: DateTime! }
+type RainReviewState { status: RainReviewStatus!, areaLabel: String!, checkedAt: DateTime, proposals: [RainProposal!]! }
+input DismissRainReviewInput { id: ID! }
+type DismissRainReviewPayload { dismissedId: ID, problems: [MutationProblem!]!, clientMutationId: String }
 extend type Query {
   """Inclusive dates; maximum 62 days. Complete pagination before displaying a month."""
   calendarEvents(from: LocalDate!, to: LocalDate!, first: Int = 100, after: String): CalendarEventConnection!
@@ -26,4 +32,6 @@ extend type Mutation {
   """Area rain only. Never creates WATER activities or completes care tasks."""
   recordRain(input: RecordRainInput!, clientMutationId: String): RecordRainPayload!
   voidRain(input: VoidRainInput!, clientMutationId: String): VoidRainPayload!
+  "Dismiss an area rain prompt. This never logs watering or rain."
+  dismissRainReview(input: DismissRainReviewInput!, clientMutationId: String): DismissRainReviewPayload!
 }

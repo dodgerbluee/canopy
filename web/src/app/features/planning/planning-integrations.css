@@ -1,0 +1,116 @@
+:host {
+  display: block;
+}
+.planning-upcoming {
+  margin-block: var(--sp-6);
+}
+.integration-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.integration-heading h2 {
+  margin: 4px 0 12px;
+}
+.integration-action {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.integration-action > span {
+  flex: 1;
+  min-width: 0;
+}
+.integration-action strong,
+.integration-action small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.integration-action small,
+.integration-action time {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.planning-overlay-toggle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 44px;
+  font-weight: 600;
+}
+.year-plantings {
+  margin: 24px 0;
+  padding: 16px 20px;
+  border: 1px dashed var(--border);
+  border-radius: 16px;
+}
+.planned-year-axis,
+.planned-year-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 220px) minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+.planned-year-axis > div,
+.planned-year-track {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2px;
+}
+.planned-year-axis {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 16px;
+}
+.planned-year-axis > div > span {
+  text-align: center;
+}
+.planned-year-row {
+  min-height: 64px;
+  text-decoration: none;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+.planned-year-row strong,
+.planned-year-row small {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.planned-year-row small {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.planned-year-band {
+  height: 22px;
+  border: 1px dashed var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius: 12px;
+}
+.planning-overlay-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--accent);
+}
+@media (max-width: 600px) {
+  .year-plantings {
+    padding: 12px;
+  }
+  .planned-year-axis,
+  .planned-year-row {
+    grid-template-columns: minmax(95px, 35%) minmax(0, 1fr);
+    gap: 8px;
+  }
+  .integration-action {
+    flex-wrap: wrap;
+  }
+  .integration-action time {
+    padding-left: 31px;
+  }
+}

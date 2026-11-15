@@ -586,5 +586,131 @@
     "scope": "exports:request",
     "mode": "review",
     "description": "Export propose. Uses Canopy records and domain validation. Creates an immutable proposal for owner review; does not apply the change."
+  },
+  {
+    "name": "planting_plans_list",
+    "root": "plantingPlans",
+    "scope": "planning:read",
+    "mode": "read",
+    "description": "Planting plans list. Future intentions are separate from owned plants, recorded work and actual spending. Workspace-wide planning grants only; reads never call AI or save dates."
+  },
+  {
+    "name": "planting_plan_get",
+    "root": "plantingPlan",
+    "scope": "planning:read",
+    "mode": "read",
+    "description": "Planting plan get. Future intentions are separate from owned plants, recorded work and actual spending. Workspace-wide planning grants only; reads never call AI or save dates."
+  },
+  {
+    "name": "planting_schedule_get",
+    "root": "plantingSchedule",
+    "scope": "planning:read",
+    "mode": "read",
+    "description": "Planting schedule get. Future intentions are separate from owned plants, recorded work and actual spending. Workspace-wide planning grants only; reads never call AI or save dates."
+  },
+  {
+    "name": "planting_board",
+    "root": "plantingBoard",
+    "scope": "planning:read",
+    "mode": "read",
+    "description": "Planting board. Future intentions are separate from owned plants, recorded work and actual spending. Workspace-wide planning grants only; reads never call AI or save dates."
+  },
+  {
+    "name": "planting_calendar_events",
+    "root": "plantingEvents",
+    "scope": "planning:read",
+    "mode": "read",
+    "description": "Planting calendar events. Future intentions are separate from owned plants, recorded work and actual spending. Workspace-wide planning grants only; reads never call AI or save dates."
+  },
+  {
+    "name": "planting_plan_create",
+    "root": "createPlantingPlan",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting plan create. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_plan_update",
+    "root": "updatePlantingPlan",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting plan update. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_plan_state_change",
+    "root": "changePlantingPlanState",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting plan state change. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_plan_cancel",
+    "root": "cancelPlantingPlan",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting plan cancel. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_plan_restore",
+    "root": "restorePlantingPlan",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting plan restore. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_action_create",
+    "root": "createPlantingAction",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting action create. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_action_update",
+    "root": "updatePlantingAction",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting action update. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_action_delete",
+    "root": "deletePlantingAction",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting action delete. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_action_complete",
+    "root": "completePlantingAction",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting action complete. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_action_dismiss",
+    "root": "dismissPlantingAction",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting action dismiss. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_schedule_confirm",
+    "root": "confirmPlantingSchedule",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting schedule confirm. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_add_to_garden",
+    "root": "addPlantingToGarden",
+    "scope": "planning:write",
+    "mode": "review",
+    "description": "Planting add to garden. Creates an owner-reviewed proposal; supply current plan revision and stable operation_id. Changing an actual living plant also requires plants:write; a real initial purchase requires purchases:write. No automatic ownership, care or estimated spending."
+  },
+  {
+    "name": "planting_guidance_refresh",
+    "root": "refreshPlantingGuidance",
+    "scope": "planning:write",
+    "mode": "direct",
+    "description": "Request bounded, deduplicated regional source research for a saved plan. Does not change chosen dates/actions or create an owned plant. Unsupported regions retain manual planning."
   }
 ]

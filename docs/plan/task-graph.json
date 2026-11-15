@@ -522,7 +522,14 @@
         "PUB02",
         "DEP03",
         "MIG02",
-        "FAV01"
+        "FAV01",
+        "PLAN00",
+        "PLAN01",
+        "PLAN02",
+        "PLAN03",
+        "PLAN04",
+        "PLAN08",
+        "FIX09"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -1004,6 +1011,86 @@
       "dependsOn": [
         "DEP03",
         "MIG02"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN00": {
+      "title": "Design the future planting planner",
+      "dependsOn": [
+        "FAV01"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN01": {
+      "title": "Planting planner contracts and storage foundation",
+      "dependsOn": [
+        "PLAN00"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN02": {
+      "title": "Planning domain, CRUD API and portability",
+      "dependsOn": [
+        "PLAN01"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN03": {
+      "title": "Crop-based regional planning guidance and bounded enrichment",
+      "dependsOn": [
+        "PLAN02"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN04": {
+      "title": "Pure planting schedule projections and explicit source-backed confirmation",
+      "dependsOn": [
+        "PLAN03"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN05": {
+      "title": "Angular Planning page, modal workflows and local Docker preview",
+      "dependsOn": [
+        "PLAN04"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN06": {
+      "title": "Planning Calendar, Year, Today projections and opt-in reminders",
+      "dependsOn": [
+        "PLAN05"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN07": {
+      "title": "Atomic garden conversion and explicit planning action completion",
+      "dependsOn": [
+        "PLAN06"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN08": {
+      "title": "Scoped planner MCP tools, assistant drafts and final implementation gate",
+      "dependsOn": [
+        "PLAN07"
+      ],
+      "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "FIX09": {
+      "title": "Remove default login identity and connect garden rain reviews",
+      "dependsOn": [
+        "PLAN08"
       ],
       "status": "ACCEPTED",
       "release": "R3"

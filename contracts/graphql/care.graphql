@@ -618,6 +618,7 @@ enum NotificationChannel {
 enum NotificationRefKind {
   OCCURRENCE
   SUGGESTION
+  PLANTING_ACTION
 }
 
 type Notification {

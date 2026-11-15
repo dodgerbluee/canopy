@@ -1,0 +1,177 @@
+@media (max-width: 1100px) {
+  .planning-heading {
+    align-items: flex-start;
+  }
+  .planning-summary {
+    gap: 16px;
+    padding: 20px;
+  }
+  .planning-summary > div + div {
+    padding-left: 16px;
+  }
+  .planning-controls {
+    gap: 8px;
+  }
+  .planning-toolbar {
+    flex-wrap: wrap;
+  }
+  .planning-legend small {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .planning-heading {
+    display: block;
+    margin-bottom: 24px;
+  }
+  .planning-heading h1 {
+    font-size: 36px;
+  }
+  .planning-heading-actions {
+    justify-content: flex-start;
+    margin-top: 20px;
+  }
+  .planning-heading > .btn {
+    margin-top: 20px;
+  }
+  .planning-summary {
+    grid-template-columns: 1fr 1fr;
+    margin-bottom: 20px;
+    padding: 18px;
+    gap: 16px;
+  }
+  .planning-summary > div:nth-child(2) {
+    display: none;
+  }
+  .planning-summary > div:last-child {
+    padding-left: 16px;
+  }
+  .planning-summary strong {
+    font-size: 13px;
+  }
+  .planning-summary > div:first-child strong {
+    font-size: 26px;
+  }
+  .planning-summary ui-icon {
+    display: none;
+  }
+  .planning-toolbar {
+    gap: 12px;
+  }
+  .planning-controls {
+    width: 100%;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .planning-range {
+    margin-left: -10px;
+  }
+  .range-label {
+    padding: 4px;
+    font-size: 12px;
+  }
+  .planning-legend {
+    display: none;
+  }
+  .planning-filter-note {
+    align-items: flex-start;
+  }
+  .planning-empty-state {
+    padding: 32px 20px;
+  }
+  .planning-empty-state h2 {
+    font-size: 28px;
+  }
+  .planning-detail-back {
+    display: flex;
+    justify-self: start;
+    margin: -8px 0 0 -12px;
+  }
+  .planning-pagination {
+    align-items: flex-start;
+  }
+  .planning-pagination > div {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .planning-intro {
+    max-width: 320px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    scroll-behavior: auto;
+  }
+}
+
+@media (max-width: 1100px) {
+  .planning-axis {
+    display: none;
+  }
+  .planning-row,
+  .wishlist-board .planning-row {
+    grid-template-columns: minmax(0, 1fr) 52px;
+    padding: 20px 0;
+    align-items: start;
+  }
+  .planning-identity {
+    padding: 0 20px;
+  }
+  .planning-track {
+    display: none;
+  }
+  .planning-mobile-period,
+  .wishlist-board .planning-mobile-period {
+    display: grid;
+    grid-column: 1;
+    grid-row: 2;
+    gap: 8px;
+    justify-items: start;
+    padding: 12px 20px 0 74px;
+  }
+  .plan-row-actions {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .plan-subline {
+    margin-left: 54px;
+  }
+  .plan-guidance-link {
+    margin-left: 54px;
+  }
+}
+
+@media (max-width: 767px) {
+  .planning-row,
+  .wishlist-board .planning-row {
+    padding: 18px 0;
+  }
+  .planning-identity {
+    padding: 0 12px;
+  }
+  .planning-mobile-period,
+  .wishlist-board .planning-mobile-period {
+    padding-left: 66px;
+  }
+  .plan-row-actions {
+    padding-right: 6px;
+  }
+  .plan-guidance-link {
+    padding-bottom: 0;
+  }
+  .planning-mobile-period > .btn {
+    min-height: 44px;
+  }
+  .plan-identity strong {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chosen-band,
+  .source-band {
+    transition: none;
+  }
+}

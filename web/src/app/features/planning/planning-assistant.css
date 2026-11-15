@@ -1,0 +1,54 @@
+.assistant-plans {
+  display: grid;
+  gap: 4px;
+}
+.assistant-plans label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 14px;
+}
+.assistant-plans input {
+  accent-color: var(--accent);
+}
+.assistant-scope {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text);
+}
+.assistant-answer {
+  display: grid;
+  gap: 16px;
+  border-top: 1px solid var(--border-decorative);
+  padding-top: 24px;
+}
+.assistant-copy {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.9;
+  margin: 0;
+}
+.assistant-source {
+  padding: 14px 0;
+  display: grid;
+  gap: 8px;
+  border-top: 1px solid var(--border-decorative);
+}
+.assistant-source a {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.assistant-source small {
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.assistant-source p {
+  font-size: 13px;
+  line-height: 1.8;
+  margin: 0;
+}

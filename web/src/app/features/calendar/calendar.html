@@ -85,6 +85,17 @@
           /><ui-icon name="rain" [size]="17" />Area rain</label
         >
       </div>
+      <div class="filter-section">
+        <h3>Planned plantings</h3>
+        <label class="type-check"
+          ><input
+            type="checkbox"
+            [ngModel]="showPlanning()"
+            (ngModelChange)="showPlanning.set($event)"
+          /><ui-icon name="sprout" [size]="17" />Chosen action days</label
+        >
+        <p class="filter-hint">Future intentions, separate from recorded history.</p>
+      </div>
       <p class="area-caption"><ui-icon name="location" [size]="15" />{{ area() }}</p>
       <p class="filter-hint">Rain is area context, separate from manual watering.</p>
     </aside>
@@ -99,7 +110,7 @@
               } @else if (error()) {
                 History unavailable
               } @else {
-                {{ monthCount() }} entries this month
+                {{ monthCount() }} recorded entries · {{ planningCount() }} planned actions
               }
               @if (timezone()) {
                 <span>· {{ timezone() }}</span>
@@ -174,6 +185,7 @@
                   @for (group of groups(day); track group.icon) {
                     <span
                       class="event-marker"
+                      [class.planning-marker]="group.icon === 'sprout'"
                       [class.rain-marker]="group.icon === 'rain'"
                       [attr.title]="group.label + ': ' + group.count"
                       ><span class="visually-hidden">{{ group.label }}: </span
@@ -191,9 +203,16 @@
           <span><ui-icon name="drop" [size]="15" />Watering</span
           ><span><ui-icon name="rain" [size]="15" />Rain</span
           ><span><ui-icon name="camera" [size]="15" />Photos taken</span
-          ><span><ui-icon name="leaf" [size]="15" />Other</span>
+          ><span><ui-icon name="leaf" [size]="15" />Other</span
+          ><span><ui-icon name="sprout" [size]="15" />Planned</span>
         </div>
       </section>
+      @if (planningError()) {
+        <div class="calendar-error" role="alert">
+          <p>{{ planningError() }}</p>
+          <button class="btn" type="button" (click)="loadMonth()">Retry planning dates</button>
+        </div>
+      }
       <section class="day-panel" aria-labelledby="selected-day-title">
         <div class="day-heading">
           <div>
@@ -207,6 +226,30 @@
         } @else if (error()) {
           <p class="day-empty">History is unavailable. Retry loading the calendar above.</p>
         } @else {
+          @for (plan of dayPlans(); track plan.id) {
+            <article class="calendar-entry planning-entry">
+              <span class="entry-icon"><ui-icon name="sprout" [size]="20" /></span>
+              <div class="entry-copy">
+                <p class="entry-title">{{ plan.title }}</p>
+                <a
+                  class="entry-plant"
+                  routerLink="/planning"
+                  [queryParams]="{ plan: plan.planId }"
+                  >{{ plan.planName }}</a
+                >
+                <p class="entry-meta">
+                  Planned ·
+                  {{
+                    plan.state === 'DONE'
+                      ? 'Completed'
+                      : plan.state === 'DISMISSED'
+                        ? 'Dismissed'
+                        : 'Open action'
+                  }}
+                </p>
+              </div>
+            </article>
+          }
           @for (entry of dayEvents(); track entry.id) {
             <article class="calendar-entry">
               <span class="entry-icon" [class.is-rain]="entry.kind === 'RAIN'"
@@ -241,7 +284,8 @@
                 </button>
               }
             </article>
-          } @empty {
+          }
+          @if (!dayEvents().length && !dayPlans().length) {
             <div class="day-empty">
               <ui-icon name="sprout" [size]="28" />
               <p>No entries with these filters.</p>
@@ -374,6 +418,16 @@
       ><label class="type-check"
         ><input type="checkbox" [ngModel]="showRain()" (ngModelChange)="showRain.set($event)" />Area
         rain</label
+      >
+    </div>
+    <div class="filter-section">
+      <h3>Planned plantings</h3>
+      <label class="type-check"
+        ><input
+          type="checkbox"
+          [ngModel]="showPlanning()"
+          (ngModelChange)="showPlanning.set($event)"
+        />Chosen action days</label
       >
     </div>
     <button type="button" class="btn btn-primary" (click)="filterDialog.requestClose()">

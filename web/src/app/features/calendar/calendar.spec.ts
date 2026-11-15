@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { PlantsDocument, SessionDocument } from '@canopy/contracts';
+import { PlantsDocument, SessionDocument, PlantingEventsDocument } from '@canopy/contracts';
 import { GraphQLClient } from '../../core/graphql/client';
 import { SessionService } from '../../core/auth/session';
 import { UiToasts } from '../../ui/toast';
@@ -62,7 +62,22 @@ describe('calendar state', () => {
                     { id: 'lime', name: 'Lime', status: 'ACTIVE', coverPhoto: null },
                   ]),
                 }
-              : { calendarEvents: connection([water, rain]) },
+              : doc === PlantingEventsDocument
+                ? {
+                    plantingEvents: connection([
+                      {
+                        id: 'pa',
+                        planId: 'future',
+                        planName: 'Future fig',
+                        planRevision: 1,
+                        kind: 'PREPARE',
+                        title: 'Prepare',
+                        day: '2026-11-04',
+                        state: 'OPEN',
+                      },
+                    ]),
+                  }
+                : { calendarEvents: connection([water, rain]) },
         ),
       ),
       mutate: vi.fn(),
@@ -107,16 +122,14 @@ describe('calendar state', () => {
     c.addRain();
     c.rainAmount.set('0.1');
     const first = deferred<unknown>();
-    gql.mutate
-      .mockReturnValueOnce(first.promise)
-      .mockResolvedValueOnce(
-        ok({
-          recordRain: {
-            rain: { id: 'new', day: '2026-11-04', amountMm: '2.54', note: null, revision: 1 },
-            problems: [],
-          },
-        }),
-      );
+    gql.mutate.mockReturnValueOnce(first.promise).mockResolvedValueOnce(
+      ok({
+        recordRain: {
+          rain: { id: 'new', day: '2026-11-04', amountMm: '2.54', note: null, revision: 1 },
+          problems: [],
+        },
+      }),
+    );
     const saving = c.saveRain();
     await c.saveRain();
     expect(gql.mutate).toHaveBeenCalledTimes(1);
@@ -135,9 +148,12 @@ describe('calendar state', () => {
     const f = await render(),
       c = f.componentInstance;
     const first = deferred<unknown>();
-    gql.query
-      .mockReturnValueOnce(first.promise)
-      .mockResolvedValueOnce(ok({ calendarEvents: connection([{ ...water, id: 'current' }]) }));
+    let records = 0;
+    gql.query.mockImplementation(async (doc: unknown) => {
+      if (doc === PlantingEventsDocument) return ok({ plantingEvents: connection([]) });
+      if (records++ === 0) return first.promise;
+      return ok({ calendarEvents: connection([{ ...water, id: 'current' }]) });
+    });
     c.month.set('2026-12');
     const old = c.loadMonth();
     c.month.set('2027-01');
@@ -179,5 +195,19 @@ describe('calendar state', () => {
     );
     await saving;
     expect(c.events().some((e) => e.entityId === 'foreign')).toBe(false);
+  });
+  it('keeps planning independent of owned plants and recorded counts', async () => {
+    const f = await render();
+    const c = f.componentInstance;
+    c.month.set('2026-11');
+    c.selectedDay.set('2026-11-04');
+    c.chooseAll(false);
+    expect(c.dayPlans().map((p) => p.planName)).toEqual(['Future fig']);
+    expect(c.dayEvents().map((e) => e.kind)).toEqual(['RAIN']);
+    expect(c.monthCount()).toBe(1);
+    expect(c.groups('2026-11-04').some((g) => g.label === 'Planned actions')).toBe(true);
+    c.showPlanning.set(false);
+    expect(c.dayPlans()).toEqual([]);
+    expect(c.groups('2026-11-04').some((g) => g.label === 'Planned actions')).toBe(false);
   });
 });

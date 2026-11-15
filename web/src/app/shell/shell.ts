@@ -17,6 +17,7 @@ const ROUTE_LABELS: Record<string, string> = {
   calendar: 'Calendar',
   'calendar/year': 'Garden year',
   year: 'Garden year',
+  planning: 'Planning',
   insights: 'AI assistant',
   more: 'More',
   rounds: 'Garden rounds',

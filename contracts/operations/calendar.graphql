@@ -16,3 +16,8 @@ mutation VoidRain($input: VoidRainInput!, $clientMutationId: String) {
     removedId problems { code field message currentRevision } clientMutationId
   }
 }
+mutation DismissRainReview($input: DismissRainReviewInput!, $clientMutationId: String) {
+  dismissRainReview(input: $input, clientMutationId: $clientMutationId) {
+    dismissedId problems { code field message currentRevision } clientMutationId
+  }
+}

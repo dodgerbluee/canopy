@@ -10,6 +10,12 @@
   </div>
 </header>
 
+@if (!loading() && !loadError()) {
+  @if (data()?.rainReview; as review) {
+    <today-rain [review]="review" (changed)="reload()" />
+  }
+}
+
 <!-- Check it off / Complete / Snooze open the shared entry dialog instead of
      expanding the row. One form per mode, native fields and exact payload
      shapes unchanged, and the dialog stays mounted while the mutation runs. -->
@@ -278,8 +284,8 @@
           </div>
         } @else {
           <p class="caption">
-            No location with coordinates yet — set them on a plant and the latest conditions will
-            appear here. The day works fully without them.
+            No daily plant-location forecast is available. Rain checks use your garden location;
+            their status is shown above.
           </p>
         }
       </div>
@@ -401,3 +407,5 @@
     </aside>
   </div>
 }
+
+<upcoming-plantings />

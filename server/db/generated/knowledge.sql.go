@@ -40,6 +40,16 @@ func (q *Queries) ClaimKnowledge(ctx context.Context, arg ClaimKnowledgeParams) 
 	return i, err
 }
 
+const cleanupPlanningProviderUsage = `-- name: CleanupPlanningProviderUsage :exec
+DELETE FROM planning_provider_usage WHERE (workspace_id,window_start) IN
+ (SELECT workspace_id,window_start FROM planning_provider_usage WHERE window_start<now()-interval '7 days' LIMIT 512)
+`
+
+func (q *Queries) CleanupPlanningProviderUsage(ctx context.Context) error {
+	_, err := q.db.Exec(ctx, cleanupPlanningProviderUsage)
+	return err
+}
+
 const exportKnowledgeProfiles = `-- name: ExportKnowledgeProfiles :many
 SELECT to_jsonb(t) AS row FROM knowledge_profiles t WHERE workspace_id=$1 ORDER BY profile_key
 `
@@ -176,6 +186,27 @@ func (q *Queries) GetKnowledgeProfile(ctx context.Context, arg GetKnowledgeProfi
 		&i.ProfileKey,
 		&i.Facts,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getPublication = `-- name: GetPublication :one
+SELECT url, provider, content_sha256, source_text, fetched_at, expires_at, planning_key, planning_facts, planning_extracted_at FROM knowledge_publications WHERE url=$1 AND expires_at>now()
+`
+
+func (q *Queries) GetPublication(ctx context.Context, url string) (KnowledgePublication, error) {
+	row := q.db.QueryRow(ctx, getPublication, url)
+	var i KnowledgePublication
+	err := row.Scan(
+		&i.Url,
+		&i.Provider,
+		&i.ContentSha256,
+		&i.SourceText,
+		&i.FetchedAt,
+		&i.ExpiresAt,
+		&i.PlanningKey,
+		&i.PlanningFacts,
+		&i.PlanningExtractedAt,
 	)
 	return i, err
 }
@@ -396,6 +427,71 @@ func (q *Queries) PutKnowledgeProfile(ctx context.Context, arg PutKnowledgeProfi
 	return err
 }
 
+const putPlanningPublicationFacts = `-- name: PutPlanningPublicationFacts :execrows
+UPDATE knowledge_publications SET planning_key=$2,planning_facts=$3,planning_extracted_at=now()
+WHERE url=$1 AND content_sha256=$4
+`
+
+type PutPlanningPublicationFactsParams struct {
+	Url           string
+	PlanningKey   pgtype.Text
+	PlanningFacts []byte
+	ContentSha256 string
+}
+
+func (q *Queries) PutPlanningPublicationFacts(ctx context.Context, arg PutPlanningPublicationFactsParams) (int64, error) {
+	result, err := q.db.Exec(ctx, putPlanningPublicationFacts,
+		arg.Url,
+		arg.PlanningKey,
+		arg.PlanningFacts,
+		arg.ContentSha256,
+	)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const putPublication = `-- name: PutPublication :one
+INSERT INTO knowledge_publications(url,provider,content_sha256,source_text,expires_at)
+VALUES($1,$2,$3,$4,now()+interval '30 days')
+ON CONFLICT(url) DO UPDATE SET provider=excluded.provider,content_sha256=excluded.content_sha256,
+ source_text=excluded.source_text,fetched_at=now(),expires_at=excluded.expires_at,
+ planning_key=CASE WHEN knowledge_publications.content_sha256=excluded.content_sha256 THEN knowledge_publications.planning_key END,
+ planning_facts=CASE WHEN knowledge_publications.content_sha256=excluded.content_sha256 THEN knowledge_publications.planning_facts END,
+ planning_extracted_at=CASE WHEN knowledge_publications.content_sha256=excluded.content_sha256 THEN knowledge_publications.planning_extracted_at END
+RETURNING url, provider, content_sha256, source_text, fetched_at, expires_at, planning_key, planning_facts, planning_extracted_at
+`
+
+type PutPublicationParams struct {
+	Url           string
+	Provider      string
+	ContentSha256 string
+	SourceText    string
+}
+
+func (q *Queries) PutPublication(ctx context.Context, arg PutPublicationParams) (KnowledgePublication, error) {
+	row := q.db.QueryRow(ctx, putPublication,
+		arg.Url,
+		arg.Provider,
+		arg.ContentSha256,
+		arg.SourceText,
+	)
+	var i KnowledgePublication
+	err := row.Scan(
+		&i.Url,
+		&i.Provider,
+		&i.ContentSha256,
+		&i.SourceText,
+		&i.FetchedAt,
+		&i.ExpiresAt,
+		&i.PlanningKey,
+		&i.PlanningFacts,
+		&i.PlanningExtractedAt,
+	)
+	return i, err
+}
+
 const refreshKnowledge = `-- name: RefreshKnowledge :execrows
 UPDATE plant_knowledge SET generation=generation+1,state='PENDING',profile_key=NULL,message='Waiting for regional guidance.',updated_at=now(),lease_until=NULL
 WHERE workspace_id=$1 AND ($2::uuid IS NULL OR plant_id=$2)
@@ -428,6 +524,21 @@ WHERE k.plant_id=p.id AND k.workspace_id=p.workspace_id AND p.status='ACTIVE' AN
 
 func (q *Queries) RequeueStaleKnowledge(ctx context.Context, extractionVersion string) (int64, error) {
 	result, err := q.db.Exec(ctx, requeueStaleKnowledge, extractionVersion)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const reservePlanningProviderRequest = `-- name: ReservePlanningProviderRequest :execrows
+INSERT INTO planning_provider_usage(workspace_id,window_start,requests)
+VALUES($1,date_trunc('hour',now(),'UTC'),1)
+ON CONFLICT(workspace_id,window_start) DO UPDATE SET requests=planning_provider_usage.requests+1
+WHERE planning_provider_usage.requests<8
+`
+
+func (q *Queries) ReservePlanningProviderRequest(ctx context.Context, workspaceID pgtype.UUID) (int64, error) {
+	result, err := q.db.Exec(ctx, reservePlanningProviderRequest, workspaceID)
 	if err != nil {
 		return 0, err
 	}

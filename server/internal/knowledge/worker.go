@@ -168,10 +168,11 @@ func (s *Service) Enrich(ctx context.Context, row dbgen.PlantKnowledge) error {
 			if s.Fetch == nil || model == nil {
 				return s.finish(ctx, row, "FAILED", "Knowledge extraction needs a configured source fetcher and AI model.", "")
 			}
-			text, err := s.Fetch.Read(ctx, source)
+			publication, err := s.publication(ctx, source)
 			if err != nil {
-				return s.finish(ctx, row, "FAILED", err.Error()+" Retry after checking source availability.", "")
+				return s.finish(ctx, row, "FAILED", "The regional publication could not be read. Retry after checking source availability.", "")
 			}
+			text := publication.SourceText
 			if !agentcontext.JobAllowed(ctx, s.Pool, uid(row.AgentGrantID), uid(row.AgentCredentialID), uid(row.WorkspaceID), "analysis:run", uid(row.PlantID)) {
 				return s.finish(ctx, row, "FAILED", "The initiating agent connection is no longer authorized.", "")
 			}

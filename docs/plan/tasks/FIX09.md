@@ -1,6 +1,6 @@
 # FIX09 — Sign-in identity and rain reviews
 
-Status: IN_PROGRESS.
+Status: ACCEPTED. Implementation and exact-source GitHub CI passed.
 
 ### FIX09 — Blank sign-in identity and garden rain confirmation
 

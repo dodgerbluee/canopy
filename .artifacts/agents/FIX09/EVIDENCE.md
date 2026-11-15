@@ -1,6 +1,6 @@
 # FIX09 — Sign-in identity and garden rain reviews
 
-Status: local implementation and verification complete; exact-source GitHub CI and requested PR merge pending.
+Status: ACCEPTED. Implementation, local verification and exact-source GitHub CI passed.
 
 ## Findings and changes
 
@@ -17,6 +17,7 @@ Status: local implementation and verification complete; exact-source GitHub CI a
 - Final targeted rain suites: passed. `go test -race -p 2 ./internal/journal ./internal/care/weather ./internal/transport/graphql -run 'TestRecentRain|TestGardenRain|TestRainReview|TestManualRain|TestCalendarRain' -count=1`: passed against PG17. Covers provider units/time bounds/nulls/errors, DST/fractional-offset midnight, no locations or care, cache/failure/staleness, concurrent confirmations, unknown amount, manual rain, isolation and a moved location during fetch. Output: `rain-race.log`.
 - Angular full regression: **65 files / 525 tests passed** (`frontend-final-tests.log`). Production build and final compact-layout focused **5/5** tests passed (`final-layout-checks.log`). A receipt-polling test initially timed out during simultaneous image compilation; the full suite passed once that build finished, without changing its implementation or timeout.
 - Playwright: **20/20 passed**, repeated after final layout and paired runtime refresh. Desktop and Pixel 7, both themes. Real live dashboard reads and blank-login behavior plus explicitly controlled rain responses for save/retry/depth/dismiss interaction states. Axe zero violations and no horizontal overflow. The actual recording/worker paths are verified separately over real GraphQL/PG17. Output: `final-browser-tests.log`; screenshots visually inspected.
+- Disposable migration round trip **24 → 23 → 24** through the actual image migrator: passed (`migration-roundtrip.log`), touching only the test database.
 - `make gen-check`: passed; authoritative GraphQL, SQL, gqlgen and 102-tool MCP manifest generation left no diff. `go vet ./...`, whole-server gofmt, contract TypeScript check and fixture validator: passed. Plan/packet/dispatch and import-boundary checks (including negative fixtures): passed. `git diff --check`: passed.
 
 ## Preserved local preview
@@ -27,4 +28,4 @@ The actual hourly rain job completed and fetched public weather using the previe
 
 ## Release/merge
 
-The full eight-step planner was already accepted in PLAN01–PLAN08. This packet adds the requested username/rain corrections before merging that feature branch. Main is unprotected; preserve packet history with a merge commit after exact-source CI succeeds. Main automatically starts the existing dev-image publishing workflow; no stable version tag or production redeployment is implied.
+The full eight-step planner was already accepted in PLAN01–PLAN08. This packet adds the requested username/rain corrections before merging that feature branch. Exact implementation commit `fc7ded9f481ca48e61872a3c7cb4450181137418` passed [PR CI](https://github.com/dodgerbluee/canopy/actions/runs/43776800485). [PR #1](https://github.com/dodgerbluee/canopy/pull/1) is ready for the requested merge. This acceptance audit changes only task/evidence metadata; the validated implementation is unchanged. Main is unprotected; preserve packet history with a merge commit. Main automatically starts the existing dev-image publishing workflow; no stable version tag or production redeployment is implied.

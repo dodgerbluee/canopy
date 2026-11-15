@@ -1,7 +1,8 @@
 # Future planting planner
 
-Status: implementation started. PLAN01 establishes the staged contracts and storage;
-the page and live API remain hidden until their implementation packets land.
+Status: step 1 of 8 complete. PLAN01 establishes the accepted staged contracts and
+storage. PLAN02 is next; the page and live API remain hidden until their
+implementation packets land.
 
 ## Product direction
 
@@ -275,14 +276,14 @@ plant. Completing the overall plan is distinct from ownership and an elapsed dat
 
 ## Eight sequential implementation packets
 
-PLAN01 is the dispatched contract/storage step. Register the remaining sequential
+PLAN01 is the accepted contract/storage step. Register the remaining sequential
 implementation packets when they are kicked off. Its accepted contract is recorded
 in `docs/plan/tasks/PLAN01-contract-change.md`; the planning SDL is deliberately
 staged outside the runtime server schema until PLAN02 provides real resolvers.
 
 | Step | Deliverable | Main paths | Acceptance/verification |
 | --- | --- | --- | --- |
-| 1 | Contracts and storage | Draft contract change record; `contracts/graphql/planning.graphql`, operations, next migration number | Define states, date precision, source vs user dates, permissions, pagination, revisions and promotion semantics. Migrate up/down on a disposable DB; run code generators. Do not assume migration 19 is still free at implementation time. |
+| 1 — complete | Contracts and storage | Accepted contract change record; `contracts/graphql/planning.graphql`, operations, migration 00019 | States, date precision, source vs user dates, permissions, pagination, revisions and promotion semantics defined. Disposable PostgreSQL up/down/reapply, generators, local regression suite and full GitHub CI passed. |
 | 2 | Planning domain and CRUD | `server/internal/planning/`, DB queries, GraphQL resolver, portability manifests | Workspace isolation, validated optional fields, exact budgets, idempotency/conflict/audit behavior and full backup/export inclusion. Real PostgreSQL tests, including backup/restore of new rows. |
 | 3 | Crop-based guidance | `server/internal/knowledge/`, source adapters, enrichment queries/worker | Guidance works before a plant exists; add seed/sow/transplant facts without breaking current seasonal kinds. Test source/cultivar/region/method matching, unsupported/manual paths, stale-generation refusal and provider failure. |
 | 4 | Schedule engine | `server/internal/planning/schedule.go` and scoped query/confirmation commands | Pure, clock-injected calculations with preserved granularity and evidence. Test multiple windows, New Year, leap days, hemisphere, missing anchors, first-harvest uncertainty and unchanged accepted dates after refresh. |

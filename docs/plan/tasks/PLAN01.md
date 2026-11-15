@@ -1,6 +1,6 @@
 # PLAN01 — Contracts and storage
 
-Status: IN_PROGRESS.
+Status: ACCEPTED. Evidence: `.artifacts/agents/PLAN01/EVIDENCE.md`.
 
 ### PLAN01 — Planting contracts and storage foundation
 

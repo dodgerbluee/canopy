@@ -1,6 +1,9 @@
 # PLAN01 — Planning contracts and storage foundation
 
-Local implementation/verification complete; final generation/CI acceptance pending.
+Status: ACCEPTED. Implementation commit: 3079640cb4dce05f30d313e53b746aabc9a9374b.
+
+Full GitHub CI passed on that commit:
+https://github.com/dodgerbluee/canopy/actions/runs/43661976089
 
 Added staged additive planning SDL, typed operations and three example responses.
 Runtime server schema registration remains deferred to PLAN02, following the
@@ -33,11 +36,20 @@ Executed local checks:
 - Node24 contract validation/codegen, TypeScript check and Angular production
   build passed; three fixtures also passed actual GraphQL response completion.
 - All generators ran, and make lint (gofmt/vet/TypeScript/Angular build) passed.
+- make gen-check confirmed regeneration leaves no diff. Task dispatch, plan,
+  packet and architecture boundary gates passed locally and in CI.
+- GitHub CI passed release-tool checks, fresh dependency installation, generation
+  no-diff, plan/boundary gates, lint, unit tests and real PostgreSQL integration.
 
 No local or remote production database, provider, container or deployment was
-changed. Only the explicitly named disposable test database was started.
+changed. Only the explicitly named disposable test database was started and it
+was removed after verification. The feature branch is feature/planting-planner;
+it was not merged or published as a deployment image.
 Planning writes remain inactive until PLAN02 adds real resolvers and populated
 backup/export/restore support. Later scheduling/promotion commands will have
 additive contract amendments rather than unfinished public handlers.
+
+Next packet: PLAN02, domain/CRUD resolvers plus populated portability coverage.
+The Planning page remains step 5; no visible UI is claimed in this foundation.
 
 Raw logs, fixture checker and test migration executable remain ignored here.

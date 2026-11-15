@@ -340,3 +340,15 @@ extend type Query {
 extend type Mutation {
   confirmPlantingSchedule(input: ConfirmPlantingScheduleInput!, clientMutationId: String): PlantingPlanPayload!
 }
+
+type PlantingBoardRow { plan: PlantingPlan!, schedule: PlantingScheduleConnection! }
+type PlantingBoardConnection {
+  timezone: String!
+  today: LocalDate!
+  items: [PlantingBoardRow!]!
+  pageInfo: PageInfo!
+}
+extend type Query {
+  """Paginated plan rows and their first 25 schedule windows in one read-only page request. No-date/unsupported plans remain visible."""
+  plantingBoard(input: PlantingScheduleInput!, first: Int = 25, after: String, filter: PlantingPlanFilter): PlantingBoardConnection!
+}

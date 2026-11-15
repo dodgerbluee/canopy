@@ -55,7 +55,7 @@ func (q queryResolver) PlantingSchedule(ctx context.Context, planID string, inpu
 	if first != nil {
 		pageSize = *first
 	}
-	in := planning.ScheduleQuery{PlanID: planID, Range: planning.MonthRange{From: input.FromMonth, To: input.ToMonth}, Assumptions: plantingScheduleAssumptionsIn(input.Assumptions), First: pageSize, After: after}
+	in := planning.ScheduleQuery{PlanID: planID, Range: planning.MonthRange{From: input.FromMonth, To: input.ToMonth}, Assumptions: plantingScheduleAssumptionsIn(input.Assumptions), AssumptionsExplicit: input.Assumptions != nil, First: pageSize, After: after}
 	page, err := q.r.Planning.Schedule(ctx, planningActor(p), in)
 	if errors.Is(err, planning.ErrInvalidSchedule) {
 		return nil, invalidFilterError()
@@ -69,6 +69,9 @@ func (q queryResolver) PlantingSchedule(ctx context.Context, planID string, inpu
 	if page == nil {
 		return nil, nil
 	}
+	return plantingSchedulePageOut(page), nil
+}
+func plantingSchedulePageOut(page *planning.SchedulePage) *gql.PlantingScheduleConnection {
 	out := &gql.PlantingScheduleConnection{PlanID: page.PlanID, Revision: int(page.Revision), GuidanceGeneration: int(page.Generation), Timezone: page.Timezone, Today: scalars.Date(page.Today), TargetPeriod: plantingPeriodOut(page.TargetPeriod), TargetStatus: gql.PlantingPeriodStatus(page.TargetStatus), TargetDisplayMonths: plantingMonthRangeOut(page.TargetDisplayMonths), TargetVisible: page.TargetVisible, AcceptedSchedule: plantingScheduleSelectionOut(page.Selection), SourceSnapshotID: page.SourceSnapshotID, GuidanceState: gql.KnowledgeState(page.GuidanceState), GuidanceCurrent: page.GuidanceCurrent, Message: page.Message, Assumptions: plantingScheduleAssumptionsOut(page.Assumptions), Items: []*gql.PlantingProjectedWindow{}, PageInfo: &gql.PageInfo{HasNextPage: page.HasNext, EndCursor: page.EndCursor}}
 	if page.TargetHemisphere != nil {
 		v := gql.PlantingHemisphere(*page.TargetHemisphere)
@@ -77,7 +80,7 @@ func (q queryResolver) PlantingSchedule(ctx context.Context, planID string, inpu
 	for _, w := range page.Windows {
 		out.Items = append(out.Items, &gql.PlantingProjectedWindow{ID: w.ID, FactID: w.FactID, WindowIndex: w.WindowIndex, Year: w.Year, Phase: gql.PlantingPhaseKind(w.Phase), Label: w.Label, Resolution: gql.PlantingScheduleResolution(w.Resolution), Message: w.Message, Status: gql.PlantingPeriodStatus(w.Status), Period: plantingPeriodOut(w.Period), DisplayMonths: plantingMonthRangeOut(w.DisplayMonths), ContinuesBefore: w.ContinuesBefore, ContinuesAfter: w.ContinuesAfter, Estimated: w.Estimated, FirstHarvestUnknown: w.FirstHarvestUnknown, Selectable: w.Selectable})
 	}
-	return out, nil
+	return out
 }
 func (m mutationResolver) ConfirmPlantingSchedule(ctx context.Context, input gql.ConfirmPlantingScheduleInput, key *string) (*gql.PlantingPlanPayload, error) {
 	in := planning.ConfirmScheduleInput{PlanID: input.PlanID, SnapshotID: input.SnapshotID, ExpectedRevision: plantingPositiveInt(input.ExpectedRevision), Generation: plantingPositiveInt(input.Generation), FactID: input.FactID, WindowIndex: input.WindowIndex, Year: input.Year, Assumptions: plantingScheduleAssumptionsIn(input.Assumptions), TargetPeriod: plantingPeriodIn(input.TargetPeriod)}

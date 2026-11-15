@@ -935,6 +935,18 @@ type ComplexityRoot struct {
 		Season    func(childComplexity int) int
 	}
 
+	PlantingBoardConnection struct {
+		Items    func(childComplexity int) int
+		PageInfo func(childComplexity int) int
+		Timezone func(childComplexity int) int
+		Today    func(childComplexity int) int
+	}
+
+	PlantingBoardRow struct {
+		Plan     func(childComplexity int) int
+		Schedule func(childComplexity int) int
+	}
+
 	PlantingDateRange struct {
 		From func(childComplexity int) int
 		To   func(childComplexity int) int
@@ -1228,6 +1240,7 @@ type ComplexityRoot struct {
 		Notifications        func(childComplexity int, unreadOnly *bool, first *int, after *string) int
 		PendingUploads       func(childComplexity int, first *int, after *string) int
 		Plant                func(childComplexity int, id string) int
+		PlantingBoard        func(childComplexity int, input PlantingScheduleInput, first *int, after *string, filter *PlantingPlanFilter) int
 		PlantingPlan         func(childComplexity int, id string) int
 		PlantingPlans        func(childComplexity int, first *int, after *string, filter *PlantingPlanFilter, order *PlantingPlanOrder) int
 		PlantingSchedule     func(childComplexity int, planID string, input PlantingScheduleInput, first *int, after *string) int
@@ -1671,6 +1684,7 @@ type QueryResolver interface {
 	PlantingPlans(ctx context.Context, first *int, after *string, filter *PlantingPlanFilter, order *PlantingPlanOrder) (*PlantingPlanConnection, error)
 	PlantingPlan(ctx context.Context, id string) (*PlantingPlan, error)
 	PlantingSchedule(ctx context.Context, planID string, input PlantingScheduleInput, first *int, after *string) (*PlantingScheduleConnection, error)
+	PlantingBoard(ctx context.Context, input PlantingScheduleInput, first *int, after *string, filter *PlantingPlanFilter) (*PlantingBoardConnection, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -5800,6 +5814,44 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.PlantingAnnualPeriod.Season(childComplexity), true
 
+	case "PlantingBoardConnection.items":
+		if e.ComplexityRoot.PlantingBoardConnection.Items == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingBoardConnection.Items(childComplexity), true
+	case "PlantingBoardConnection.pageInfo":
+		if e.ComplexityRoot.PlantingBoardConnection.PageInfo == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingBoardConnection.PageInfo(childComplexity), true
+	case "PlantingBoardConnection.timezone":
+		if e.ComplexityRoot.PlantingBoardConnection.Timezone == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingBoardConnection.Timezone(childComplexity), true
+	case "PlantingBoardConnection.today":
+		if e.ComplexityRoot.PlantingBoardConnection.Today == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingBoardConnection.Today(childComplexity), true
+
+	case "PlantingBoardRow.plan":
+		if e.ComplexityRoot.PlantingBoardRow.Plan == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingBoardRow.Plan(childComplexity), true
+	case "PlantingBoardRow.schedule":
+		if e.ComplexityRoot.PlantingBoardRow.Schedule == nil {
+			break
+		}
+
+		return e.ComplexityRoot.PlantingBoardRow.Schedule(childComplexity), true
+
 	case "PlantingDateRange.from":
 		if e.ComplexityRoot.PlantingDateRange.From == nil {
 			break
@@ -7091,6 +7143,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Plant(childComplexity, args["id"].(string)), true
+	case "Query.plantingBoard":
+		if e.ComplexityRoot.Query.PlantingBoard == nil {
+			break
+		}
+
+		args, err := ec.field_Query_plantingBoard_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.PlantingBoard(childComplexity, args["input"].(PlantingScheduleInput), args["first"].(*int), args["after"].(*string), args["filter"].(*PlantingPlanFilter)), true
 	case "Query.plantingPlan":
 		if e.ComplexityRoot.Query.PlantingPlan == nil {
 			break
@@ -10725,6 +10788,18 @@ extend type Query {
 extend type Mutation {
   confirmPlantingSchedule(input: ConfirmPlantingScheduleInput!, clientMutationId: String): PlantingPlanPayload!
 }
+
+type PlantingBoardRow { plan: PlantingPlan!, schedule: PlantingScheduleConnection! }
+type PlantingBoardConnection {
+  timezone: String!
+  today: LocalDate!
+  items: [PlantingBoardRow!]!
+  pageInfo: PageInfo!
+}
+extend type Query {
+  """Paginated plan rows and their first 25 schedule windows in one read-only page request. No-date/unsupported plans remain visible."""
+  plantingBoard(input: PlantingScheduleInput!, first: Int = 25, after: String, filter: PlantingPlanFilter): PlantingBoardConnection!
+}
 `, BuiltIn: false},
 	{Name: "../../../../../contracts/graphql/portability.graphql", Input: `# Portability: export jobs. Frozen by T01.r1.
 # Download is authenticated HTTP; no signed public links.
@@ -13008,6 +13083,30 @@ func (ec *executionContext) childFields_PlantingAnnualPeriod(ctx context.Context
 		return ec.fieldContext_PlantingAnnualPeriod_season(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type PlantingAnnualPeriod", field.Name)
+}
+
+func (ec *executionContext) childFields_PlantingBoardConnection(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "timezone":
+		return ec.fieldContext_PlantingBoardConnection_timezone(ctx, field)
+	case "today":
+		return ec.fieldContext_PlantingBoardConnection_today(ctx, field)
+	case "items":
+		return ec.fieldContext_PlantingBoardConnection_items(ctx, field)
+	case "pageInfo":
+		return ec.fieldContext_PlantingBoardConnection_pageInfo(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PlantingBoardConnection", field.Name)
+}
+
+func (ec *executionContext) childFields_PlantingBoardRow(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "plan":
+		return ec.fieldContext_PlantingBoardRow_plan(ctx, field)
+	case "schedule":
+		return ec.fieldContext_PlantingBoardRow_schedule(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PlantingBoardRow", field.Name)
 }
 
 func (ec *executionContext) childFields_PlantingDateRange(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -16187,6 +16286,44 @@ func (ec *executionContext) field_Query_plant_args(ctx context.Context, rawArgs 
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_plantingBoard_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (PlantingScheduleInput, error) {
+			return ec.unmarshalNPlantingScheduleInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingScheduleInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "first",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["first"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "after",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["after"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "filter",
+		func(ctx context.Context, v any) (*PlantingPlanFilter, error) {
+			return ec.unmarshalOPlantingPlanFilter2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingPlanFilter(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["filter"] = arg3
 	return args, nil
 }
 
@@ -33138,6 +33275,180 @@ func (ec *executionContext) fieldContext_PlantingAnnualPeriod_season(_ context.C
 	return graphql.NewScalarFieldContext("PlantingAnnualPeriod", field, false, false, "PlantingSeason")
 }
 
+func (ec *executionContext) _PlantingBoardConnection_timezone(ctx context.Context, field graphql.CollectedField, obj *PlantingBoardConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingBoardConnection_timezone(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Timezone, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingBoardConnection_timezone(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingBoardConnection", field, false, false, "String")
+}
+
+func (ec *executionContext) _PlantingBoardConnection_today(ctx context.Context, field graphql.CollectedField, obj *PlantingBoardConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingBoardConnection_today(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Today, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v scalars.Date) graphql.Marshaler {
+			return ec.marshalNLocalDate2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋscalarsᚐDate(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingBoardConnection_today(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("PlantingBoardConnection", field, false, false, "LocalDate")
+}
+
+func (ec *executionContext) _PlantingBoardConnection_items(ctx context.Context, field graphql.CollectedField, obj *PlantingBoardConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingBoardConnection_items(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Items, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*PlantingBoardRow) graphql.Marshaler {
+			return ec.marshalNPlantingBoardRow2ᚕᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingBoardRowᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingBoardConnection_items(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlantingBoardConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingBoardRow(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlantingBoardConnection_pageInfo(ctx context.Context, field graphql.CollectedField, obj *PlantingBoardConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingBoardConnection_pageInfo(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PageInfo) graphql.Marshaler {
+			return ec.marshalNPageInfo2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPageInfo(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingBoardConnection_pageInfo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlantingBoardConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PageInfo(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlantingBoardRow_plan(ctx context.Context, field graphql.CollectedField, obj *PlantingBoardRow) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingBoardRow_plan(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Plan, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingPlan) graphql.Marshaler {
+			return ec.marshalNPlantingPlan2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingPlan(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingBoardRow_plan(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlantingBoardRow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingPlan(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _PlantingBoardRow_schedule(ctx context.Context, field graphql.CollectedField, obj *PlantingBoardRow) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PlantingBoardRow_schedule(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Schedule, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingScheduleConnection) graphql.Marshaler {
+			return ec.marshalNPlantingScheduleConnection2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingScheduleConnection(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_PlantingBoardRow_schedule(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "PlantingBoardRow",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingScheduleConnection(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _PlantingDateRange_from(ctx context.Context, field graphql.CollectedField, obj *PlantingDateRange) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -39070,6 +39381,50 @@ func (ec *executionContext) fieldContext_Query_plantingSchedule(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_plantingSchedule_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_plantingBoard(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_plantingBoard(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().PlantingBoard(ctx, fc.Args["input"].(PlantingScheduleInput), fc.Args["first"].(*int), fc.Args["after"].(*string), fc.Args["filter"].(*PlantingPlanFilter))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *PlantingBoardConnection) graphql.Marshaler {
+			return ec.marshalNPlantingBoardConnection2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingBoardConnection(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_plantingBoard(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_PlantingBoardConnection(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_plantingBoard_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -58246,6 +58601,92 @@ func (ec *executionContext) _PlantingAnnualPeriod(ctx context.Context, sel ast.S
 	return out
 }
 
+var plantingBoardConnectionImplementors = []string{"PlantingBoardConnection"}
+
+func (ec *executionContext) _PlantingBoardConnection(ctx context.Context, sel ast.SelectionSet, obj *PlantingBoardConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, plantingBoardConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PlantingBoardConnection")
+		case "timezone":
+			out.Values[i] = ec._PlantingBoardConnection_timezone(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "today":
+			out.Values[i] = ec._PlantingBoardConnection_today(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "items":
+			out.Values[i] = ec._PlantingBoardConnection_items(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "pageInfo":
+			out.Values[i] = ec._PlantingBoardConnection_pageInfo(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var plantingBoardRowImplementors = []string{"PlantingBoardRow"}
+
+func (ec *executionContext) _PlantingBoardRow(ctx context.Context, sel ast.SelectionSet, obj *PlantingBoardRow) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, plantingBoardRowImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PlantingBoardRow")
+		case "plan":
+			out.Values[i] = ec._PlantingBoardRow_plan(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "schedule":
+			out.Values[i] = ec._PlantingBoardRow_schedule(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
 var plantingDateRangeImplementors = []string{"PlantingDateRange"}
 
 func (ec *executionContext) _PlantingDateRange(ctx context.Context, sel ast.SelectionSet, obj *PlantingDateRange) graphql.Marshaler {
@@ -60232,6 +60673,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				true, false,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_plantingSchedule(ctx, field)
+				})
+		case "plantingBoard":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_plantingBoard(ctx, field)
 				})
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -64509,6 +64956,38 @@ func (ec *executionContext) marshalNPlantingAnnualPrecision2canopyᚋserverᚋin
 	return v
 }
 
+func (ec *executionContext) marshalNPlantingBoardConnection2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingBoardConnection(ctx context.Context, sel ast.SelectionSet, v *PlantingBoardConnection) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "PlantingBoardConnection!")
+		return graphql.Null
+	}
+	return ec._PlantingBoardConnection(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPlantingBoardRow2ᚕᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingBoardRowᚄ(ctx context.Context, sel ast.SelectionSet, v []*PlantingBoardRow) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNPlantingBoardRow2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingBoardRow(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNPlantingBoardRow2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingBoardRow(ctx context.Context, sel ast.SelectionSet, v *PlantingBoardRow) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "PlantingBoardRow!")
+		return graphql.Null
+	}
+	return ec._PlantingBoardRow(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNPlantingGardenLinkMode2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingGardenLinkMode(ctx context.Context, v any) (PlantingGardenLinkMode, error) {
 	var res PlantingGardenLinkMode
 	err := res.UnmarshalGQL(v)
@@ -64751,6 +65230,14 @@ func (ec *executionContext) marshalNPlantingScheduleAssumptions2ᚖcanopyᚋserv
 		return graphql.Null
 	}
 	return ec._PlantingScheduleAssumptions(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPlantingScheduleConnection2ᚖcanopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingScheduleConnection(ctx context.Context, sel ast.SelectionSet, v *PlantingScheduleConnection) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "PlantingScheduleConnection!")
+		return graphql.Null
+	}
+	return ec._PlantingScheduleConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNPlantingScheduleInput2canopyᚋserverᚋinternalᚋtransportᚋgraphqlᚋgqlᚐPlantingScheduleInput(ctx context.Context, v any) (PlantingScheduleInput, error) {

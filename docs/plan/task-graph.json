@@ -527,7 +527,8 @@
         "PLAN01",
         "PLAN02",
         "PLAN03",
-        "PLAN04"
+        "PLAN04",
+        "PLAN05"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -1051,6 +1052,14 @@
         "PLAN03"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN05": {
+      "title": "Angular Planning page, modal workflows and local Docker preview",
+      "dependsOn": [
+        "PLAN04"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

@@ -1348,6 +1348,18 @@ type PlantingAnnualPeriod struct {
 	Season    *PlantingSeason           `json:"season,omitempty"`
 }
 
+type PlantingBoardConnection struct {
+	Timezone string              `json:"timezone"`
+	Today    scalars.Date        `json:"today"`
+	Items    []*PlantingBoardRow `json:"items"`
+	PageInfo *PageInfo           `json:"pageInfo"`
+}
+
+type PlantingBoardRow struct {
+	Plan     *PlantingPlan               `json:"plan"`
+	Schedule *PlantingScheduleConnection `json:"schedule"`
+}
+
 type PlantingBudgetInput struct {
 	MinorUnits scalars.MinorUnits `json:"minorUnits"`
 	Currency   string             `json:"currency"`

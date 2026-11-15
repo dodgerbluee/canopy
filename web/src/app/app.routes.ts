@@ -89,6 +89,11 @@ export const routes: Routes = [
         loadComponent: () => import('./features/calendar/calendar').then((m) => m.CalendarPage),
       },
       {
+        path: 'planning',
+        canDeactivate: [entryGuard],
+        loadComponent: () => import('./features/planning/planning').then((m) => m.PlanningPage),
+      },
+      {
         path: 'journal',
         canDeactivate: [entryGuard],
         loadComponent: () => import('./features/journal/journal').then((m) => m.JournalPage),

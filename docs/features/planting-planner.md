@@ -1,8 +1,10 @@
 # Future planting planner
 
-Status: steps 1–4 of 8 complete and accepted on the feature branch, including
-the pure schedule engine and explicit source-backed selection. The Planning page
-follows in step 5. Existing production deployments are unchanged.
+Status: steps 1–4 of 8 accepted; step 5's Planning page and shared modal flows
+are under final CI verification. An isolated Docker preview is available at
+http://127.0.0.1:7082/planning. Calendar integrations, garden promotion and agent/
+assistant work follow in steps 6–8; the user authorized continuing through all.
+Existing production deployments are unchanged.
 
 ## Product direction
 
@@ -288,7 +290,7 @@ PLAN03's additive refresh/research contract is recorded in
 | 2 — complete | Planning domain and CRUD | `server/internal/planning/`, DB queries, GraphQL resolver, portability manifests | Workspace isolation, optional values, exact budgets, transactional revisions/audit/replay, scoped cursors and complete backup/export inclusion implemented. Real HTTP operations, populated and legacy restore, race checks, full backend regression and GitHub CI passed. |
 | 3 — complete | Crop-based guidance | `server/internal/knowledge/`, source adapters, enrichment queries/worker | Research before a plant exists, automatic/explicit refresh, immutable provenance, honest timing, stale-generation fencing, public cache and bounded provider usage. Source/cultivar/region/method matching, three configured transports, failed/manual paths, populated/legacy portability, race checks, fresh primary-source/local-model smoke and full GitHub CI passed. |
 | 4 — complete | Schedule engine | `server/internal/planning/schedule.go` and scoped query/confirmation commands | Pure civil projections, twelve-month per-plan pagination and explicit acceptance with portable assumptions. Distinct/overlapping windows, Gregorian leap cycle, hemispheres, missing/wrong anchors, first-harvest uncertainty, conflicts/replay/rollback and preserved choices verified. Populated/legacy restore, migration CLI 21→20→21, race checks, full Go regression and GitHub CI passed. |
-| 5 | Angular page and shared modals | `web/src/app/features/planning/`, data layer, routes/shell/More, reusable timeline primitives | Complete ideas/plans/detail/edit flow on desktop and phone. Test fresh-form validation, unknown/failed guidance, cancel/restore, URL filters, keyboard focus, scrolling and both themes. Serve a local Docker preview. |
+| 5 — verifying | Angular page and shared modals | `web/src/app/features/planning/`, data layer, routes/shell/More, batched board composition | Complete ideas/plans/edit/actions/source-choice flows on desktop/phone with shared modal guards, hidden URL filters and both themes. 504 Angular tests/build, real API/race/regression checks, 20 authenticated browser/accessibility scenarios and paired Docker preview pass; full CI pending. |
 | 6 | Calendar, Year, Today and reminders | Existing calendar/seasons/today/inbox modules; scoped planner projections and worker | Planning stays visually distinct and filterable, with no fake real-plant events. Only explicit dates create markers/reminders. Test near-term scheduling, duplicate suppression, cancellation and date changes. |
 | 7 | Add to garden | Planning promotion command, narrow collection transaction interface, existing plant form | One atomic conversion to one plant/group, with confirmed actual values and origin link. Test retry after lost response, concurrent different keys, stale revisions, conflicts, rollback, unknown actual count, linking an existing plant and buying early while a later plant-out action stays open. |
 | 8 | Agent integration and release gate | Agent catalog/context, remaining browser/portability tests, release/deployment tooling | Scoped MCP read/write/promote behavior, complete round-trip portability, full end-to-end journey and no planning leakage into actual totals. Verify deployed API/worker compatibility and queued jobs before release. |

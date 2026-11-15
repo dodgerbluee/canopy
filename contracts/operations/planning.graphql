@@ -142,3 +142,25 @@ mutation ConfirmPlantingSchedule($input: ConfirmPlantingScheduleInput!, $clientM
     clientMutationId
   }
 }
+
+query PlantingBoard($input: PlantingScheduleInput!, $first: Int, $after: String, $filter: PlantingPlanFilter) {
+  plantingBoard(input: $input, first: $first, after: $after, filter: $filter) {
+    timezone today
+    items {
+      plan { ...PlantingPlanFields }
+      schedule {
+        planId revision guidanceGeneration sourceSnapshotId guidanceState guidanceCurrent message
+        targetStatus targetDisplayMonths { from to } targetVisible
+        acceptedSchedule { ...PlantingScheduleSelectionFields }
+        items {
+          id factId windowIndex year phase label resolution message status
+          period { ...PlantingPeriodFields }
+          displayMonths { from to }
+          continuesBefore continuesAfter estimated firstHarvestUnknown selectable
+        }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+    pageInfo { hasNextPage endCursor }
+  }
+}

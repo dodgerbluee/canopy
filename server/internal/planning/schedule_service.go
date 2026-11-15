@@ -113,14 +113,12 @@ func (s *Service) Schedule(ctx context.Context, a Actor, in ScheduleQuery) (*Sch
 	if err != nil || plan == nil {
 		return nil, err
 	}
-	assumptions, timezone, err := scheduleGeography(ctx, s.q(), plan.Row, in.Assumptions)
-	if err != nil {
-		return nil, err
-	}
-	zone, err := time.LoadLocation(timezone)
-	if err != nil {
-		return nil, err
-	}
+	return s.schedulePlan(ctx, a, *plan, in)
+}
+
+// Page composition reuses its already hydrated aggregates, avoiding a second
+// plan/actions/snapshots read per row. Provider context inspection stays local.
+func (s *Service) schedulePlan(ctx context.Context, a Actor, plan Plan, in ScheduleQuery) (*SchedulePage, error) {
 	selection, err := DecodeScheduleSelection(plan.Row.AcceptedSchedule)
 	if err != nil {
 		return nil, err
@@ -132,6 +130,25 @@ func (s *Service) Schedule(ctx context.Context, a Actor, in ScheduleQuery) (*Sch
 			return nil, err
 		}
 		c = &value
+	}
+	provided := in.Assumptions
+	usingSaved := false
+	if !in.AssumptionsExplicit && len(provided.Anchors) == 0 && provided.Hemisphere == nil && selection != nil && c != nil && plan.AcceptedGuidance != nil && plan.AcceptedGuidance.ContextSha256 == c.Fingerprint {
+		provided = selection.Assumptions
+		usingSaved = true
+	}
+	assumptions, timezone, err := scheduleGeography(ctx, s.q(), plan.Row, provided)
+	if usingSaved && errors.Is(err, ErrInvalidSchedule) {
+		// An automatic default must not block the user's manual plan when known
+		// site geography conflicts with old assumptions. Explicit inputs still fail.
+		assumptions, timezone, err = scheduleGeography(ctx, s.q(), plan.Row, in.Assumptions)
+	}
+	if err != nil {
+		return nil, err
+	}
+	zone, err := time.LoadLocation(timezone)
+	if err != nil {
+		return nil, err
 	}
 	out := &SchedulePage{PlanID: idString(plan.Row.ID), Revision: plan.Row.Revision, Generation: plan.Row.GuidanceGeneration, Timezone: timezone, Today: s.Clock.Now().In(zone).Format(time.DateOnly), TargetPeriod: PeriodFromRow(plan.Row), Selection: selection, Assumptions: assumptions, GuidanceState: "PENDING", Message: "Waiting for current regional guidance."}
 	if selection != nil {

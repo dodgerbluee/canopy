@@ -70,11 +70,12 @@ type ConfirmScheduleInput struct {
 	TargetPeriod       *Period
 }
 type ScheduleQuery struct {
-	PlanID      string
-	Range       MonthRange
-	Assumptions ScheduleAssumptions
-	First       int
-	After       *string
+	PlanID              string
+	Range               MonthRange
+	Assumptions         ScheduleAssumptions
+	AssumptionsExplicit bool
+	First               int
+	After               *string
 }
 type SchedulePage struct {
 	PlanID, Timezone, Today string

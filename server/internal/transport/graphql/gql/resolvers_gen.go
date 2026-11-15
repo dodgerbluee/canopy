@@ -534,6 +534,11 @@ func (r *queryResolver) PlantingSchedule(ctx context.Context, planID string, inp
 	panic("not implemented")
 }
 
+// PlantingBoard is the resolver for the plantingBoard field.
+func (r *queryResolver) PlantingBoard(ctx context.Context, input PlantingScheduleInput, first *int, after *string, filter *PlantingPlanFilter) (*PlantingBoardConnection, error) {
+	panic("not implemented")
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

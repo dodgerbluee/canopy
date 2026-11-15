@@ -1,0 +1,160 @@
+.planning-board {
+  border: 1px solid var(--border-decorative);
+  border-radius: var(--radius-hero);
+  background: var(--surface-base);
+  overflow: clip;
+}
+
+.planning-axis,
+.planning-row {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr) 52px;
+  gap: 0;
+}
+
+.planning-axis {
+  background: var(--surface-canvas);
+  border-bottom: 1px solid var(--border-decorative);
+  align-items: center;
+}
+
+.planning-axis > span {
+  padding: 20px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.planning-axis > div {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.planning-axis > div > span {
+  text-align: center;
+  font: 500 12px/1.5 var(--font-mono);
+  color: var(--text-muted);
+  padding: 16px 0;
+}
+
+.planning-axis small {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.planning-axis .current-month {
+  color: var(--accent);
+  background: var(--surface-raised);
+}
+
+.planning-row {
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border-decorative);
+}
+
+.planning-row:last-child {
+  border-bottom: 0;
+}
+
+.planning-identity {
+  padding: 0 20px;
+  min-width: 0;
+}
+
+.plan-identity {
+  border: 0;
+  background: none;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  font: inherit;
+  text-align: left;
+  padding: 0;
+  cursor: pointer;
+  width: 100%;
+}
+
+.plan-identity > span:last-child {
+  min-width: 0;
+}
+
+.plan-avatar {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 48px;
+  border-radius: var(--radius-pill);
+  color: var(--accent);
+  background: var(--surface-raised);
+}
+
+.plan-identity strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.plan-identity small {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  margin-top: 3px;
+}
+
+.plan-subline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--text-muted);
+  margin: 12px 0 2px;
+}
+
+.plan-state {
+  border-radius: var(--radius-pill);
+  background: var(--surface-raised);
+  padding: 3px 9px;
+  color: var(--accent);
+  font-size: 12px;
+}
+
+.state-CANCELLED,
+.state-COMPLETED {
+  color: var(--text-muted);
+  background: var(--surface-canvas);
+}
+
+.plan-guidance-link {
+  display: block;
+  min-height: 44px;
+  background: none;
+  border: 0;
+  color: var(--accent);
+  font: 500 12px/1.6 var(--font-ui);
+  text-align: left;
+  padding: 8px 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.plan-row-actions {
+  align-self: start;
+  display: flex;
+  justify-content: center;
+  padding-top: 2px;
+}
+
+.plan-row-actions button {
+  min-width: 44px;
+  min-height: 44px;
+}

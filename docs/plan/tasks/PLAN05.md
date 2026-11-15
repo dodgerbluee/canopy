@@ -1,6 +1,6 @@
 # PLAN05 — Planning page
 
-Status: IN_PROGRESS.
+Status: ACCEPTED.
 
 ### PLAN05 — Angular Planning page and consistent modal workflows
 

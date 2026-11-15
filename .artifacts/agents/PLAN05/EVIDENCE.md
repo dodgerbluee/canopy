@@ -1,6 +1,6 @@
 # PLAN05 — Planning page and modal workflows
 
-Status: IN_PROGRESS. Local verification passed; GitHub CI pending.
+Status: ACCEPTED. Local verification and full GitHub CI passed.
 
 Added Planning beside Garden year on desktop and under mobile More, preserving
 the existing bottom bar. The page has Planned/Wishlist views, a twelve-month
@@ -52,7 +52,7 @@ Executed checks:
 - Final lint/typecheck/build, generation no-diff and plan/packet/dispatch/boundary
   checks passed (`lint.log`, `generation-no-diff.log`, `final-plan-boundary.log`).
   Final saved-assumption/board tests, race checks and full Go regression passed.
-  GitHub CI pending.
+  Full GitHub CI passed for implementation `611df8e7a4362ad2425c78f7c285114f1e0a8777`: https://github.com/dodgerbluee/canopy/actions/runs/43741250181 (generation, lint, all units and real PostgreSQL integrations).
 
 Preview is isolated: canopy-planning-preview + canopy-planning-preview-db, their
 own network and volumes; only 127.0.0.1:7082 is published. Its disposable login is

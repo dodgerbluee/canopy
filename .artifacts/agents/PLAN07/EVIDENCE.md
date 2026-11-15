@@ -1,6 +1,6 @@
 # PLAN07 — Atomic Add to garden and action completion
 
-Status: IN_PROGRESS. Local verification passed; exact-source CI pending.
+Status: ACCEPTED. Local verification and full exact-source CI passed.
 
 Conversion uses a narrow GardenWriter adapter and existing collection transaction bodies, shared command values and transport parsing. Existing create/update/context entry points call the same bodies. One transaction validates plan revision, creates or locks the actual plant, records reviewed actual provenance/price/context, writes the unique fulfillment, advances progress, audits and stores its replay receipt. No nested transaction or public API chaining. Planned budget/count/date/site never silently become actual records. Generic create count parsing now rejects overflow before int32 conversion.
 
@@ -16,4 +16,4 @@ Executed checks:
 - Paired API/worker image built and restarted on isolated 7082, with unchanged database, storage and AI config. Four active sample plans and zero actual test plants remain; real planting.guidance and planting.reminders River jobs completed, ready returned 200 (`preview-runtime.txt`). Original 4311 and remote production remain untouched.
 - Final lint/Go vet/contracts typecheck/production build, generation no-diff, plan/packet/dispatch/boundary and whitespace gates passed (`lint.log`, `generation-no-diff.log`, `plan-boundary.log`).
 
-Pending: full exact-source CI, acceptance, then PLAN08 MCP and assistant integration plus the final release gate. No partial production release.
+Full GitHub CI passed for `d40bd9048b881edcf2ccc072471a3a53801f27dc`: https://github.com/dodgerbluee/canopy/actions/runs/43745888644 (generation, lint, all units and real PostgreSQL integrations). Proceeding to PLAN08 MCP/assistant integration and final gate; no partial production release.

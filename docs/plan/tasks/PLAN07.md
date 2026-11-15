@@ -1,6 +1,6 @@
 # PLAN07 — Atomic Add to garden and action completion
 
-Status: IN_PROGRESS.
+Status: ACCEPTED.
 
 ### PLAN07 — Add to garden and explicit action completion
 

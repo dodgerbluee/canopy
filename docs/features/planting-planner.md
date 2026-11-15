@@ -1,6 +1,7 @@
 # Future planting planner
 
-Status: implementation proposal. The application has not been changed by this plan.
+Status: implementation started. PLAN01 establishes the staged contracts and storage;
+the page and live API remain hidden until their implementation packets land.
 
 ## Product direction
 
@@ -121,11 +122,13 @@ Proposed records:
   reference, optional desired quantity, starting method, intended location and
   placement, target period, optional budget/currency, notes, state and revision.
 - `planting_actions`: plan, action kind, explicitly chosen local date, reminder
-  preference, state and revision. These are planning actions, not care occurrences.
+  preference, state and schedule revision. Child edits use the plan aggregate revision;
+  these are planning actions, not care occurrences.
 - `planting_guidance_snapshots`: plan/context identity, provider/source versions,
   supported windows, assumptions, provenance and retrieval state.
-- `planting_fulfillments`: immutable link from a plan to its resulting actual
-  plant/group, with the confirmed conversion inputs and audit identity.
+- `planting_fulfillments`: minimal immutable link from a plan to its resulting
+  actual plant/group. Actual plant details stay in the collection and audit
+  records rather than being copied into planning data.
 
 Logical states: `IDEA → PLANNED → IN_PROGRESS → COMPLETED`, with `CANCELLED` for
 abandoned work. Ownership is a separate fulfillment link, not a terminal planning
@@ -272,8 +275,10 @@ plant. Completing the overall plan is distinct from ownership and an elapsed dat
 
 ## Eight sequential implementation packets
 
-These are proposed future tasks; only the design task is currently dispatched.
-Create their official task-graph/ownership packets when implementation is authorized.
+PLAN01 is the dispatched contract/storage step. Register the remaining sequential
+implementation packets when they are kicked off. Its accepted contract is recorded
+in `docs/plan/tasks/PLAN01-contract-change.md`; the planning SDL is deliberately
+staged outside the runtime server schema until PLAN02 provides real resolvers.
 
 | Step | Deliverable | Main paths | Acceptance/verification |
 | --- | --- | --- | --- |

@@ -1,0 +1,79 @@
+{
+  "data": {
+    "plantingPlan": {
+      "id": "f0000000-0000-4000-8000-000000000001",
+      "name": "Future fig",
+      "scientificName": null,
+      "cultivar": null,
+      "category": "FIG",
+      "desiredQuantity": 1,
+      "method": "NURSERY_PLANT",
+      "intendedLocation": null,
+      "intendedPlacement": "GROUND",
+      "targetPeriod": {
+        "precision": "YEAR",
+        "dates": null,
+        "months": null,
+        "season": null,
+        "year": 2027
+      },
+      "budget": null,
+      "notes": null,
+      "state": "PLANNED",
+      "cancelledAt": null,
+      "completedAt": null,
+      "revision": 1,
+      "actions": [],
+      "fulfillment": null,
+      "createdAt": "2026-11-14T12:00:00Z",
+      "updatedAt": "2026-11-14T12:00:00Z",
+      "latestGuidance": {
+        "id": "f0000000-0000-4000-8000-000000000002",
+        "generation": 1,
+        "state": "READY",
+        "message": "Illustrative contract fixture; not planting advice.",
+        "facts": [
+          {
+            "id": "fixture-fact",
+            "phase": "PLANT_OUT",
+            "label": "Example annual window",
+            "summary": "This synthetic fixture demonstrates year-independent timing.",
+            "conditions": [
+              "Contract fixture only; no real recommendation."
+            ],
+            "windows": [
+              {
+                "precision": "ANNUAL",
+                "label": "Illustrative months spanning New Year",
+                "hemisphere": "NORTHERN",
+                "absolute": null,
+                "annual": {
+                  "precision": "MONTH_RANGE",
+                  "dates": null,
+                  "months": {
+                    "from": 12,
+                    "to": 2
+                  },
+                  "season": null
+                },
+                "relative": null
+              }
+            ],
+            "sourceTitle": "Contract fixture publication",
+            "sourceUrl": "https://example.invalid/planting-fixture",
+            "publisher": "Contract fixture",
+            "sourceRegion": "Test region",
+            "retrievedAt": "2026-11-14T12:00:00Z",
+            "contentSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        ],
+        "assumptions": [],
+        "retrievedAt": "2026-11-14T12:00:00Z",
+        "createdAt": "2026-11-14T12:00:00Z",
+        "updatedAt": "2026-11-14T12:00:00Z"
+      },
+      "acceptedGuidance": null,
+      "guidanceGeneration": 1
+    }
+  }
+}

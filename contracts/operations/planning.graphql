@@ -1,0 +1,101 @@
+fragment PlantingPeriodFields on PlantingPeriod {
+  precision
+  dates { from to }
+  months { from to }
+  season { season year }
+  year
+}
+fragment PlantingActionFields on PlantingAction {
+  id kind title scheduledOn reminderOn scheduleRevision notes state
+  completedOn completedAt dismissedAt createdAt updatedAt
+}
+fragment PlantingPlanFields on PlantingPlan {
+  id name scientificName cultivar category desiredQuantity method
+  intendedLocation { id name situation revision }
+  intendedPlacement targetPeriod { ...PlantingPeriodFields }
+  budget { minorUnits currency } notes state cancelledAt completedAt revision guidanceGeneration
+  actions { ...PlantingActionFields }
+  fulfillment { id plant { id name status } actionId mode linkedAt }
+  createdAt updatedAt
+}
+query PlantingPlans($first: Int, $after: String, $filter: PlantingPlanFilter, $order: PlantingPlanOrder) {
+  plantingPlans(first: $first, after: $after, filter: $filter, order: $order) {
+    items { ...PlantingPlanFields }
+    pageInfo { hasNextPage endCursor }
+  }
+}
+fragment PlantingGuidanceFields on PlantingGuidanceSnapshot {
+  id generation state message assumptions retrievedAt createdAt updatedAt
+  facts {
+    id phase label summary conditions sourceTitle sourceUrl publisher sourceRegion retrievedAt contentSha256
+    windows {
+      precision label hemisphere absolute { ...PlantingPeriodFields }
+      annual { precision dates { from { month day } to { month day } } months { from to } season }
+      relative { anchor fromDays toDays }
+    }
+  }
+}
+query PlantingPlanDetail($id: ID!) {
+  plantingPlan(id: $id) {
+    ...PlantingPlanFields
+    latestGuidance { ...PlantingGuidanceFields }
+    acceptedGuidance { ...PlantingGuidanceFields }
+  }
+}
+
+mutation CreatePlantingPlan($input: CreatePlantingPlanInput!, $clientMutationId: String) {
+  createPlantingPlan(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation UpdatePlantingPlan($input: UpdatePlantingPlanInput!, $clientMutationId: String) {
+  updatePlantingPlan(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation ChangePlantingPlanState($input: ChangePlantingPlanStateInput!, $clientMutationId: String) {
+  changePlantingPlanState(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation CancelPlantingPlan($input: CancelPlantingPlanInput!, $clientMutationId: String) {
+  cancelPlantingPlan(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation RestorePlantingPlan($input: RestorePlantingPlanInput!, $clientMutationId: String) {
+  restorePlantingPlan(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation CreatePlantingAction($input: CreatePlantingActionInput!, $clientMutationId: String) {
+  createPlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation UpdatePlantingAction($input: UpdatePlantingActionInput!, $clientMutationId: String) {
+  updatePlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}
+mutation DeletePlantingAction($input: DeletePlantingActionInput!, $clientMutationId: String) {
+  deletePlantingAction(input: $input, clientMutationId: $clientMutationId) {
+    plan { ...PlantingPlanFields }
+    problems { code field message currentRevision }
+    clientMutationId
+  }
+}

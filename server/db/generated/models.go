@@ -985,6 +985,360 @@ func (ns NullPlantType) Value() (driver.Value, error) {
 	return string(ns.PlantType), nil
 }
 
+type PlantingActionKind string
+
+const (
+	PlantingActionKindPREPARE      PlantingActionKind = "PREPARE"
+	PlantingActionKindBUY          PlantingActionKind = "BUY"
+	PlantingActionKindSTARTINDOORS PlantingActionKind = "START_INDOORS"
+	PlantingActionKindDIRECTSOW    PlantingActionKind = "DIRECT_SOW"
+	PlantingActionKindTRANSPLANT   PlantingActionKind = "TRANSPLANT"
+	PlantingActionKindPLANTOUT     PlantingActionKind = "PLANT_OUT"
+)
+
+func (e *PlantingActionKind) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PlantingActionKind(s)
+	case string:
+		*e = PlantingActionKind(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PlantingActionKind: %T", src)
+	}
+	return nil
+}
+
+type NullPlantingActionKind struct {
+	PlantingActionKind PlantingActionKind
+	Valid              bool // Valid is true if PlantingActionKind is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPlantingActionKind) Scan(value interface{}) error {
+	if value == nil {
+		ns.PlantingActionKind, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PlantingActionKind.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPlantingActionKind) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PlantingActionKind), nil
+}
+
+type PlantingActionState string
+
+const (
+	PlantingActionStateOPEN      PlantingActionState = "OPEN"
+	PlantingActionStateDONE      PlantingActionState = "DONE"
+	PlantingActionStateDISMISSED PlantingActionState = "DISMISSED"
+)
+
+func (e *PlantingActionState) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PlantingActionState(s)
+	case string:
+		*e = PlantingActionState(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PlantingActionState: %T", src)
+	}
+	return nil
+}
+
+type NullPlantingActionState struct {
+	PlantingActionState PlantingActionState
+	Valid               bool // Valid is true if PlantingActionState is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPlantingActionState) Scan(value interface{}) error {
+	if value == nil {
+		ns.PlantingActionState, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PlantingActionState.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPlantingActionState) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PlantingActionState), nil
+}
+
+type PlantingGuidanceState string
+
+const (
+	PlantingGuidanceStatePENDING       PlantingGuidanceState = "PENDING"
+	PlantingGuidanceStatePROCESSING    PlantingGuidanceState = "PROCESSING"
+	PlantingGuidanceStateREADY         PlantingGuidanceState = "READY"
+	PlantingGuidanceStateNEEDSLOCATION PlantingGuidanceState = "NEEDS_LOCATION"
+	PlantingGuidanceStateDISABLED      PlantingGuidanceState = "DISABLED"
+	PlantingGuidanceStateUNSUPPORTED   PlantingGuidanceState = "UNSUPPORTED"
+	PlantingGuidanceStateFAILED        PlantingGuidanceState = "FAILED"
+)
+
+func (e *PlantingGuidanceState) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PlantingGuidanceState(s)
+	case string:
+		*e = PlantingGuidanceState(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PlantingGuidanceState: %T", src)
+	}
+	return nil
+}
+
+type NullPlantingGuidanceState struct {
+	PlantingGuidanceState PlantingGuidanceState
+	Valid                 bool // Valid is true if PlantingGuidanceState is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPlantingGuidanceState) Scan(value interface{}) error {
+	if value == nil {
+		ns.PlantingGuidanceState, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PlantingGuidanceState.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPlantingGuidanceState) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PlantingGuidanceState), nil
+}
+
+type PlantingLinkMode string
+
+const (
+	PlantingLinkModeCREATED  PlantingLinkMode = "CREATED"
+	PlantingLinkModeEXISTING PlantingLinkMode = "EXISTING"
+)
+
+func (e *PlantingLinkMode) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PlantingLinkMode(s)
+	case string:
+		*e = PlantingLinkMode(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PlantingLinkMode: %T", src)
+	}
+	return nil
+}
+
+type NullPlantingLinkMode struct {
+	PlantingLinkMode PlantingLinkMode
+	Valid            bool // Valid is true if PlantingLinkMode is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPlantingLinkMode) Scan(value interface{}) error {
+	if value == nil {
+		ns.PlantingLinkMode, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PlantingLinkMode.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPlantingLinkMode) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PlantingLinkMode), nil
+}
+
+type PlantingMethod string
+
+const (
+	PlantingMethodSTARTINDOORS PlantingMethod = "START_INDOORS"
+	PlantingMethodDIRECTSOW    PlantingMethod = "DIRECT_SOW"
+	PlantingMethodNURSERYPLANT PlantingMethod = "NURSERY_PLANT"
+)
+
+func (e *PlantingMethod) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PlantingMethod(s)
+	case string:
+		*e = PlantingMethod(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PlantingMethod: %T", src)
+	}
+	return nil
+}
+
+type NullPlantingMethod struct {
+	PlantingMethod PlantingMethod
+	Valid          bool // Valid is true if PlantingMethod is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPlantingMethod) Scan(value interface{}) error {
+	if value == nil {
+		ns.PlantingMethod, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PlantingMethod.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPlantingMethod) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PlantingMethod), nil
+}
+
+type PlantingPeriodPrecision string
+
+const (
+	PlantingPeriodPrecisionDATERANGE  PlantingPeriodPrecision = "DATE_RANGE"
+	PlantingPeriodPrecisionMONTHRANGE PlantingPeriodPrecision = "MONTH_RANGE"
+	PlantingPeriodPrecisionSEASON     PlantingPeriodPrecision = "SEASON"
+	PlantingPeriodPrecisionYEAR       PlantingPeriodPrecision = "YEAR"
+)
+
+func (e *PlantingPeriodPrecision) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PlantingPeriodPrecision(s)
+	case string:
+		*e = PlantingPeriodPrecision(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PlantingPeriodPrecision: %T", src)
+	}
+	return nil
+}
+
+type NullPlantingPeriodPrecision struct {
+	PlantingPeriodPrecision PlantingPeriodPrecision
+	Valid                   bool // Valid is true if PlantingPeriodPrecision is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPlantingPeriodPrecision) Scan(value interface{}) error {
+	if value == nil {
+		ns.PlantingPeriodPrecision, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PlantingPeriodPrecision.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPlantingPeriodPrecision) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PlantingPeriodPrecision), nil
+}
+
+type PlantingPlanState string
+
+const (
+	PlantingPlanStateIDEA       PlantingPlanState = "IDEA"
+	PlantingPlanStatePLANNED    PlantingPlanState = "PLANNED"
+	PlantingPlanStateINPROGRESS PlantingPlanState = "IN_PROGRESS"
+	PlantingPlanStateCOMPLETED  PlantingPlanState = "COMPLETED"
+	PlantingPlanStateCANCELLED  PlantingPlanState = "CANCELLED"
+)
+
+func (e *PlantingPlanState) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PlantingPlanState(s)
+	case string:
+		*e = PlantingPlanState(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PlantingPlanState: %T", src)
+	}
+	return nil
+}
+
+type NullPlantingPlanState struct {
+	PlantingPlanState PlantingPlanState
+	Valid             bool // Valid is true if PlantingPlanState is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPlantingPlanState) Scan(value interface{}) error {
+	if value == nil {
+		ns.PlantingPlanState, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PlantingPlanState.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPlantingPlanState) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PlantingPlanState), nil
+}
+
+type PlantingSeason string
+
+const (
+	PlantingSeasonSPRING PlantingSeason = "SPRING"
+	PlantingSeasonSUMMER PlantingSeason = "SUMMER"
+	PlantingSeasonAUTUMN PlantingSeason = "AUTUMN"
+	PlantingSeasonWINTER PlantingSeason = "WINTER"
+)
+
+func (e *PlantingSeason) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PlantingSeason(s)
+	case string:
+		*e = PlantingSeason(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PlantingSeason: %T", src)
+	}
+	return nil
+}
+
+type NullPlantingSeason struct {
+	PlantingSeason PlantingSeason
+	Valid          bool // Valid is true if PlantingSeason is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPlantingSeason) Scan(value interface{}) error {
+	if value == nil {
+		ns.PlantingSeason, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PlantingSeason.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPlantingSeason) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PlantingSeason), nil
+}
+
 type PricingState string
 
 const (
@@ -1919,6 +2273,81 @@ type PlantTag struct {
 	PlantID     pgtype.UUID
 	TagID       pgtype.UUID
 	CreatedAt   pgtype.Timestamptz
+}
+
+type PlantingAction struct {
+	ID               pgtype.UUID
+	WorkspaceID      pgtype.UUID
+	PlanID           pgtype.UUID
+	Kind             PlantingActionKind
+	Title            string
+	ScheduledOn      pgtype.Date
+	ReminderOn       pgtype.Date
+	ScheduleRevision int32
+	Notes            pgtype.Text
+	State            PlantingActionState
+	CompletedOn      pgtype.Date
+	CompletedAt      pgtype.Timestamptz
+	DismissedAt      pgtype.Timestamptz
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
+}
+
+type PlantingFulfillment struct {
+	ID          pgtype.UUID
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	PlantID     pgtype.UUID
+	ActionID    pgtype.UUID
+	Mode        PlantingLinkMode
+	LinkedAt    pgtype.Timestamptz
+}
+
+type PlantingGuidanceSnapshot struct {
+	ID            pgtype.UUID
+	WorkspaceID   pgtype.UUID
+	PlanID        pgtype.UUID
+	Generation    int32
+	ContextSha256 string
+	State         PlantingGuidanceState
+	Message       string
+	Facts         []byte
+	Assumptions   []string
+	RetrievedAt   pgtype.Timestamptz
+	CreatedAt     pgtype.Timestamptz
+	UpdatedAt     pgtype.Timestamptz
+}
+
+type PlantingPlan struct {
+	ID                 pgtype.UUID
+	WorkspaceID        pgtype.UUID
+	Name               string
+	ScientificName     pgtype.Text
+	Cultivar           pgtype.Text
+	Category           PlantCategory
+	DesiredQuantity    pgtype.Int4
+	Method             NullPlantingMethod
+	IntendedLocationID pgtype.UUID
+	IntendedPlacement  NullContextPlacement
+	TargetPrecision    NullPlantingPeriodPrecision
+	TargetFrom         pgtype.Date
+	TargetTo           pgtype.Date
+	TargetFromMonth    pgtype.Text
+	TargetToMonth      pgtype.Text
+	TargetYear         pgtype.Int4
+	TargetSeason       NullPlantingSeason
+	BudgetMinor        pgtype.Int8
+	BudgetCurrency     pgtype.Text
+	Notes              pgtype.Text
+	State              PlantingPlanState
+	ResumeState        NullPlantingPlanState
+	CancelledAt        pgtype.Timestamptz
+	CompletedAt        pgtype.Timestamptz
+	Revision           int32
+	GuidanceGeneration int32
+	AcceptedGuidanceID pgtype.UUID
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
 }
 
 type Purchase struct {

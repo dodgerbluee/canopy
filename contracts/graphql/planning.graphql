@@ -1,0 +1,244 @@
+"""Future intentions, independent of actual ownership and recorded care/spending."""
+enum PlantingPlanState { IDEA PLANNED IN_PROGRESS COMPLETED CANCELLED }
+enum PlantingMethod { START_INDOORS DIRECT_SOW NURSERY_PLANT }
+enum PlantingPeriodPrecision { DATE_RANGE MONTH_RANGE SEASON YEAR }
+enum PlantingSeason { SPRING SUMMER AUTUMN WINTER }
+enum PlantingActionKind { PREPARE BUY START_INDOORS DIRECT_SOW TRANSPLANT PLANT_OUT }
+enum PlantingActionState { OPEN DONE DISMISSED }
+enum PlantingGardenLinkMode { CREATED EXISTING }
+enum PlantingPlanOrder { NAME_ASC UPDATED_DESC }
+enum PlantingPhaseKind { START_INDOORS DIRECT_SOW TRANSPLANT PLANT_OUT GROWTH BLOOM HARVEST DORMANCY PROTECT }
+enum PlantingGuidancePrecision { ABSOLUTE ANNUAL RELATIVE UNKNOWN }
+enum PlantingAnnualPrecision { DATE_RANGE MONTH_RANGE SEASON }
+enum PlantingTimingAnchor { LAST_FROST FIRST_FROST SOWING TRANSPLANTING PLANTING HARVEST UNKNOWN }
+enum PlantingHemisphere { NORTHERN SOUTHERN }
+
+type PlantingDateRange { from: LocalDate!, to: LocalDate! }
+"""Inclusive canonical YYYY-MM values; real months, years 0001..9999."""
+type PlantingMonthRange { from: String!, to: String! }
+"""Year of the season's start, not its end. Hemisphere is never inferred from timezone."""
+type PlantingSeasonPeriod { season: PlantingSeason!, year: Int! }
+"""
+Exactly one member matches precision. Null targetPeriod means unscheduled.
+No concrete day is synthesized for MONTH_RANGE/SEASON/YEAR. A season can remain
+abstract until geography supplies a hemisphere. Inclusive, ordered bounds.
+"""
+type PlantingPeriod {
+  precision: PlantingPeriodPrecision!
+  dates: PlantingDateRange
+  months: PlantingMonthRange
+  season: PlantingSeasonPeriod
+  year: Int
+}
+input PlantingDateRangeInput { from: LocalDate!, to: LocalDate! }
+input PlantingMonthRangeInput { from: String!, to: String! }
+input PlantingSeasonPeriodInput { season: PlantingSeason!, year: Int! }
+input PlantingPeriodInput {
+  precision: PlantingPeriodPrecision!
+  dates: PlantingDateRangeInput
+  months: PlantingMonthRangeInput
+  season: PlantingSeasonPeriodInput
+  year: Int
+}
+input PlantingBudgetInput { minorUnits: MinorUnits!, currency: String! }
+
+"""Offsets are signed; null is unknown, never zero by default. No frost date is inferred from zone."""
+type PlantingRelativeWindow {
+  anchor: PlantingTimingAnchor!
+  fromDays: Int
+  toDays: Int
+}
+type PlantingMonthDay { month: Int!, day: Int! }
+type PlantingAnnualDateRange { from: PlantingMonthDay!, to: PlantingMonthDay! }
+"""Months 1..12. End < start wraps New Year; multiple windows stay separate."""
+type PlantingAnnualMonthRange { from: Int!, to: Int! }
+"""Year-independent publication timing. Exactly one member matches precision; no year is invented."""
+type PlantingAnnualPeriod {
+  precision: PlantingAnnualPrecision!
+  dates: PlantingAnnualDateRange
+  months: PlantingAnnualMonthRange
+  season: PlantingSeason
+}
+"""Advice, not user dates. Exactly the matching body is present; UNKNOWN has none."""
+type PlantingGuidanceWindow {
+  precision: PlantingGuidancePrecision!
+  label: String!
+  absolute: PlantingPeriod
+  annual: PlantingAnnualPeriod
+  relative: PlantingRelativeWindow
+  hemisphere: PlantingHemisphere
+}
+type PlantingGuidanceFact {
+  id: ID!
+  phase: PlantingPhaseKind!
+  label: String!
+  summary: String!
+  conditions: [String!]!
+  windows: [PlantingGuidanceWindow!]!
+  sourceTitle: String!
+  sourceUrl: String!
+  publisher: String!
+  sourceRegion: String!
+  retrievedAt: DateTime!
+  contentSha256: String!
+}
+"""A READY snapshot is immutable. Refresh creates another generation; accepted dates stay unchanged."""
+type PlantingGuidanceSnapshot {
+  id: ID!
+  generation: Int!
+  state: KnowledgeState!
+  message: String!
+  facts: [PlantingGuidanceFact!]!
+  assumptions: [String!]!
+  retrievedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""Child of the plan aggregate: edits use the parent plan's expectedRevision."""
+type PlantingAction {
+  id: ID!
+  kind: PlantingActionKind!
+  title: String!
+  """Explicitly selected civil day in workspace timezone. Never a guessed window boundary."""
+  scheduledOn: LocalDate!
+  """Opt-in local reminder day, no later than scheduledOn; default delivery time 09:00."""
+  reminderOn: LocalDate
+  scheduleRevision: Int!
+  notes: String
+  state: PlantingActionState!
+  completedOn: LocalDate
+  completedAt: DateTime
+  dismissedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+"""One link per plan. A purged plant becomes null; the marker prevents replay from recreating it."""
+type PlantingFulfillment {
+  id: ID!
+  plant: Plant
+  actionId: ID
+  mode: PlantingGardenLinkMode!
+  linkedAt: DateTime!
+}
+type PlantingPlan {
+  id: ID!
+  name: String!
+  scientificName: String
+  cultivar: String
+  category: PlantCategory!
+  desiredQuantity: Int
+  method: PlantingMethod
+  intendedLocation: Location
+  intendedPlacement: ContextPlacement
+  targetPeriod: PlantingPeriod
+  """Estimate only. Null is unknown; zero is explicitly free. Never part of actual spending."""
+  budget: Money
+  notes: String
+  state: PlantingPlanState!
+  cancelledAt: DateTime
+  completedAt: DateTime
+  revision: Int!
+  """At most 100 per plan; ordered by scheduledOn then id."""
+  actions: [PlantingAction!]!
+  """Current context/source generation, independent of the edit revision."""
+  guidanceGeneration: Int!
+  """Only the current generation; null while no current snapshot exists."""
+  latestGuidance: PlantingGuidanceSnapshot
+  acceptedGuidance: PlantingGuidanceSnapshot
+  """Ownership is independent of progress; adding a nursery plant does not complete plant-out actions."""
+  fulfillment: PlantingFulfillment
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+type PlantingPlanConnection { items: [PlantingPlan!]!, pageInfo: PageInfo! }
+input PlantingPlanFilter {
+  query: String
+  """Default IDEA/PLANNED/IN_PROGRESS. Empty explicitly selects no states."""
+  states: [PlantingPlanState!]
+  method: PlantingMethod
+  locationId: ID
+}
+input CreatePlantingPlanInput {
+  name: String!
+  scientificName: String
+  cultivar: String
+  category: PlantCategory! = OTHER
+  desiredQuantity: Int
+  method: PlantingMethod
+  intendedLocationId: ID
+  intendedPlacement: ContextPlacement
+  targetPeriod: PlantingPeriodInput
+  budget: PlantingBudgetInput
+  notes: String
+  """Only IDEA or PLANNED are accepted on creation."""
+  state: PlantingPlanState! = IDEA
+}
+"""Full replacement of editable intent; null clears an optional value. Active plans only."""
+input UpdatePlantingPlanInput {
+  id: ID!
+  expectedRevision: Int!
+  name: String!
+  scientificName: String
+  cultivar: String
+  category: PlantCategory! = OTHER
+  desiredQuantity: Int
+  method: PlantingMethod
+  intendedLocationId: ID
+  intendedPlacement: ContextPlacement
+  targetPeriod: PlantingPeriodInput
+  budget: PlantingBudgetInput
+  notes: String
+}
+input ChangePlantingPlanStateInput {
+  id: ID!
+  expectedRevision: Int!
+  """Cancel/restore use their dedicated commands; legal transitions are frozen in PLAN01-contract-change.md."""
+  state: PlantingPlanState!
+}
+input CancelPlantingPlanInput { id: ID!, expectedRevision: Int! }
+input RestorePlantingPlanInput { id: ID!, expectedRevision: Int! }
+input CreatePlantingActionInput {
+  planId: ID!
+  expectedRevision: Int!
+  kind: PlantingActionKind!
+  title: String!
+  scheduledOn: LocalDate!
+  reminderOn: LocalDate
+  notes: String
+}
+"""Full replacement of an OPEN action. The expected revision is the parent plan's revision."""
+input UpdatePlantingActionInput {
+  planId: ID!
+  id: ID!
+  expectedRevision: Int!
+  kind: PlantingActionKind!
+  title: String!
+  scheduledOn: LocalDate!
+  reminderOn: LocalDate
+  notes: String
+}
+input DeletePlantingActionInput { planId: ID!, id: ID!, expectedRevision: Int! }
+type PlantingPlanPayload {
+  plan: PlantingPlan
+  problems: [MutationProblem!]!
+  clientMutationId: String
+}
+
+# Staged contract: server/gqlgen.yml deliberately excludes this file until
+# PLAN02 registers real resolvers. No public not-implemented handlers are added.
+extend type Query {
+  """Workspace-scoped keyset pagination. first 1..100; cursor bound to filter/order."""
+  plantingPlans(first: Int = 25, after: String, filter: PlantingPlanFilter, order: PlantingPlanOrder = NAME_ASC): PlantingPlanConnection!
+  plantingPlan(id: ID!): PlantingPlan
+}
+extend type Mutation {
+  createPlantingPlan(input: CreatePlantingPlanInput!, clientMutationId: String): PlantingPlanPayload!
+  updatePlantingPlan(input: UpdatePlantingPlanInput!, clientMutationId: String): PlantingPlanPayload!
+  changePlantingPlanState(input: ChangePlantingPlanStateInput!, clientMutationId: String): PlantingPlanPayload!
+  cancelPlantingPlan(input: CancelPlantingPlanInput!, clientMutationId: String): PlantingPlanPayload!
+  restorePlantingPlan(input: RestorePlantingPlanInput!, clientMutationId: String): PlantingPlanPayload!
+  createPlantingAction(input: CreatePlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
+  updatePlantingAction(input: UpdatePlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
+  deletePlantingAction(input: DeletePlantingActionInput!, clientMutationId: String): PlantingPlanPayload!
+}

@@ -684,8 +684,9 @@ func (ns NullNotificationChannel) Value() (driver.Value, error) {
 type NotificationRefKind string
 
 const (
-	NotificationRefKindOCCURRENCE NotificationRefKind = "OCCURRENCE"
-	NotificationRefKindSUGGESTION NotificationRefKind = "SUGGESTION"
+	NotificationRefKindOCCURRENCE     NotificationRefKind = "OCCURRENCE"
+	NotificationRefKindSUGGESTION     NotificationRefKind = "SUGGESTION"
+	NotificationRefKindPLANTINGACTION NotificationRefKind = "PLANTING_ACTION"
 )
 
 func (e *NotificationRefKind) Scan(src interface{}) error {

@@ -770,6 +770,89 @@ func (q *Queries) ListPlantingActions(ctx context.Context, arg ListPlantingActio
 	return items, nil
 }
 
+const listPlantingEvents = `-- name: ListPlantingEvents :many
+SELECT a.id, a.workspace_id, a.plan_id, a.kind, a.title, a.scheduled_on, a.reminder_on, a.schedule_revision, a.notes, a.state, a.completed_on, a.completed_at, a.dismissed_at, a.created_at, a.updated_at, p.name AS plan_name, p.revision AS plan_revision
+FROM planting_actions a JOIN planting_plans p ON (p.workspace_id,p.id)=(a.workspace_id,a.plan_id)
+WHERE a.workspace_id=$1 AND p.state IN ('IDEA','PLANNED','IN_PROGRESS')
+ AND a.scheduled_on BETWEEN $2::date AND $3::date
+ AND ($4::date IS NULL OR (a.scheduled_on,a.id)>($4::date,$5::uuid))
+ORDER BY a.scheduled_on,a.id LIMIT $6
+`
+
+type ListPlantingEventsParams struct {
+	WorkspaceID pgtype.UUID
+	FromDay     pgtype.Date
+	ToDay       pgtype.Date
+	AfterDay    pgtype.Date
+	AfterID     pgtype.UUID
+	LimitCount  int32
+}
+
+type ListPlantingEventsRow struct {
+	ID               pgtype.UUID
+	WorkspaceID      pgtype.UUID
+	PlanID           pgtype.UUID
+	Kind             PlantingActionKind
+	Title            string
+	ScheduledOn      pgtype.Date
+	ReminderOn       pgtype.Date
+	ScheduleRevision int32
+	Notes            pgtype.Text
+	State            PlantingActionState
+	CompletedOn      pgtype.Date
+	CompletedAt      pgtype.Timestamptz
+	DismissedAt      pgtype.Timestamptz
+	CreatedAt        pgtype.Timestamptz
+	UpdatedAt        pgtype.Timestamptz
+	PlanName         string
+	PlanRevision     int32
+}
+
+func (q *Queries) ListPlantingEvents(ctx context.Context, arg ListPlantingEventsParams) ([]ListPlantingEventsRow, error) {
+	rows, err := q.db.Query(ctx, listPlantingEvents,
+		arg.WorkspaceID,
+		arg.FromDay,
+		arg.ToDay,
+		arg.AfterDay,
+		arg.AfterID,
+		arg.LimitCount,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListPlantingEventsRow{}
+	for rows.Next() {
+		var i ListPlantingEventsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.WorkspaceID,
+			&i.PlanID,
+			&i.Kind,
+			&i.Title,
+			&i.ScheduledOn,
+			&i.ReminderOn,
+			&i.ScheduleRevision,
+			&i.Notes,
+			&i.State,
+			&i.CompletedOn,
+			&i.CompletedAt,
+			&i.DismissedAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.PlanName,
+			&i.PlanRevision,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPlantingFulfillments = `-- name: ListPlantingFulfillments :many
 SELECT id, workspace_id, plan_id, plant_id, action_id, mode, linked_at FROM planting_fulfillments WHERE workspace_id=$1 AND plan_id=ANY($2::uuid[])
 `
@@ -973,6 +1056,22 @@ func (q *Queries) ListPlantingPlansUpdatedDesc(ctx context.Context, arg ListPlan
 	return items, nil
 }
 
+const lockPlanningReminderWorkspace = `-- name: LockPlanningReminderWorkspace :one
+SELECT owner_id,timezone FROM workspace WHERE id=$1 FOR SHARE
+`
+
+type LockPlanningReminderWorkspaceRow struct {
+	OwnerID  pgtype.UUID
+	Timezone string
+}
+
+func (q *Queries) LockPlanningReminderWorkspace(ctx context.Context, id pgtype.UUID) (LockPlanningReminderWorkspaceRow, error) {
+	row := q.db.QueryRow(ctx, lockPlanningReminderWorkspace, id)
+	var i LockPlanningReminderWorkspaceRow
+	err := row.Scan(&i.OwnerID, &i.Timezone)
+	return i, err
+}
+
 const lockPlantingLocation = `-- name: LockPlantingLocation :one
 SELECT id FROM locations WHERE workspace_id=$1 AND id=$2 FOR KEY SHARE
 `
@@ -1086,6 +1185,44 @@ func (q *Queries) PlanningGuidanceCandidates(ctx context.Context) ([]PlantingPla
 			&i.UpdatedAt,
 			&i.AcceptedSchedule,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const planningReminderCandidates = `-- name: PlanningReminderCandidates :many
+SELECT a.workspace_id,a.plan_id,a.id FROM planting_actions a
+JOIN planting_plans p ON (p.workspace_id,p.id)=(a.workspace_id,a.plan_id)
+JOIN workspace w ON w.id=a.workspace_id
+WHERE a.state='OPEN' AND p.state IN ('IDEA','PLANNED','IN_PROGRESS')
+ AND a.reminder_on BETWEEN ($1::timestamptz AT TIME ZONE w.timezone)::date-7
+                       AND ($1::timestamptz AT TIME ZONE w.timezone)::date
+ AND NOT EXISTS (SELECT 1 FROM notifications n WHERE n.workspace_id=a.workspace_id
+   AND n.dedup_key='planting:'||a.id::text||':'||a.schedule_revision::text||':'||w.owner_id::text||':INAPP')
+ORDER BY a.reminder_on,a.id LIMIT 200
+`
+
+type PlanningReminderCandidatesRow struct {
+	WorkspaceID pgtype.UUID
+	PlanID      pgtype.UUID
+	ID          pgtype.UUID
+}
+
+func (q *Queries) PlanningReminderCandidates(ctx context.Context, nowAt pgtype.Timestamptz) ([]PlanningReminderCandidatesRow, error) {
+	rows, err := q.db.Query(ctx, planningReminderCandidates, nowAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []PlanningReminderCandidatesRow{}
+	for rows.Next() {
+		var i PlanningReminderCandidatesRow
+		if err := rows.Scan(&i.WorkspaceID, &i.PlanID, &i.ID); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

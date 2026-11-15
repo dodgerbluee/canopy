@@ -1,6 +1,28 @@
 -- name: GetPlantingPlan :one
 SELECT * FROM planting_plans WHERE workspace_id=$1 AND id=$2;
 
+-- name: ListPlantingEvents :many
+SELECT a.*, p.name AS plan_name, p.revision AS plan_revision
+FROM planting_actions a JOIN planting_plans p ON (p.workspace_id,p.id)=(a.workspace_id,a.plan_id)
+WHERE a.workspace_id=sqlc.arg(workspace_id) AND p.state IN ('IDEA','PLANNED','IN_PROGRESS')
+ AND a.scheduled_on BETWEEN sqlc.arg(from_day)::date AND sqlc.arg(to_day)::date
+ AND (sqlc.narg(after_day)::date IS NULL OR (a.scheduled_on,a.id)>(sqlc.narg(after_day)::date,sqlc.narg(after_id)::uuid))
+ORDER BY a.scheduled_on,a.id LIMIT sqlc.arg(limit_count);
+
+-- name: PlanningReminderCandidates :many
+SELECT a.workspace_id,a.plan_id,a.id FROM planting_actions a
+JOIN planting_plans p ON (p.workspace_id,p.id)=(a.workspace_id,a.plan_id)
+JOIN workspace w ON w.id=a.workspace_id
+WHERE a.state='OPEN' AND p.state IN ('IDEA','PLANNED','IN_PROGRESS')
+ AND a.reminder_on BETWEEN (sqlc.arg(now_at)::timestamptz AT TIME ZONE w.timezone)::date-7
+                       AND (sqlc.arg(now_at)::timestamptz AT TIME ZONE w.timezone)::date
+ AND NOT EXISTS (SELECT 1 FROM notifications n WHERE n.workspace_id=a.workspace_id
+   AND n.dedup_key='planting:'||a.id::text||':'||a.schedule_revision::text||':'||w.owner_id::text||':INAPP')
+ORDER BY a.reminder_on,a.id LIMIT 200;
+
+-- name: LockPlanningReminderWorkspace :one
+SELECT owner_id,timezone FROM workspace WHERE id=$1 FOR SHARE;
+
 -- name: LockPlantingPlan :one
 SELECT * FROM planting_plans WHERE workspace_id=$1 AND id=$2 FOR UPDATE;
 

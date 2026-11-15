@@ -59,9 +59,23 @@
             </div>
             <p class="caption notice-body">{{ n.body }}</p>
             <div class="row wrap notice-actions">
-              <a class="btn" [routerLink]="n.refKind === 'SUGGESTION' ? '/insights' : '/care'">{{
-                n.refKind === 'SUGGESTION' ? 'Review AI suggestions' : 'Review care'
-              }}</a>
+              <a
+                class="btn"
+                [routerLink]="
+                  n.refKind === 'PLANTING_ACTION'
+                    ? '/planning'
+                    : n.refKind === 'SUGGESTION'
+                      ? '/insights'
+                      : '/care'
+                "
+                >{{
+                  n.refKind === 'PLANTING_ACTION'
+                    ? 'Review planting plan'
+                    : n.refKind === 'SUGGESTION'
+                      ? 'Review AI suggestions'
+                      : 'Review care'
+                }}</a
+              >
               @if (!n.readAt) {
                 <button
                   type="button"

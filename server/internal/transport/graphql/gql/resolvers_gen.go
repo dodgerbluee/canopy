@@ -534,6 +534,11 @@ func (r *queryResolver) PlantingSchedule(ctx context.Context, planID string, inp
 	panic("not implemented")
 }
 
+// PlantingEvents is the resolver for the plantingEvents field.
+func (r *queryResolver) PlantingEvents(ctx context.Context, from scalars.Date, to scalars.Date, first *int, after *string) (*PlantingEventConnection, error) {
+	panic("not implemented")
+}
+
 // PlantingBoard is the resolver for the plantingBoard field.
 func (r *queryResolver) PlantingBoard(ctx context.Context, input PlantingScheduleInput, first *int, after *string, filter *PlantingPlanFilter) (*PlantingBoardConnection, error) {
 	panic("not implemented")

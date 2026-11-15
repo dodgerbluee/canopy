@@ -33,6 +33,7 @@ import { UiStatus } from '../../ui/status';
 import { UiToasts } from '../../ui/toast';
 import { STARTER_PLANTS, starterKey } from '../collection/starter';
 import { conflictNote, type PayloadProblem } from '../collection/shared';
+import { UpcomingPlantings } from '../planning/upcoming-plantings';
 import { HeroRotation } from './hero-rotation';
 import { InsightSuggestionCard } from '../insights/suggestion-card';
 import {
@@ -85,6 +86,7 @@ function cardUrl(p: PlantFieldsFragment): string {
     UiSkeleton,
     UiStatus,
     InsightSuggestionCard,
+    UpcomingPlantings,
   ],
   templateUrl: './today.html',
   styleUrl: './today.css',

@@ -528,7 +528,7 @@
         "PLAN02",
         "PLAN03",
         "PLAN04",
-        "PLAN05"
+        "PLAN06"
       ],
       "status": "PLANNED",
       "release": "R4"
@@ -1060,6 +1060,14 @@
         "PLAN04"
       ],
       "status": "ACCEPTED",
+      "release": "R3"
+    },
+    "PLAN06": {
+      "title": "Planning Calendar, Year, Today projections and opt-in reminders",
+      "dependsOn": [
+        "PLAN05"
+      ],
+      "status": "IN_PROGRESS",
       "release": "R3"
     }
   },

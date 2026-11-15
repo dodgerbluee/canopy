@@ -5,6 +5,13 @@ fragment PlantingPeriodFields on PlantingPeriod {
   season { season year }
   year
 }
+query PlantingEvents($from: LocalDate!, $to: LocalDate!, $first: Int, $after: String) {
+  plantingEvents(from: $from, to: $to, first: $first, after: $after) {
+    timezone today
+    items { id planId planName planRevision kind title day state }
+    pageInfo { hasNextPage endCursor }
+  }
+}
 fragment PlantingActionFields on PlantingAction {
   id kind title scheduledOn reminderOn scheduleRevision notes state
   completedOn completedAt dismissedAt createdAt updatedAt

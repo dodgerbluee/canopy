@@ -155,7 +155,7 @@ func (w *walker) walkField(f *ast.Field, parent *ast.Definition, depth, connSize
 		}
 		// A variable first value is unknown here. Planner connections charge
 		// their full allowed page to keep the new nested lists bounded.
-		if typeName == "PlantingPlanConnection" || typeName == "PlantingScheduleConnection" || typeName == "PlantingBoardConnection" {
+		if typeName == "PlantingPlanConnection" || typeName == "PlantingScheduleConnection" || typeName == "PlantingBoardConnection" || typeName == "PlantingEventConnection" {
 			for _, arg := range f.Arguments {
 				if arg.Name == "first" && arg.Value != nil && arg.Value.Kind == ast.Variable {
 					size = w.lim.MaxPageSize

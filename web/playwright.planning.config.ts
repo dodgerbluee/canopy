@@ -2,12 +2,12 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './e2e',
-  testMatch: 'planning.spec.ts',
+  testMatch: 'planning*.spec.ts',
   workers: 1,
   fullyParallel: false,
   retries: 0,
   timeout: 45000,
-  outputDir: '../.artifacts/agents/PLAN05/browser-output',
+  outputDir: '../.artifacts/agents/PLAN06/browser-output',
   reporter: [['list']],
   use: {
     baseURL: process.env.PLANNING_BASE_URL ?? 'http://host.docker.internal:7082',

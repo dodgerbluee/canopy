@@ -236,6 +236,7 @@ export class PlanningPage {
     }).formatToParts(new Date());
     return `${parts.find((p) => p.type === 'year')!.value.padStart(4, '0')}-${parts.find((p) => p.type === 'month')!.value}`;
   }
+  private linkedPlan = '';
   private applyRoute(): void {
     const p = this.route.snapshot.queryParamMap;
     this.view.set(p.get('view') === 'wishlist' ? 'wishlist' : 'planned');
@@ -255,6 +256,13 @@ export class PlanningPage {
     this.after.set(p.get('after'));
     this.board.set(null);
     void this.load();
+    const linked = p.get('plan') ?? '';
+    if (linked && linked !== this.linkedPlan) {
+      this.linkedPlan = linked;
+      this.detailOpen.set(true);
+      this.detailTab.set('planning-actions');
+      void this.fetchDetail(linked);
+    }
   }
   private filter(): PlantingPlanFilter {
     const states: PlantingPlanState[] =

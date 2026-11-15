@@ -1375,6 +1375,25 @@ type PlantingDateRangeInput struct {
 	To   scalars.Date `json:"to"`
 }
 
+// A chosen planning action day, separate from recorded garden history.
+type PlantingEvent struct {
+	ID           string              `json:"id"`
+	PlanID       string              `json:"planId"`
+	PlanName     string              `json:"planName"`
+	PlanRevision int                 `json:"planRevision"`
+	Kind         PlantingActionKind  `json:"kind"`
+	Title        string              `json:"title"`
+	Day          scalars.Date        `json:"day"`
+	State        PlantingActionState `json:"state"`
+}
+
+type PlantingEventConnection struct {
+	Timezone string           `json:"timezone"`
+	Today    scalars.Date     `json:"today"`
+	Items    []*PlantingEvent `json:"items"`
+	PageInfo *PageInfo        `json:"pageInfo"`
+}
+
 // One link per plan. A purged plant becomes null; the marker prevents replay from recreating it.
 type PlantingFulfillment struct {
 	ID       string                 `json:"id"`
@@ -3830,18 +3849,20 @@ func (e NotificationChannel) MarshalJSON() ([]byte, error) {
 type NotificationRefKind string
 
 const (
-	NotificationRefKindOccurrence NotificationRefKind = "OCCURRENCE"
-	NotificationRefKindSuggestion NotificationRefKind = "SUGGESTION"
+	NotificationRefKindOccurrence     NotificationRefKind = "OCCURRENCE"
+	NotificationRefKindSuggestion     NotificationRefKind = "SUGGESTION"
+	NotificationRefKindPlantingAction NotificationRefKind = "PLANTING_ACTION"
 )
 
 var AllNotificationRefKind = []NotificationRefKind{
 	NotificationRefKindOccurrence,
 	NotificationRefKindSuggestion,
+	NotificationRefKindPlantingAction,
 }
 
 func (e NotificationRefKind) IsValid() bool {
 	switch e {
-	case NotificationRefKindOccurrence, NotificationRefKindSuggestion:
+	case NotificationRefKindOccurrence, NotificationRefKindSuggestion, NotificationRefKindPlantingAction:
 		return true
 	}
 	return false

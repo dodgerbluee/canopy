@@ -186,7 +186,7 @@ describe('TodayPage', () => {
     expect(fixture.nativeElement.querySelector('.hero-photo img')).toBeNull();
   });
 
-  it('one composition on load: overview + plant names + the suggestions slot, nothing else', async () => {
+  it('loads recorded overview and independent upcoming planning context', async () => {
     const calls = stubFetch({
       Plants: plants(),
       TodayOverview: overview([occurrence()]),
@@ -199,6 +199,7 @@ describe('TodayPage', () => {
     expect(calls.map((c) => c.op).sort()).toEqual([
       'Plants',
       'ProviderCapabilities',
+      'Session',
       'SuggestionsPage',
       'TodayOverview',
     ]);

@@ -342,6 +342,27 @@ extend type Mutation {
 }
 
 type PlantingBoardRow { plan: PlantingPlan!, schedule: PlantingScheduleConnection! }
+"A chosen planning action day, separate from recorded garden history."
+type PlantingEvent {
+  id: ID!
+  planId: ID!
+  planName: String!
+  planRevision: Int!
+  kind: PlantingActionKind!
+  title: String!
+  day: LocalDate!
+  state: PlantingActionState!
+}
+type PlantingEventConnection {
+  timezone: String!
+  today: LocalDate!
+  items: [PlantingEvent!]!
+  pageInfo: PageInfo!
+}
+extend type Query {
+  "Only explicit action dates on active plans. Inclusive civil range, at most 62 days."
+  plantingEvents(from: LocalDate!, to: LocalDate!, first: Int = 25, after: String): PlantingEventConnection!
+}
 type PlantingBoardConnection {
   timezone: String!
   today: LocalDate!

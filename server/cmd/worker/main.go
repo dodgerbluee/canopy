@@ -117,6 +117,7 @@ func main() {
 	plannerSvc := planning.New(pool, log)
 	plannerSvc.Guidance = knowledge.PlanningProvider{Service: knowledgeSvc}
 	river.AddWorker(workers, &planning.GuidanceWorker{Service: plannerSvc})
+	river.AddWorker(workers, &planning.ReminderWorker{Service: plannerSvc})
 	river.AddWorker(workers, &care.CareTickWorker{Svc: careSvc, Log: log})
 
 	// AI analysis runs (T29): claim → bounded provider attempt → validate
@@ -164,7 +165,7 @@ func main() {
 	// retry; empty CANOPY_SMTP_HOST means the deployment opted out and
 	// EMAIL intents stay pending (in-app notification unaffected)
 	periodics := []*river.PeriodicJob{
-		care.CarePeriodicJob(), care.WeatherFetchPeriodicJob(), knowledge.PeriodicJob(), planning.GuidancePeriodicJob(), processor.CoverQualityPeriodicJob(),
+		care.CarePeriodicJob(), care.WeatherFetchPeriodicJob(), knowledge.PeriodicJob(), planning.GuidancePeriodicJob(), planning.ReminderPeriodicJob(), processor.CoverQualityPeriodicJob(),
 		insights.SuggestionExpiryPeriodicJob(),
 	}
 	if cfg.SMTPHost != "" {

@@ -14,6 +14,7 @@ import { GraphQLClient } from '../../core/graphql/client';
 import { UiEntryDialog } from '../../ui/entry-dialog';
 import { UiIcon, type UiIconName } from '../../ui/icon';
 import { resultData } from '../calendar/calendar-data';
+import { YearPlantings } from '../planning/year-plantings';
 import { GardenOverview } from './garden-overview';
 import { GardenChatDialog } from '../assistant/garden-chat';
 import { GardenSettings } from './garden-settings';
@@ -36,6 +37,7 @@ import {
     GardenSettings,
 
     GardenOverview,
+    YearPlantings,
     GardenChatDialog,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,

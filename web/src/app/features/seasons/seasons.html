@@ -110,6 +110,7 @@
     @if (refreshError()) {
       <p class="seasons-error" role="alert">{{ refreshError() }}</p>
     }
+    <year-plantings [year]="year()" />
     <garden-year-overview
       [plants]="overviewPlants()"
       [visibleKinds]="selectedKinds()"

@@ -78,6 +78,27 @@ type Action = Plan['actions'][number];
           <p class="field-hint">A day you choose, in your garden's timezone.</p>
         </div>
         <div class="field">
+          <label class="field-label"
+            ><input type="checkbox" name="remind" [(ngModel)]="draft.remind" /> Remind me in
+            Inbox</label
+          >
+          @if (draft.remind) {
+            <label class="field-label" for="action-reminder">Remind on</label
+            ><input
+              class="input"
+              id="action-reminder"
+              name="reminder"
+              type="date"
+              [(ngModel)]="draft.reminder"
+              [max]="draft.day"
+              required
+            />
+            <p class="field-hint">
+              At 9 am in your garden's timezone, on or before the planned day. No email is sent.
+            </p>
+          }
+        </div>
+        <div class="field">
           <label class="field-label" for="action-notes">Notes</label
           ><textarea
             class="input"
@@ -136,7 +157,7 @@ export class ActionEditor {
   readonly message = signal('');
   readonly submitted = signal(false);
   readonly removing = signal(false);
-  draft = { kind: 'PREPARE', title: '', day: '', notes: '' };
+  draft = { kind: 'PREPARE', title: '', day: '', notes: '', remind: false, reminder: '' };
   private original = '';
   private attempt = new PlanningAttempt();
   constructor() {
@@ -151,6 +172,8 @@ export class ActionEditor {
             title: a?.title ?? '',
             day: a?.scheduledOn ?? '',
             notes: a?.notes ?? '',
+            remind: !!a?.reminderOn,
+            reminder: a?.reminderOn ?? a?.scheduledOn ?? '',
           };
           this.original = JSON.stringify(this.draft);
           this.attempt = new PlanningAttempt();
@@ -176,6 +199,13 @@ export class ActionEditor {
       this.message.set('Enter an action title and a real planned day.');
       return;
     }
+    if (
+      this.draft.remind &&
+      (!isCivilDate(this.draft.reminder) || this.draft.reminder > this.draft.day)
+    ) {
+      this.message.set('Choose a reminder day on or before the planned day.');
+      return;
+    }
     this.saving.set(true);
     this.message.set('');
     try {
@@ -187,7 +217,7 @@ export class ActionEditor {
         title: this.draft.title.trim(),
         scheduledOn: this.draft.day,
         notes: this.draft.notes.trim() || null,
-        reminderOn: action?.reminderOn ?? null,
+        reminderOn: this.draft.remind ? this.draft.reminder : null,
       };
       const payload = action
         ? await this.api.command(

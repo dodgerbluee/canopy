@@ -1,6 +1,10 @@
 # PLAN03 — Crop-based regional planning guidance
 
-Status: IN_PROGRESS. Local checks passed; GitHub CI pending.
+Status: ACCEPTED. Implementation commit:
+8838404ba0f76d283e8ccb6de4c8ca5c8d7e445a.
+
+Full GitHub CI passed on that commit:
+https://github.com/dodgerbluee/canopy/actions/runs/43685699102
 
 Implemented crop/region research for future plans without creating owned plants.
 The existing knowledge service supplies reviewed regional publications, fetching,
@@ -61,13 +65,19 @@ Executed checks and logs:
   including conservative missing-section handling and lock cleanup changes.
 - Lint passed Go format/vet, Node24 contract TypeScript and Angular production
   build (`lint.log`). Generation no-diff, dispatch, plan/packet and import-boundary
-  gates passed (`generation-no-diff.log`, `final-plan-boundary.log`). GitHub CI
-  conclusion pending.
+  gates passed (`generation-no-diff.log`, `final-plan-boundary.log`).
+- GitHub CI passed release tooling, clean dependency installation, generation
+  no-diff, plan/boundary gates, lint/build, unit tests and real PostgreSQL
+  integration on the exact final implementation commit. The structured result
+  and full run log are retained as `ci-result.json` and `ci.log`.
 
-Only the disposable canopy-plan03-pg database is used. Live extraction sends
-public publications to the configured local Strata model; no production
+Only the disposable canopy-plan03-pg database was used and its container was
+removed after local verification. Live extraction sent public publications to
+the configured local Strata model; no production
 database, connection settings, garden records, app runtime or deployment is
 changed. No UI, schedule projection, reminder, garden promotion or MCP tool is
 included in this packet. Raw logs and recorded public drafts remain ignored.
+Changes are pushed to feature/planting-planner without a main-branch merge or
+deployment image release.
 
 Next: PLAN04, the pure schedule engine and explicit selection/projections.

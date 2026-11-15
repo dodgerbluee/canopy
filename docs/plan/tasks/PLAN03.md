@@ -1,6 +1,6 @@
 # PLAN03 — Planning knowledge
 
-Status: IN_PROGRESS.
+Status: ACCEPTED. Evidence: `.artifacts/agents/PLAN03/EVIDENCE.md`.
 
 ### PLAN03 — Crop-based regional planning guidance
 
